@@ -1,6 +1,7 @@
 ## Autores
 - [Patrick Dey](https://github.com/patrickmdey)
 - [Guido Gordyn Biello](https://github.com/ggordyn) 
+- [Santos Rosati](https://github.com/srosati) 
 
 # Manual de usuario
 
