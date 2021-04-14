@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stddef.h> 
 
-uint8_t *dummyMalloc(void);
+void initMemory();
+
+uint8_t * dummyMalloc(uint32_t size);
+
+void free(uint8_t* dir);
+
 
 #endif

@@ -1,7 +1,8 @@
 #include <taskManager.h>
+#include <memoryManager.h>
 
 int main() {
-      dummyMalloc();
+      initMemory();
       initApps();
       return 0;
 }
