@@ -8,8 +8,6 @@
 #include <systemCalls.h>
 #include <utils.h>
 
-#include <memoryManager.h>
-
 static void initChess(t_chessData * chessData);
 static void processChar(char c, t_chessData * chessData);
 static void chessText(t_chessData * chessData);
@@ -20,9 +18,6 @@ static void rePrintLog(t_chessData *chessData, int *currentY);
 void runChess(){
       t_chessData chessData;
       initChess(&chessData);
-
-            dummyMalloc(32);
-
       char c;
       int elapsed;
       while (1) {

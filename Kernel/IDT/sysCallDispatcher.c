@@ -6,6 +6,7 @@
 #include <keyboardDriver.h>
 #include <videoDriver.h>
 #include <timerTick.h>
+#include <memoryManager.h>
 
 #define SYS_GETMEM_ID 0
 #define SYS_RTC_TIME_ID 1
@@ -22,8 +23,12 @@
 #define SYS_MOVE_CURSOR_TO 12
 #define SYS_CURRENT_CURSOR 13
 #define SYS_TICKS_ELAPSED 14
+#define SYS_INIT_MEM 15
+#define SYS_ASIGN_MEMORY 16
+#define SYS_FREE_MEMORY 17
+#define SYS_GET_MEM_INFO 18
 
-#define SYSCALLS 14
+#define SYSCALLS 18
 
 uint64_t sysCallDispatcher(t_registers *r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS){
@@ -86,6 +91,20 @@ uint64_t sysCallDispatcher(t_registers *r) {
                         break;
                   case SYS_TICKS_ELAPSED:
                         return ticksElapsed();
+                        break;
+                  case SYS_INIT_MEM:
+                        initMemory();
+                        break;
+                  case SYS_ASIGN_MEMORY:
+                        return (uint64_t) myMalloc((uint8_t) r->rdi);
+                        break;
+                  case SYS_FREE_MEMORY:
+                        myFree((uint8_t *) r->rdi);
+                        break;
+                  case SYS_GET_MEM_INFO:
+                        getMemoryInfo();
+                        break;
+
             }
       }
       return 0;
