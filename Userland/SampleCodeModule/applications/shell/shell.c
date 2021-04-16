@@ -87,13 +87,13 @@ static void processChar(char c, t_shellData* shellData) {
 
             //TESTEO DE MALLOC Y CALLOC
             case 'k':
-                  dir1 = allocMemory(100);
-                  allocMemory(3);
-                  dir2 = allocMemory(11);
-                  freeMemory(dir1);
+                  dir1 = malloc(100);
+                  malloc(3);
+                  dir2 = malloc(11);
+                  free(dir1);
                   getMemoryInfo();
-                  allocMemory(38);
-                  freeMemory(dir2);
+                  malloc(38);
+                  free(dir2);
                   getMemoryInfo();
                   break;
 
