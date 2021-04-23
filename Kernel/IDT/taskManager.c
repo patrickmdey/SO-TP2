@@ -5,6 +5,8 @@
 #include <staticQueue.h>
 #include <lib.h>
 
+#include <list.h>
+
 #define SIZE_OF_STACK 4 * 1024
 
 static void* getNewStackBase();
@@ -39,20 +41,53 @@ typedef struct {
 } t_stackFrame;
 
 static t_PCB processes[MAX_PROCESSES];
+static uint8_t stacks[MAX_PROCESSES][SIZE_OF_STACK], freeStacks[MAX_PROCESSES] = { 0 };
 
-static uint8_t stacks[MAX_PROCESSES][SIZE_OF_STACK], freeStacks[MAX_PROCESSES]={0};
+t_queue taskManager = { processes, 0, -1, 0, MAX_PROCESSES, sizeof(t_PCB) };
 
-t_queue taskManager = {processes, 0, -1, 0, MAX_PROCESSES, sizeof(t_PCB)};
+t_list tasks = { 0, NULL, NULL };
+t_PCB* current;
+
+int currentPID = 0;
+
+void initTaskManager(int entryPoint) {
+      t_PCB* shell = malloc(sizeof(t_PCB));
+      shell->entryPoint = entryPoint;
+      addProcess(shell);
+      current = shell;
+}
+
+//void* schedule(void* oldRSP, int forceStart) {
+      // t_PCB* nextProcess;
+      // nextProcess = currentProcess->next
+      //       //pcb1 ---> pcb2 ---> pcb3
+
+
+      //       // YA HAY PROCESOS EN LA LISTA
+      //       if (!forceStart) {
+      //             currentProcess->rsp = oldRSP; //OBLIGATORIO
+      //             currentProcess->state = READY;
+      //             currentProcess = nextProcess;
+      //       }
+
+      // // t_PCB nextProcess = currentProcess->next;
+      // nextProcess->state = CPU
+
+      //       changeBuffer(nextProcess.bufferID);
+
+      // return nextProcess->rsp;
+//}
 
 void* schedule(void* oldRSP, int forceStart) {
       t_PCB currentProcess, nextProcess;
-
+      // YA HAY PROCESOS EN LA LISTA
       if (!forceStart) {
-            queueRemoveData(&taskManager, &currentProcess);
-            currentProcess.rsp = oldRSP;
-            queueInsert(&taskManager, &currentProcess);
+            queueRemoveData(&taskManager, &currentProcess); //ESTO NO
+            currentProcess.rsp = oldRSP; //OBLIGATORIO
+            queueInsert(&taskManager, &currentProcess); //paso prox proceso
       }
 
+      // t_PCB nextProcess = currentProcess->next;
       queuePeek(&taskManager, &nextProcess);
 
       changeBuffer(nextProcess.bufferID);
@@ -60,8 +95,21 @@ void* schedule(void* oldRSP, int forceStart) {
       return nextProcess.rsp;
 }
 
+// int addProcess(t_PCB* process) {
+//       if (process->entryPoint == 0) {
+//             return 0;
+//       }
+//       process->rbp = getNewStackBase();
+//       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK - 1));
+//       process->pid = currentPID++;
+//       process->state = READY;
+//       creo Buffer
+//       insertPCB(&tasks, process)
+//       return 1;
+// }
+
 int addProcess(t_PCB* process) {
-      if( process->entryPoint==0 || queueIsFull(&taskManager)){
+      if (process->entryPoint == 0 || queueIsFull(&taskManager)) {
             return 0;
       }
       process->rbp = getNewStackBase();
@@ -72,7 +120,7 @@ int addProcess(t_PCB* process) {
 }
 
 void killCurrentProcess() {
-      if(queueIsEmpty(&taskManager)){
+      if (queueIsEmpty(&taskManager)) {
             return;
       }
       t_PCB currentProcess;
@@ -82,22 +130,22 @@ void killCurrentProcess() {
       sys_forceStart();
 }
 
-void resetCurrentProcess(){
+void resetCurrentProcess() {
       if (queueIsEmpty(&taskManager)) {
             return;
       }
       t_PCB currentProcess;
-      queuePeek(&taskManager,&currentProcess);
+      queuePeek(&taskManager, &currentProcess);
       currentProcess.rsp = initializeStackFrame(currentProcess.entryPoint, (void*)(currentProcess.rbp + SIZE_OF_STACK - 1));
-      queueUpdateFirst(&taskManager,&currentProcess);
+      queueUpdateFirst(&taskManager, &currentProcess);
       sys_forceStart();
 }
 
 static void* getNewStackBase() {
       for (int i = 0; i < MAX_PROCESSES; i++)
       {
-            if(freeStacks[i]==0){
-                  freeStacks[i]=1;
+            if (freeStacks[i] == 0) {
+                  freeStacks[i] = 1;
                   return stacks[i];
             }
       }
@@ -128,7 +176,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       frame->rbx = 0x010;
       frame->rax = 0x011;
       //interrupts StackFrame (es lo que se pushea cuando hay una interrupcion)
-      
+
       frame->rip = (uint64_t)entryPoint;             //LO MAS IMPORTANTE
       frame->cs = 0x008;
       frame->eflags = 0x202;

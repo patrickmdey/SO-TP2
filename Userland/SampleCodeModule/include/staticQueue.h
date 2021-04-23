@@ -6,7 +6,7 @@
 #define MAX_SIZE 50
 
 typedef struct {
-      void* queue;
+      void* queue; // Array
       int front;
       int rear;
       int size;
