@@ -23,12 +23,11 @@
 #define SYS_MOVE_CURSOR_TO 12
 #define SYS_CURRENT_CURSOR 13
 #define SYS_TICKS_ELAPSED 14
-#define SYS_INIT_MEM 15
-#define SYS_ASIGN_MEMORY 16
-#define SYS_FREE_MEMORY 17
-#define SYS_GET_MEM_INFO 18
+#define SYS_ASIGN_MEMORY 15
+#define SYS_FREE_MEMORY 16
+#define SYS_GET_MEM_INFO 17
 
-#define SYSCALLS 18
+#define SYSCALLS 17
 
 uint64_t sysCallDispatcher(t_registers *r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS){
@@ -91,15 +90,12 @@ uint64_t sysCallDispatcher(t_registers *r) {
                         break;
                   case SYS_TICKS_ELAPSED:
                         return ticksElapsed();
-                        break;
-                  case SYS_INIT_MEM:
-                        initMemory();
-                        break;
+                        break;                        
                   case SYS_ASIGN_MEMORY:
-                        return (uint64_t) myMalloc((uint8_t) r->rdi);
+                        return (uint64_t) malloc((uint8_t) r->rdi);
                         break;
                   case SYS_FREE_MEMORY:
-                        myFree((uint8_t *) r->rdi);
+                        free((uint8_t *) r->rdi);
                         break;
                   case SYS_GET_MEM_INFO:
                         getMemoryInfo();

@@ -1,9 +1,10 @@
 #include <memoryManager.h>
 #include <stringLib.h>
+#include <limits.h>
 
 #define TOTAL_MEM 1024 * 2
 #define BLOCK_SIZE 64
-#define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
+#define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE) -15
 
 static int findBlocks(int amount);
 static void asignMemory(int first_idx, int count, int size);
@@ -29,7 +30,7 @@ void initMemory() {
     }
 }
 
-uint8_t* myMalloc(uint32_t size) {
+uint8_t* malloc(uint32_t size) {
     if (size == 0)
         return NULL;
 
@@ -55,9 +56,7 @@ uint8_t* myMalloc(uint32_t size) {
     return &start[first_idx * BLOCK_SIZE];
 }
 
-
-
-void myFree(uint8_t* dir) {
+void free(uint8_t* dir) {
     printStringWC("LLAMADO A FREE", BLACK, GREEN);
     printStringLn("");
     int idx = (dir - start) / BLOCK_SIZE;
@@ -106,6 +105,22 @@ void getMemoryInfo(void) {
     printStringLn("");
 }
 
+static void asignMemory(int first_idx, int count, int size) {
+    for (int i = first_idx; i < count + first_idx; i++) {
+        blockArray[i].size = BLOCK_SIZE;
+        blockArray[i].uses_next = 1;
+        if (i == count + first_idx - 1) {
+            if (size % BLOCK_SIZE != 0)
+                blockArray[i].size = size % BLOCK_SIZE;
+
+            blockArray[i].uses_next = 0;
+        }
+        blockArray[i].free = 0;
+        //blockArray[j].pos = j; // Esto lo deberiamos hacer en un init
+    }
+}
+
+#ifndef BUDDY
 
 static int findBlocks(int amount) {
     int i, count = 0, first_idx;
@@ -123,20 +138,34 @@ static int findBlocks(int amount) {
     return -1;
 }
 
-static void asignMemory(int first_idx, int count, int size) {
-    for (int i = first_idx; i < count + first_idx; i++) {
-        blockArray[i].size = BLOCK_SIZE;
-        blockArray[i].uses_next = 1;
-        if (i == count + first_idx - 1) {
-            if (size % BLOCK_SIZE != 0)
-                blockArray[i].size = size % BLOCK_SIZE;
-
-            blockArray[i].uses_next = 0;
+#else
+// Otro sistema --> menor cantidad de bloques por memoria pedida
+static int findBlocks(int amount) {
+    printStringLn("BUDDY!");
+    int i, count = 0, first_idx, best_fit = INT_MAX, best_fit_idx = -1;
+    for (i = 0; i < TOTAL_BLOCKS; i++) {
+        if (blockArray[i].free) {
+            if (count == 0) {
+                first_idx = i;
+            }
+            count++;
+        } else {
+            if (count >= amount && count < best_fit) {
+                best_fit_idx = first_idx;
+                best_fit = count;
+            }
+            count = 0;
         }
-        blockArray[i].free = 0;
-        //blockArray[j].pos = j; // Esto lo deberiamos hacer en un init
     }
+
+    if (count >= amount && count < best_fit) {
+        return first_idx;
+    }
+    
+    return best_fit_idx;
 }
+
+#endif
 
 static void testPrint(int index) {
     for (int k = 0; k < TOTAL_BLOCKS; k++) {
