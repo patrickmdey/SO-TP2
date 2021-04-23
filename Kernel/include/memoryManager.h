@@ -6,9 +6,9 @@
 
 void initMemory();
 
-uint8_t * malloc(uint32_t size);
+void * malloc(uint32_t size);
 
-void free(uint8_t* dir);
+void free(void* dir);
 
 void getMemoryInfo(void);
 

@@ -2,9 +2,9 @@
 #include <stringLib.h>
 #include <limits.h>
 
-#define TOTAL_MEM 1024 * 2
+#define TOTAL_MEM 1024 * 1000
 #define BLOCK_SIZE 64
-#define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE) -15
+#define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
 
 static int findBlocks(int amount);
 static void asignMemory(int first_idx, int count, int size);
@@ -30,7 +30,7 @@ void initMemory() {
     }
 }
 
-uint8_t* malloc(uint32_t size) {
+void* malloc(uint32_t size) {
     if (size == 0)
         return NULL;
 
@@ -48,18 +48,18 @@ uint8_t* malloc(uint32_t size) {
 
     asignMemory(first_idx, amount, size);
 
-    printStringWC("LLAMADO A MALLOC", BLACK, GREEN);
-    printStringLn("");
+    //printStringWC("LLAMADO A MALLOC", BLACK, GREEN);
+    //printStringLn("");
 
     //testPrint();
 
     return &start[first_idx * BLOCK_SIZE];
 }
 
-void free(uint8_t* dir) {
+void free(void * dir) {
     printStringWC("LLAMADO A FREE", BLACK, GREEN);
     printStringLn("");
-    int idx = (dir - start) / BLOCK_SIZE;
+    int idx = ((uint8_t *) dir - start) / BLOCK_SIZE;
     if (idx < 0 || idx >= TOTAL_BLOCKS) {
         return;
     }

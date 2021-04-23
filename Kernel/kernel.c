@@ -7,6 +7,8 @@
 #include <timerTick.h>
 #include <videoDriver.h>
 #include <taskManager.h>
+#include <interrupts.h>
+#include <memoryManager.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -42,9 +44,12 @@ void* initializeKernelBinary() {
 }
 
 int main() {
-      initTaskManager(0x400000);
-      load_idt();
+      initMemory();
+      initTaskManager((void *) 0x400000);
       initVideoDriver(BLACK, WHITE);
-      ((EntryPoint)sampleCodeModuleAddress)();
+      load_idt();
+      sys_forceStart();
+      _hlt();
+      //((EntryPoint)sampleCodeModuleAddress)();
       return 0;
 }

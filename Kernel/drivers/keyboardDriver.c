@@ -12,6 +12,8 @@
 #include <utils.h>
 #include <videoDriver.h>
 
+#include <taskManager.h>
+
 #define MAX_PROCESSES 2
 #define REGISTERS 16
 
@@ -22,9 +24,9 @@ static char pressCodes[KEYS][2] =
     {{0, 0}, {0, 0}, {'1', '!'}, {'2', '@'}, {'3', '#'}, {'4', '$'}, {'5', '%'}, {'6', '^'}, {'7', '&'}, {'8', '*'}, {'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {'\b', '\b'}, {'\t', '\t'}, {'q', 'Q'}, {'w', 'W'}, {'e', 'E'}, {'r', 'R'}, {'t', 'T'}, {'y', 'Y'}, {'u', 'U'}, {'i', 'I'}, {'o', 'O'}, {'p', 'P'}, {'[', '{'}, {']', '}'}, {'\n', '\n'}, {0, 0}, {'a', 'A'}, {'s', 'S'}, {'d', 'D'}, {'f', 'F'}, {'g', 'G'}, {'h', 'H'}, {'j', 'J'}, {'k', 'K'}, {'l', 'L'}, {';', ':'}, {'\'', '\"'}, {'`', '~'}, {0, 0}, {'\\', '|'}, {'z', 'Z'}, {'x', 'X'}, {'c', 'C'}, {'v', 'V'}, {'b', 'B'}, {'n', 'N'}, {'m', 'M'}, {',', '<'}, {'.', '>'}, {'/', '?'}, {0, 0}, {0, 0}, {0, 0}, {' ', ' '}, {0, 0}};
 
 static uint8_t scanCode, currentAction, specialChars = 0, capsLock = 0, l_ctrl = 0;
-static char buffer1[MAX_SIZE] = {0}, buffer2[MAX_SIZE] = {0};
-static t_queue buffers[MAX_PROCESSES] = {{buffer1, 0, -1, 0, MAX_SIZE, sizeof(char)}, {buffer2, 0, -1, 0, MAX_SIZE, sizeof(char)}};
-static t_queue* currentBuffer;
+//static char buffer1[MAX_SIZE] = {0}, buffer2[MAX_SIZE] = {0};
+//static t_queue buffers[MAX_PROCESSES] = {{buffer1, 0, -1, 0, MAX_SIZE, sizeof(char)}, {buffer2, 0, -1, 0, MAX_SIZE, sizeof(char)}};
+//static t_queue* currentBuffer;
 static t_specialKeyCode clearS = CLEAR_SCREEN;
 static uint64_t registers[REGISTERS+1] = {0};
 
@@ -33,38 +35,41 @@ void keyboardHandler(uint64_t rsp) {
             scanCode = getKey();
             currentAction = action(scanCode);
             if (currentAction == PRESSED) {
-                  if (currentBuffer)
-                        switch (scanCode) {
-                              case L_SHFT_SC:
-                              case R_SHFT_SC:
-                                    specialChars = 1;
-                                    break;
+                  //if (currentBuffer)
+                  switch (scanCode) {
+                        case L_SHFT_SC:
+                        case R_SHFT_SC:
+                              specialChars = 1;
+                              break;
 
-                              case CAPS_LCK_SC:
-                                    capsLock = capsLock == 1 ? 0 : 1;
-                                    break;
+                        case CAPS_LCK_SC:
+                              capsLock = capsLock == 1 ? 0 : 1;
+                              break;
 
-                              case L_CONTROL_SC:
-                                    l_ctrl = 1;
-                                    break;
+                        case L_CONTROL_SC:
+                              l_ctrl = 1;
+                              break;
 
-                              default:
-                                    if (pressCodes[scanCode][0] != 0) {
-                                          if (l_ctrl) {
-                                                if (pressCodes[scanCode][0] == 'l') {
-                                                      queueInsert(currentBuffer, &clearS);
-                                                } else if (pressCodes[scanCode][0] == 's') {
-                                                      updateSnapshot((uint64_t*)rsp);
-                                                }
+                        default:
+                              if (pressCodes[scanCode][0] != 0) {
+                                    if (l_ctrl) {
+                                          if (pressCodes[scanCode][0] == 'l') {
+                                                //queueInsert(currentBuffer, &clearS);
+                                                writeKeyOnBuffer(clearS);
+                                          } else if (pressCodes[scanCode][0] == 's') {
+                                                updateSnapshot((uint64_t*)rsp);
+                                          }
+                                    } else {
+                                          if (!IS_LETTER(pressCodes[scanCode][0])) {
+                                                //queueInsert(currentBuffer, &pressCodes[scanCode][specialChars]);
+                                                writeKeyOnBuffer(pressCodes[scanCode][specialChars]);
                                           } else {
-                                                if (!IS_LETTER(pressCodes[scanCode][0])) {
-                                                      queueInsert(currentBuffer, &pressCodes[scanCode][specialChars]);
-                                                } else {
-                                                      queueInsert(currentBuffer, &pressCodes[scanCode][ABS(capsLock - (specialChars))]);
-                                                }
+                                                //queueInsert(currentBuffer, &pressCodes[scanCode][ABS(capsLock - (specialChars))]);
+                                                writeKeyOnBuffer(pressCodes[scanCode][ABS(capsLock - (specialChars))]);
                                           }
                                     }
-                        }
+                              }
+                  }
             } else if (currentAction == RELEASED) {
                   switch (scanCode) {
                         case L_SHFT_SC | 0x80:  //for realease code
@@ -87,7 +92,8 @@ char getchar() {
                   blinkCursor();
             }
             _hlt();
-            queueRemoveData(currentBuffer, &c);
+            c = removeKeyFromBuffer();
+      
       }
       stopBlink();
       return c;
@@ -99,14 +105,14 @@ char getcharOnce(){
              blinkCursor();
       }
       _hlt();
-      queueRemoveData(currentBuffer, &c);
+      c = removeKeyFromBuffer();
       stopBlink();
       return c;
 }
 
-void changeBuffer(t_bufferID bufferID) {
+/*void changeBuffer(t_bufferID bufferID) {
       currentBuffer = &buffers[bufferID];
-}
+}*/
 
 uint64_t* getSnapshot() {
       return registers;

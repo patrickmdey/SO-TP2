@@ -6,10 +6,12 @@
 #include <lib.h>
 
 #include <list.h>
+#include <memoryManager.h>
+
+#include <stringLib.h>
 
 #define SIZE_OF_STACK 4 * 1024
 
-static void* getNewStackBase();
 static void* initializeStackFrame(void* entryPoint, void* baseStack);
 
 //sacado de stackOverflow
@@ -40,116 +42,108 @@ typedef struct {
       uint64_t base;
 } t_stackFrame;
 
-static t_PCB processes[MAX_PROCESSES];
-static uint8_t stacks[MAX_PROCESSES][SIZE_OF_STACK], freeStacks[MAX_PROCESSES] = { 0 };
 
-t_queue taskManager = { processes, 0, -1, 0, MAX_PROCESSES, sizeof(t_PCB) };
 
 t_list tasks = { 0, NULL, NULL };
 t_PCB* current;
 
 int currentPID = 0;
 
-void initTaskManager(int entryPoint) {
-      t_PCB* shell = malloc(sizeof(t_PCB));
+
+void initTaskManager(void* entryPoint) {
+      t_PCB* shell = (t_PCB*)malloc(sizeof(t_PCB));
+      if (shell == NULL)
+            return;
+
       shell->entryPoint = entryPoint;
+
       addProcess(shell);
       current = shell;
 }
 
-//void* schedule(void* oldRSP, int forceStart) {
-      // t_PCB* nextProcess;
-      // nextProcess = currentProcess->next
-      //       //pcb1 ---> pcb2 ---> pcb3
-
-
-      //       // YA HAY PROCESOS EN LA LISTA
-      //       if (!forceStart) {
-      //             currentProcess->rsp = oldRSP; //OBLIGATORIO
-      //             currentProcess->state = READY;
-      //             currentProcess = nextProcess;
-      //       }
-
-      // // t_PCB nextProcess = currentProcess->next;
-      // nextProcess->state = CPU
-
-      //       changeBuffer(nextProcess.bufferID);
-
-      // return nextProcess->rsp;
-//}
-
 void* schedule(void* oldRSP, int forceStart) {
-      t_PCB currentProcess, nextProcess;
-      // YA HAY PROCESOS EN LA LISTA
-      if (!forceStart) {
-            queueRemoveData(&taskManager, &currentProcess); //ESTO NO
-            currentProcess.rsp = oldRSP; //OBLIGATORIO
-            queueInsert(&taskManager, &currentProcess); //paso prox proceso
+      if (forceStart) {
+            return current->rsp;
       }
+      t_PCB* nextProcess;
+      nextProcess = current->next;
+      if (nextProcess == NULL) {
+            nextProcess = tasks.first;
+      }
+      //pcb1 ---> pcb2 ---> pcb3
 
-      // t_PCB nextProcess = currentProcess->next;
-      queuePeek(&taskManager, &nextProcess);
+      
+      current->rsp = oldRSP; //OBLIGATORIO
+      current = nextProcess;
+      //}
 
-      changeBuffer(nextProcess.bufferID);
-
-      return nextProcess.rsp;
+      return nextProcess->rsp;
 }
 
-// int addProcess(t_PCB* process) {
-//       if (process->entryPoint == 0) {
-//             return 0;
-//       }
-//       process->rbp = getNewStackBase();
-//       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK - 1));
-//       process->pid = currentPID++;
-//       process->state = READY;
-//       creo Buffer
-//       insertPCB(&tasks, process)
-//       return 1;
-// }
-
 int addProcess(t_PCB* process) {
-      if (process->entryPoint == 0 || queueIsFull(&taskManager)) {
+      if (process->entryPoint == 0) {
             return 0;
       }
-      process->rbp = getNewStackBase();
-      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK - 1));
+      process->rbp = malloc(SIZE_OF_STACK);
+      if (process->rbp == NULL)
+            return -1;
 
-      queueInsert(&taskManager, process);
+      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK - 1));
+      process->pid = currentPID++;
+      process->state = READY;
+
+      char* arr = (char*)malloc(MAX_SIZE);
+      if (arr == NULL)
+            return -1;
+
+      t_queue* queue = (t_queue*)malloc(sizeof(t_queue));
+      if (queue == NULL)
+            return -1;
+
+      queue->queue = arr;
+      queue->front = 0;
+      queue->rear = -1;
+      queue->size = 0;
+      queue->dim = MAX_SIZE;
+      queue->dataSize = sizeof(char);
+
+      process->buffer = queue;
+      //creo Buffer
+      insertPCB(&tasks, process);
       return 1;
 }
 
+
 void killCurrentProcess() {
-      if (queueIsEmpty(&taskManager)) {
+      if (tasks.size == 1) {
             return;
       }
-      t_PCB currentProcess;
-      queueRemoveData(&taskManager, &currentProcess);
-      freeStacks[currentProcess.stackID] = 0;
-      addProcess(&currentProcess);
-      sys_forceStart();
+      free((void*)current->rbp);
+      free((void*)current->buffer->queue);
+      free((void*)current->buffer);
+
+      removePCB(&tasks, current->pid);
 }
 
 void resetCurrentProcess() {
-      if (queueIsEmpty(&taskManager)) {
+      if (tasks.size == 1) {
             return;
       }
-      t_PCB currentProcess;
-      queuePeek(&taskManager, &currentProcess);
-      currentProcess.rsp = initializeStackFrame(currentProcess.entryPoint, (void*)(currentProcess.rbp + SIZE_OF_STACK - 1));
-      queueUpdateFirst(&taskManager, &currentProcess);
+
+      current->rsp = initializeStackFrame(current->entryPoint, (void*)(current->rbp + SIZE_OF_STACK - 1));
+      //queueUpdateFirst(&taskManager, &currentProcess);
       sys_forceStart();
 }
 
-static void* getNewStackBase() {
-      for (int i = 0; i < MAX_PROCESSES; i++)
-      {
-            if (freeStacks[i] == 0) {
-                  freeStacks[i] = 1;
-                  return stacks[i];
-            }
-      }
-      return 0;
+void writeKeyOnBuffer(char key) {
+      queueInsert(current->buffer, &key);
+}
+
+
+char removeKeyFromBuffer() {
+      char key;
+      queueRemoveData(current->buffer, &key);
+      return key;
 }
 
 
@@ -170,7 +164,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       frame->r8 = 0x00A;
       frame->rsi = 0x00B;
       frame->rdi = 0x00C;
-      frame->rbp = 0x00D;
+      frame->rbp = (uint64_t) &(frame->base); //0x00D
       frame->rdx = 0x00E;
       frame->rcx = 0x00F;
       frame->rbx = 0x010;
@@ -180,7 +174,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       frame->rip = (uint64_t)entryPoint;             //LO MAS IMPORTANTE
       frame->cs = 0x008;
       frame->eflags = 0x202;
-      frame->rsp = (uint64_t) & (frame->base);
+      frame->rsp = (uint64_t) &(frame->base);
       frame->ss = 0x000;
       frame->base = 0x000;
 

@@ -62,7 +62,7 @@ static void initShell(t_shellData* shellData) {
 
 //procesa el caracter recibido actua segun el mismo
 static void processChar(char c, t_shellData* shellData) {
-      uint8_t *dir1, *dir2;
+      //uint8_t *dir1, *dir2;
 
       if (c != 0) {
             switch (c) {
@@ -86,16 +86,16 @@ static void processChar(char c, t_shellData* shellData) {
 
 
             //TESTEO DE MALLOC Y CALLOC
-            case 'k':
-                  dir1 = malloc(100);
-                  malloc(3);
-                  dir2 = malloc(11);
-                  free(dir1);
-                  getMemoryInfo();
-                  malloc(38);
-                  free(dir2);
-                  getMemoryInfo();
-                  break;
+            // case 'k':
+            //       dir1 = malloc(100);
+            //       malloc(3);
+            //       dir2 = malloc(11);
+            //       free(dir1);
+            //       getMemoryInfo();
+            //       malloc(38);
+            //       free(dir2);
+            //       getMemoryInfo();
+            //       break;
 
             default:
                   if (shellData->buffer.index < BUFFER_SIZE) {

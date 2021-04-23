@@ -1,53 +1,29 @@
 #include <list.h>
 
+static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag);
+static void freeRec(t_PCB* pcb);
+
 uint8_t* createList() {
-    return myMalloc(sizeof(t_list));
-}
-
-static void freeRec(t_PCB* pcb) {
-    if (pcb == NULL)
-        return;
-
-    t_PCB* next = pcb->next;
-    killPCB(pcb->pid);
-    // Free buffer <- capaz cuando mato al proceso?
-    free(pcb);
-    freeRec(next);
+    return malloc(sizeof(t_list));
 }
 
 void freeList(t_list* l) {
     if (l == NULL)
         return;
     freeRec(l->first);
-    free(l);
+    free((void *)l);
 }
 
 uint8_t removePCB(t_list* l, int pid) {
     if (l == NULL)
         return -1;
     int flag = 0;
-    l->current = deleteNode(l->first, pid, &flag);
+    l->current = deletePCB(l->first, pid, &flag);
     if (flag)
         l->size--;
     return flag;
 }
 
-static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
-    if (pcb == NULL)
-        return pcb;
-
-    t_PCB* prev;
-    while (pcb != NULL && pcb != pid) {
-        prev = pcb;
-        pcb = pcb->next;
-    }
-    if (pcb == NULL)
-        *flag = -1;
-    else
-        prev->next = pcb->next;
-
-    return prev;
-}
 
 void insertPCB(t_list* l, t_PCB* pcb) {
     if (l == NULL)
@@ -80,4 +56,30 @@ int getSize(t_list *l){
     if(l == NULL)
         return -1;
     return l->size;
+}
+
+static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
+    if (pcb == NULL)
+        return pcb;
+
+    t_PCB* prev;
+    while (pcb != NULL && pcb->pid != pid) {
+        prev = pcb;
+        pcb = pcb->next;
+    }
+    if (pcb == NULL)
+        *flag = -1;
+    else
+        prev->next = pcb->next;
+
+    return prev;
+}
+
+static void freeRec(t_PCB* pcb) {
+    if (pcb == NULL)
+        return;
+
+    t_PCB* next = pcb->next;
+    free(pcb);
+    freeRec(next);
 }

@@ -178,6 +178,9 @@ sys_forceStart:
 
 	mov rsp, rax
 
+	mov al, 20h
+	out 20h, al
+
 	popaq
 	iretq
 
@@ -187,8 +190,10 @@ sys_changeProcess:
 	mov rdi,rsp
 	mov rsi,0 		;start not forced
 	call schedule
+	mov rsp, rax
 
-	mov rsp,rax
+	mov al, 20h
+	out 20h, al
 
 	popaq
 	iretq
