@@ -16,8 +16,6 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack);
 
 //sacado de stackOverflow
 typedef struct {
-      uint64_t gs;
-      uint64_t fs;
       uint64_t r15;
       uint64_t r14;
       uint64_t r13;
@@ -44,13 +42,19 @@ typedef struct {
 
 
 
-t_list tasks = { 0, NULL, NULL };
-t_PCB* current;
+static t_list * tasks;
+static t_PCB* current;
 
-int currentPID = 0;
+static int currentPID = 0;
 
 
 void initTaskManager(void* entryPoint) {
+      tasks = malloc(sizeof(t_list));
+      if (tasks == NULL)
+            return;
+
+      tasks->first = NULL;
+
       t_PCB* shell = (t_PCB*)malloc(sizeof(t_PCB));
       if (shell == NULL)
             return;
@@ -61,21 +65,19 @@ void initTaskManager(void* entryPoint) {
       current = shell;
 }
 
-void* schedule(void* oldRSP, int forceStart) {
+void* schedule(void * oldRSP, int forceStart) {
       if (forceStart) {
             return current->rsp;
       }
       t_PCB* nextProcess;
       nextProcess = current->next;
       if (nextProcess == NULL) {
-            nextProcess = tasks.first;
+            nextProcess = tasks->first;
       }
-      //pcb1 ---> pcb2 ---> pcb3
 
       
       current->rsp = oldRSP; //OBLIGATORIO
       current = nextProcess;
-      //}
 
       return nextProcess->rsp;
 }
@@ -88,7 +90,7 @@ int addProcess(t_PCB* process) {
       if (process->rbp == NULL)
             return -1;
 
-      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK - 1));
+      process->rsp = initializeStackFrame(process->entryPoint, (void *)(process->rbp + SIZE_OF_STACK) -1);
       process->pid = currentPID++;
       process->state = READY;
 
@@ -96,7 +98,7 @@ int addProcess(t_PCB* process) {
       if (arr == NULL)
             return -1;
 
-      t_queue* queue = (t_queue*)malloc(sizeof(t_queue));
+      t_queue * queue = malloc(sizeof(t_queue));
       if (queue == NULL)
             return -1;
 
@@ -108,27 +110,27 @@ int addProcess(t_PCB* process) {
       queue->dataSize = sizeof(char);
 
       process->buffer = queue;
-      //creo Buffer
-      insertPCB(&tasks, process);
+      process->next = NULL;
+      insertPCB(tasks, process);
       return 1;
 }
 
 
 void killCurrentProcess() {
-      if (tasks.size == 1) {
+      if (tasks->size == 1) {
             return;
       }
       free((void*)current->rbp);
       free((void*)current->buffer->queue);
       free((void*)current->buffer);
 
-      removePCB(&tasks, current->pid);
+      removePCB(tasks, current->pid);
 }
 
 void resetCurrentProcess() {
-      if (tasks.size == 1) {
+      /*if (tasks->size == 1) {
             return;
-      }
+      }*/
 
       current->rsp = initializeStackFrame(current->entryPoint, (void*)(current->rbp + SIZE_OF_STACK - 1));
       //queueUpdateFirst(&taskManager, &currentProcess);
@@ -150,28 +152,27 @@ char removeKeyFromBuffer() {
 //sacado de stackOverflow
 //guarda el contexto de un proceso
 static void* initializeStackFrame(void* entryPoint, void* baseStack) {
-      t_stackFrame* frame = (t_stackFrame*)baseStack - 1;
+      t_stackFrame* frame = (t_stackFrame*) (baseStack - sizeof(t_stackFrame));
+
       //todos los registros
-      frame->gs = 0x001;
-      frame->fs = 0x002;
-      frame->r15 = 0x003;
-      frame->r14 = 0x004;
-      frame->r13 = 0x005;
-      frame->r12 = 0x006;
-      frame->r11 = 0x007;
-      frame->r10 = 0x008;
-      frame->r9 = 0x009;
-      frame->r8 = 0x00A;
-      frame->rsi = 0x00B;
-      frame->rdi = 0x00C;
-      frame->rbp = (uint64_t) &(frame->base); //0x00D
-      frame->rdx = 0x00E;
-      frame->rcx = 0x00F;
-      frame->rbx = 0x010;
-      frame->rax = 0x011;
+      frame->r15 = 0x001;
+      frame->r14 = 0x002;
+      frame->r13 = 0x003;
+      frame->r12 = 0x004;
+      frame->r11 = 0x005;
+      frame->r10 = 0x006;
+      frame->r9 = 0x007;
+      frame->r8 = 0x008;
+      frame->rsi = 0x009;
+      frame->rdi = 0x00A;
+      frame->rbp = (uint64_t) baseStack; //0x00D
+      frame->rdx = 0x00B;
+      frame->rcx = 0x00C;
+      frame->rbx = 0x00D;
+      frame->rax = 0x00E;
       //interrupts StackFrame (es lo que se pushea cuando hay una interrupcion)
 
-      frame->rip = (uint64_t)entryPoint;             //LO MAS IMPORTANTE
+      frame->rip = (uint64_t) entryPoint;             //LO MAS IMPORTANTE
       frame->cs = 0x008;
       frame->eflags = 0x202;
       frame->rsp = (uint64_t) &(frame->base);

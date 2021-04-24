@@ -16,7 +16,7 @@ typedef struct t_PCB{
     void * entryPoint;      //Puntero a la funcion que debe ejecutarse
     void * rsp;             //StackFrame
     void * rbp;             //Base Pointer
-    int stackID;            //El stack que le corresponde (4KB)
+    //int stackID;            //El stack que le corresponde (4KB)
     //t_bufferID bufferID;    //El buffer que le corresponde --> CAMBIAR
     t_queue * buffer;
 
