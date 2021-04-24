@@ -26,7 +26,13 @@ typedef enum{
     GET_TICKS_ELAPSED = 14,
     ASIGN_MEMORY = 15,
     FREE_MEMORY = 16,
-    GET_MEMORY_INFO = 17
+    GET_MEMORY_INFO = 17,
+    PS = 18,
+    CREATE_PROCESS = 19,
+    GET_PID = 20,
+    KILL = 21,
+    NICE = 22,
+    BLOCK = 23
 }syscallID;
 
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);

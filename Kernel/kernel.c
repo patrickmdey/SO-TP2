@@ -44,12 +44,14 @@ void* initializeKernelBinary() {
 }
 
 int main() {
+      _cli();
       initMemory();
       initTaskManager((void *) 0x400000);
       initVideoDriver(BLACK, WHITE);
       load_idt();
       sys_forceStart();
       _hlt();
+      printStringLn("Al horno");
       //((EntryPoint)sampleCodeModuleAddress)();
       return 0;
 }

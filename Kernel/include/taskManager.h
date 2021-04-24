@@ -4,8 +4,7 @@
 #define MAX_PROCESSES 2
 
 #define READY 1
-#define CPU 2
-#define BLOCKED 3
+#define BLOCKED 2
 
 
 #include <stdint.h>
@@ -13,15 +12,14 @@
 #include <staticQueue.h>
 
 typedef struct t_PCB{
-    void * entryPoint;      //Puntero a la funcion que debe ejecutarse
-    void * rsp;             //StackFrame
-    void * rbp;             //Base Pointer
-    //int stackID;            //El stack que le corresponde (4KB)
-    //t_bufferID bufferID;    //El buffer que le corresponde --> CAMBIAR
+    void * entryPoint;
+    void * rsp;             
+    void * rbp;             
     t_queue * buffer;
 
     struct t_PCB * next;
     uint8_t state;
+    uint8_t foreground;
     int priority;
     int pid;
 } t_PCB;     //Process Control Block
@@ -31,11 +29,19 @@ extern t_queue taskManager;
 void initTaskManager(void * entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
+void createProcess(void * entryPoint);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();
+int killProcess(int pid);
+
+int getPID();
+char ** ps(int * index);
+uint8_t changeState(int pid);
 
 void writeKeyOnBuffer(char key);
 char removeKeyFromBuffer();
+
+uint8_t changePriority(int pid, int priority);
 
 #endif

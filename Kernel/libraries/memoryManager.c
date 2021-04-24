@@ -57,8 +57,8 @@ void* malloc(uint32_t size) {
 }
 
 void free(void * dir) {
-    printStringWC("LLAMADO A FREE", BLACK, GREEN);
-    printStringLn("");
+    /*printStringWC("LLAMADO A FREE", BLACK, GREEN);
+    printStringLn("");*/
     int idx = ((uint8_t *) dir - start) / BLOCK_SIZE;
     if (idx < 0 || idx >= TOTAL_BLOCKS) {
         return;
@@ -71,7 +71,7 @@ void free(void * dir) {
     }
     blockArray[idx].free = 1;
     blockArray[idx].size = 0;
-    testPrint(idx);
+    //testPrint(idx);
 }
 
 void getMemoryInfo(void) {
@@ -181,8 +181,7 @@ static void testPrint(int index) {
             printString(" DIR: ");
             printInt(start[k * BLOCK_SIZE]);
             printStringLn("");
-        }
-        else {
+        } else {
             printStringWC(" IS FREE: ",BLACK, RED);
             printInt(blockArray[k].free);
             printStringWC(" USES NEXT: ",BLACK, RED);

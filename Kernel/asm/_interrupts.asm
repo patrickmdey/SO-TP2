@@ -20,6 +20,10 @@ GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 EXTERN exceptionDispatcher
 
+EXTERN timerHandler
+EXTERN schedule
+
+
 SECTION .text
 
 %macro pushState 0
@@ -133,7 +137,21 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	;irqHandlerMaster 0
+	pushState
+
+	mov rdi, rsp
+	mov rsi, 0 		;start not forced
+	call schedule
+	mov rsp, rax
+
+	call timerHandler
+
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
 
 ;Keyboard
 _irq01Handler:

@@ -18,6 +18,6 @@ char getchar();
 char getcharOnce();
 void deletechar();
 int strlen(char* str);
-void strcpy(char* str1, char* str2);
+void strcpy(char* dst, char* src);
 
 #endif
