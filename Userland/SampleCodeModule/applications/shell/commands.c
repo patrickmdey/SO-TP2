@@ -6,6 +6,7 @@
 #include <systemCalls.h>
 #include <utils.h>
 #include <chess.h>
+#include <memoryManager.h>
 
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
@@ -167,10 +168,10 @@ void ps(int argc, char** args, t_shellData* shellData){
       char ** info = (char **) syscall(PS, (uint64_t) &index, 0, 0, 0, 0, 0);
       for(int i = 0; i < index; i++) {
             printStringLn(info[i]);
-            free(info[i]);
+            free((uint8_t*) info[i]);
       }
       
-      free(info);
+      free((uint8_t*)info);
 }
 
 void loopProcess() {
@@ -178,7 +179,7 @@ void loopProcess() {
       int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
       while (1) {
             elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
-            if (elapsed%89 == 0) {
+            if (elapsed%20 == 0) {
                   printStringLn("");
                   printStringWC("LOOP> ", BLACK, DARK_RED);
                   printString("pid ");

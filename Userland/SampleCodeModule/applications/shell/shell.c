@@ -90,19 +90,6 @@ static void processChar(char c, t_shellData* shellData) {
                   }
                   break;
 
-
-            //TESTEO DE MALLOC Y CALLOC
-            // case 'k':
-            //       dir1 = malloc(100);
-            //       malloc(3);
-            //       dir2 = malloc(11);
-            //       free(dir1);
-            //       getMemoryInfo();
-            //       malloc(38);
-            //       free(dir2);
-            //       getMemoryInfo();
-            //       break;
-
             default:
                   if (shellData->buffer.index < BUFFER_SIZE) {
                         shellData->buffer.buffer[shellData->buffer.index++] = c;

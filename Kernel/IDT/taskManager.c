@@ -50,6 +50,14 @@ static t_PCB* current;
 
 static int currentPID = 0;
 
+void* schedule(void * oldRSP, int forceStart) {
+      if (forceStart) {
+            return current->rsp;
+      }
+      current->rsp = oldRSP;
+      current = getNextProcess();
+      return current->rsp;
+}
 
 void initTaskManager(void* entryPoint) {
       tasks = malloc(sizeof(t_list));
@@ -64,33 +72,13 @@ void initTaskManager(void* entryPoint) {
       current->foreground = 1;
 }
 
-void* schedule(void * oldRSP, int forceStart) {
-      //printString("SCHEDULE");
-      //printInt(forceStart);
-      if (forceStart) {
-            return current->rsp;
-      }
-<<<<<<< HEAD
-      t_PCB* nextProcess;
-      nextProcess = current->next;
-      if (nextProcess == NULL) {
-            nextProcess = tasks->first;
-      }
+void createProcess(void * entryPoint) {
+      t_PCB * process = malloc(sizeof(t_PCB));
+      if(process == NULL)
+            return;
       
-      current->rsp = oldRSP; //OBLIGATORIO
-      current = nextProcess;
-=======
-
-      /*t_PCB *next = current->next;
-      if (next == NULL)
-            next = tasks->first;*/
->>>>>>> b1803984469e79178a5d7231302be308268610e0
-
-      current->rsp = oldRSP;
-      current = getNextProcess();
-      //printInt(current->pid);
-      //current = next;
-      return current->rsp;
+      process->entryPoint = entryPoint;
+      addProcess(process);
 }
 
 int addProcess(t_PCB* process) {
@@ -183,6 +171,8 @@ char ** ps(int *index){
             offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
             offset += strcpy(toReturn[i] + offset, " STATE: ");
             offset += strcpy(toReturn[i] + offset, iterator->state==READY?"READY":"BLOCKED");
+            offset += strcpy(toReturn[i] + offset, " FOREGROUND: ");
+            offset += strcpy(toReturn[i] + offset, iterator->foreground==1?"TRUE":"FALSE");
             offset += strcpy(toReturn[i] + offset, " RSP: ");
             offset += uintToBase((uint64_t) iterator->rsp, toReturn[i] + offset, 10);
             offset += strcpy(toReturn[i] + offset, " RBP: ");
@@ -195,19 +185,6 @@ char ** ps(int *index){
       *index = size;
       return toReturn;
 
-}
-
-void createProcess(void * entryPoint) {
-      t_PCB * process = malloc(sizeof(t_PCB));
-      if(process == NULL)
-            return;
-      
-      process->entryPoint = entryPoint;
-      addProcess(process);
-}
-
-int getPID() {
-      return current->pid;
 }
 
 uint8_t changeState(int pid){
@@ -224,7 +201,7 @@ uint8_t changeState(int pid){
 }
 
 uint8_t changePriority(int pid, int priority) {
-      if(pid = 0)
+      if(pid == 0)
             return 0;
       t_PCB * pcb = findPCB(tasks, pid);
       if(pcb == NULL)
@@ -234,8 +211,11 @@ uint8_t changePriority(int pid, int priority) {
       return 1;
 }
 
+int getPID() {
+      return current->pid;
+}
 
-//sacado de stackOverflow
+
 //guarda el contexto de un proceso
 static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       t_stackFrame* frame = (t_stackFrame*) (baseStack - sizeof(t_stackFrame));
@@ -258,7 +238,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       frame->rax = 0x00E;
       //interrupts StackFrame (es lo que se pushea cuando hay una interrupcion)
 
-      frame->rip = (uint64_t) entryPoint;             //LO MAS IMPORTANTE
+      frame->rip = (uint64_t) entryPoint;
       frame->cs = 0x008;
       frame->eflags = 0x202;
       frame->rsp = (uint64_t) &(frame->base);
@@ -270,18 +250,18 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
 
 static t_PCB * getNextProcess() {
       int i = 0, size = tasks->size;
-      t_PCB * next = current;
+      t_PCB * cur = current;
 
       do {
-            if (next->next != NULL) 
-                  next = next->next;
+            if (cur->next != NULL) 
+                  cur = cur->next;
             else {
-                  next = tasks->first;
+                  cur = tasks->first;
             }
             i++;
-      } while (i < size && next->state != READY);
+      } while (i < size && cur->state != READY);
 
-      return next;
+      return cur;
 }
 
 static t_PCB * getForegroundProcess() {

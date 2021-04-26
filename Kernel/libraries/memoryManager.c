@@ -8,7 +8,7 @@
 
 static int findBlocks(int amount);
 static void asignMemory(int first_idx, int count, int size);
-static void testPrint(int index);
+//static void testPrint(int index);
 
 uint8_t start[TOTAL_MEM];
 uint8_t* next = start;
@@ -167,32 +167,32 @@ static int findBlocks(int amount) {
 
 #endif
 
-static void testPrint(int index) {
-    for (int k = 0; k < TOTAL_BLOCKS; k++) {
-        if (k != index) {
-            printString(" IS FREE: ");
-            printInt(blockArray[k].free);
-            printString(" USES NEXT: ");
-            printInt(blockArray[k].uses_next);
-            printString(" SIZE: ");
-            printInt(blockArray[k].size);
-            printString(" ARRAY POS: ");
-            printInt(blockArray[k].pos);
-            printString(" DIR: ");
-            printInt(start[k * BLOCK_SIZE]);
-            printStringLn("");
-        } else {
-            printStringWC(" IS FREE: ",BLACK, RED);
-            printInt(blockArray[k].free);
-            printStringWC(" USES NEXT: ",BLACK, RED);
-            printInt(blockArray[k].uses_next);
-            printStringWC(" SIZE: ",BLACK, RED);
-            printInt(blockArray[k].size);
-            printStringWC(" ARRAY POS: ",BLACK, RED);
-            printInt(blockArray[k].pos);
-            printStringWC(" DIR: ",BLACK, RED);
-            printInt(start[k * BLOCK_SIZE]);
-            printStringLn("");
-        }
-    }
-}
+// static void testPrint(int index) {
+//     for (int k = 0; k < TOTAL_BLOCKS; k++) {
+//         if (k != index) {
+//             printString(" IS FREE: ");
+//             printInt(blockArray[k].free);
+//             printString(" USES NEXT: ");
+//             printInt(blockArray[k].uses_next);
+//             printString(" SIZE: ");
+//             printInt(blockArray[k].size);
+//             printString(" ARRAY POS: ");
+//             printInt(blockArray[k].pos);
+//             printString(" DIR: ");
+//             printInt(start[k * BLOCK_SIZE]);
+//             printStringLn("");
+//         } else {
+//             printStringWC(" IS FREE: ",BLACK, RED);
+//             printInt(blockArray[k].free);
+//             printStringWC(" USES NEXT: ",BLACK, RED);
+//             printInt(blockArray[k].uses_next);
+//             printStringWC(" SIZE: ",BLACK, RED);
+//             printInt(blockArray[k].size);
+//             printStringWC(" ARRAY POS: ",BLACK, RED);
+//             printInt(blockArray[k].pos);
+//             printStringWC(" DIR: ",BLACK, RED);
+//             printInt(start[k * BLOCK_SIZE]);
+//             printStringLn("");
+//         }
+//     }
+// }
