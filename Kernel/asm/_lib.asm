@@ -166,9 +166,9 @@ getBSDTimeInfo:
     ret
 
 sys_forceStart:
-	mov rsi,1		 ;force start
+	
+	mov rsi,1		 ;force start	
 	call schedule
-
 	mov rsp, rax
 
 	mov al, 20h
@@ -178,12 +178,12 @@ sys_forceStart:
 	iretq
 
 sys_changeProcess:
-	pushState
+	;pushState
 
 	mov rdi, rsp
 	mov rsi, 0 		;start not forced
 	call schedule
 	mov rsp, rax
 
-	popState
+	;popState
 	ret

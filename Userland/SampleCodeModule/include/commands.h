@@ -37,4 +37,14 @@ void showArgs(int argc, char **args, t_shellData * shellData);
 //change to chess game
 void changeToChess(int argc, char** args, t_shellData* shellData);
 
+//print all running process info
+void ps(int argc, char** args, t_shellData* shellData);
+
+void loop();
+
+void kill(int argc, char** args, t_shellData* shellData);
+
+void nice(int argc, char ** args, t_shellData* shellData);
+
+void block(int argc, char ** args, t_shellData* shellData);
 #endif

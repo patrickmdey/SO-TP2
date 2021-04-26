@@ -47,7 +47,13 @@ static void initShell(t_shellData* shellData) {
           {&checkZeroException, "checkZeroException", "triggers a zero division exception"},
           {&checkInvalidOpcodeException, "checkInvalidOpcodeException", "triggers an invalid opcode exception"},
           {&showArgs, "showArgs", "prints the arguments passed to this command"},
-          {&changeToChess, "chess", "Starts or resumes a chess game"} };
+          {&changeToChess, "chess", "starts or resumes a chess game"},
+          {&ps, "ps", "prints a list with all running processes with their most relevant information"},
+          {&loop, "loop", "creates loop process"},
+          {&kill, "kill", "kills the process with the given pid"},
+          {&block, "block", "changes process state between blocked and ready with given pid"},
+          {&nice, "nice", "changes the process with the given pid priority to the new priority"} 
+      };
 
       for (int i = 0; i < COMMANDS; i++) {
             shellData->commands[i].command = commandsData[i].command;
@@ -56,7 +62,7 @@ static void initShell(t_shellData* shellData) {
       }
 
       cleanBuffer(&shellData->buffer);
-      strcpy("USER", shellData->username);
+      strcpy( shellData->username, "USER");
       shellText(shellData);
 }
 
@@ -164,7 +170,7 @@ void changeUsername(int argc, char** argv, t_shellData* shellData) {
             return;
       }
       cleanString(shellData->username);
-      strcpy(argv[0], shellData->username);
+      strcpy(shellData->username, argv[0]);
 }
 
 //muestra la lista de comandos con sus descripciones

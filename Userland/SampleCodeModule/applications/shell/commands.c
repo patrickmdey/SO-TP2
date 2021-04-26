@@ -162,6 +162,88 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
       putchar('\n');
 }
 
+void ps(int argc, char** args, t_shellData* shellData){
+      int index = 0;
+      char ** info = (char **) syscall(PS, (uint64_t) &index, 0, 0, 0, 0, 0);
+      for(int i = 0; i < index; i++) {
+            printStringLn(info[i]);
+            free(info[i]);
+      }
+      
+      free(info);
+}
+
+void loopProcess() {
+      int elapsed;
+      int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
+      while (1) {
+            elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
+            if (elapsed%89 == 0) {
+                  printStringLn("");
+                  printStringWC("LOOP> ", BLACK, DARK_RED);
+                  printString("pid ");
+                  printInt(pid);
+                  printStringLn(" says hello");
+            }
+      }
+      //syscall(EXIT, 0, 0, 0, 0, 0, 0);
+}
+
+void loop(int argc, char** args, t_shellData* shellData) {
+      syscall(CREATE_PROCESS, (uint64_t) &loopProcess, 0, 0, 0, 0, 0);
+}
+
+void kill(int argc, char** args, t_shellData* shellData) {
+      if(argc > 2){
+            printStringLn("To many arguments");
+            return;
+      }
+      int error = 0;
+      int pid = strToInt(args[0], &error);
+      int killed = syscall(KILL, pid, 0, 0, 0, 0, 0);
+      if(killed == 1) {
+            printStringLn("Killed process");
+      } else if(killed == 0) {
+            printString("No process running with pid ");
+            printInt(pid);
+            printStringLn("");
+      } else {
+            printStringLn("Error occured: no processes running");
+      }
+}
+
+
+void nice(int argc, char ** args, t_shellData* shellData) {
+      int error = 0;
+      int pid = strToInt(args[0], &error);
+      if(error){
+            return;
+      }
+      int priority = strToInt(args[1], &error);
+      if(error){
+            return;
+      }
+      error = syscall(NICE, pid, priority, 0, 0, 0, 0);
+      if (error == 0) {
+            printStringLn("Not found");
+      }
+}
+
+void block(int argc, char ** args, t_shellData* shellData) {
+      int error = 0;
+      int pid = strToInt(args[0], &error);
+      if(error){
+            return;
+      }
+      int blocked = syscall(BLOCK, pid, 0, 0, 0, 0, 0);
+      if(blocked) {
+            printString("Changed process ");
+            printInt(pid);
+            printStringLn(" state");
+      } else
+            printStringLn("Couldn´t change process state");
+}
+
 static void memToString(char* buffer, uint8_t* mem, int bytes) {
       for (int i = 0; i < bytes * 2; i++) {
             if (mem[i] <= 0xF) {

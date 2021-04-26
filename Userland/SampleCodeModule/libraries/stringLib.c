@@ -57,10 +57,10 @@ void deletechar() {
       putchar('\b');
 }
 
-void strcpy(char* str1, char* str2){  //copies str1 into str2
+void strcpy(char* dst, char* src){ 
       int i;
-      for (i = 0; str1[i] != 0; i++) {
-            str2[i]=str1[i];
+      for (i = 0; src[i] != 0; i++) {
+            dst[i]=src[i];
       }
-      str2[i]=0;
+      dst[i]=0;
 }

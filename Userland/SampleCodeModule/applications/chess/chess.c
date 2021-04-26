@@ -53,8 +53,8 @@ void runChess(){
 static void initChess(t_chessData * chessData){
 
       chessData->lost = 0;
-      strcpy("PLAYER 1", chessData->player1);
-      strcpy("PLAYER 2", chessData->player2);
+      strcpy(chessData->player1, "PLAYER 1");
+      strcpy(chessData->player2, "PLAYER 2");
       chessData->currentPlayer = chessData->player1;
       chessData->nextPlayer = chessData->player2;
 
