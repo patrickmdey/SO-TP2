@@ -74,7 +74,6 @@ void* schedule(void * oldRSP, int forceStart) {
       if (nextProcess == NULL) {
             nextProcess = tasks->first;
       }
-
       
       current->rsp = oldRSP; //OBLIGATORIO
       current = nextProcess;
