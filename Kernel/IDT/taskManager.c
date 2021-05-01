@@ -174,10 +174,10 @@ char ** ps(int *index){
             offset += strcpy(toReturn[i] + offset, " FOREGROUND: ");
             offset += strcpy(toReturn[i] + offset, iterator->foreground==1?"TRUE":"FALSE");
             offset += strcpy(toReturn[i] + offset, " RSP: ");
-            offset += uintToBase((uint64_t) iterator->rsp, toReturn[i] + offset, 10);
+            offset += uintToBase((uint64_t) iterator->rsp, toReturn[i] + offset, 16);
             offset += strcpy(toReturn[i] + offset, " RBP: ");
-            offset += uintToBase((uint64_t) iterator->rbp, toReturn[i] + offset, 10);
-            //strcpy(toReturn[i] + offset, "\0");
+            offset += uintToBase((uint64_t) iterator->rbp, toReturn[i] + offset, 16);
+            toReturn[i][offset] = 0;
             
             iterator = iterator->next;
             i++;
