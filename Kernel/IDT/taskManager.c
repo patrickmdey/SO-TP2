@@ -163,7 +163,7 @@ char ** ps(int *index){
       t_PCB * iterator = tasks->first;
       int offset;
       while(i<size){
-            toReturn[i] = malloc(50);
+            toReturn[i] = malloc(150);
             offset = 0;
             offset += strcpy(toReturn[i], "PID: ");
             offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
