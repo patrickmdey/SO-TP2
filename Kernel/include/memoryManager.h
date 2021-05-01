@@ -6,7 +6,7 @@
 
 void initMemory();
 
-void * malloc(uint32_t size);
+void* malloc(uint32_t size);
 
 void free(void* dir);
 

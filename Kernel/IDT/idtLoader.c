@@ -18,11 +18,11 @@ typedef struct {
 #pragma pack(pop)		/* Reestablece la alinceación actual */
 
 
-DESCR_INT * idt = (DESCR_INT *) 0;	// IDT de 255 entradas -PRIMERAS 32 excepciones, resto: syscalls y irqs
+DESCR_INT* idt = (DESCR_INT*)0;	// IDT de 255 entradas -PRIMERAS 32 excepciones, resto: syscalls y irqs
 
-static void setup_IDT_entry (int index, uint64_t offset);
+static void setup_IDT_entry(int index, uint64_t offset);
 
-void load_idt() {
+void loadIDT() {
   _cli();
 
   setup_IDT_entry(0x20, (uint64_t)&_irq00Handler);
@@ -35,16 +35,14 @@ void load_idt() {
   //interrupciones habilitadas
   picMasterMask(0xFC);
   picSlaveMask(0x00);
-
-  //_sti();
 }
 
-static void setup_IDT_entry (int index, uint64_t offset) {
+static void setup_IDT_entry(int index, uint64_t offset) {
   idt[index].selector = 0x08;
   idt[index].offset_l = offset & 0xFFFF;
   idt[index].offset_m = (offset >> 16) & 0xFFFF;
   idt[index].offset_h = (offset >> 32) & 0xFFFFFFFF;
   idt[index].access = ACS_INT;
   idt[index].cero = 0;
-  idt[index].other_cero = (uint64_t) 0;
+  idt[index].other_cero = (uint64_t)0;
 }

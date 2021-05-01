@@ -11,13 +11,13 @@
 #include <buffer.h>
 #include <staticQueue.h>
 
-typedef struct t_PCB{
-    void * entryPoint;
-    void * rsp;             
-    void * rbp;             
-    t_queue * buffer;
+typedef struct t_PCB {
+    void* entryPoint;
+    void* rsp;
+    void* rbp;
+    t_queue* buffer;
 
-    struct t_PCB * next;
+    struct t_PCB* next;
     uint8_t state;
     uint8_t foreground;
     int priority;
@@ -26,17 +26,17 @@ typedef struct t_PCB{
 
 extern t_queue taskManager;
 
-void initTaskManager(void * entryPoint);
+void initTaskManager(void* entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
-void createProcess(void * entryPoint);
+void createProcess(void* entryPoint);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();
 int killProcess(int pid);
 
 int getPID();
-char ** ps(int * index);
+char** ps(int* index);
 uint8_t changeState(int pid);
 
 void writeKeyOnBuffer(char key);

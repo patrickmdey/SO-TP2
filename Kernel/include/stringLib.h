@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <colours.h>
 
-void sys_write(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour);
-void sys_staticwrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour);
+void sysWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour);
+void sysStaticWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour);
 void printString(char* str);
 void printStringLn(char* str);
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour);

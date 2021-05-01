@@ -3,7 +3,7 @@
 static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
 
-t_list * createList() {
+t_list* createList() {
     return malloc(sizeof(t_list));
 }
 
@@ -11,7 +11,7 @@ void freeList(t_list* l) {
     if (l == NULL)
         return;
     freeRec(l->first);
-    free((void *)l);
+    free((void*)l);
 }
 
 uint8_t removePCB(t_list* l, int pid) {
@@ -26,7 +26,7 @@ uint8_t removePCB(t_list* l, int pid) {
 
 
 void insertPCB(t_list* l, t_PCB* pcb) {
-    if (l == NULL){
+    if (l == NULL) {
         return;
     }
 
@@ -55,13 +55,13 @@ t_PCB* findPCB(t_list* l, int pid) {
     return pcb;
 }
 
-int getSize(t_list *l){
-    if(l == NULL)
+int getSize(t_list* l) {
+    if (l == NULL)
         return -1;
     return l->size;
 }
 
-static void freePCB(t_PCB * pcb) {
+static void freePCB(t_PCB* pcb) {
     free(pcb->rbp);
     free(pcb->buffer->queue);
     free(pcb->buffer);
@@ -69,30 +69,14 @@ static void freePCB(t_PCB * pcb) {
 }
 
 static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
-    /*if (pcb == NULL)
-        return pcb;
-
-    t_PCB* prev;
-    while (pcb != NULL && pcb->pid != pid) {
-        prev = pcb;
-        pcb = pcb->next;
-    }
-    if (pcb == NULL)
-        *flag = 0;
-    else {
-        prev->next = pcb->next;       
-    }
-
-    freePCB(pcb);*/
-
-    if (pcb == NULL){
+    if (pcb == NULL) {
         return NULL;
     }
 
     if (pcb->pid == pid) {
-        t_PCB * next = pcb->next;
+        t_PCB* next = pcb->next;
         freePCB(pcb);
-        *flag = 1; 
+        *flag = 1;
         return next;
     }
 

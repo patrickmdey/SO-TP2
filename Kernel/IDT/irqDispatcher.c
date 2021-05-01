@@ -24,10 +24,10 @@ void irqDispatcher(uint64_t irq, uint64_t rsp) {
 
 static void int_20() {
       timerHandler();
-      if (ticksElapsed() % 32 == 0){
+      if (ticksElapsed() % 32 == 0) {
             sys_changeProcess();
       }
-      
+
 }
 
 static void int_21(uint64_t rsp) {

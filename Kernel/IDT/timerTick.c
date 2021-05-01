@@ -12,5 +12,5 @@ int ticksElapsed() {
 }
 
 int secondsElapsed() {
-	return ticks / 18;
+      return ticks / 18;
 }

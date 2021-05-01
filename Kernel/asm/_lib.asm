@@ -1,7 +1,7 @@
 GLOBAL cpuVendor
 GLOBAL cpuModel
 GLOBAL cpuTemp
-GLOBAL sys_getMem
+GLOBAL sysGetMem
 
 GLOBAL updateSnapshot
 GLOBAL getSnapshot
@@ -9,7 +9,7 @@ GLOBAL getSnapshot
 GLOBAL getBSDTimeInfo
 
 GLOBAL sys_changeProcess
-GLOBAL sys_forceStart
+GLOBAL sysForceStart
 
 EXTERN schedule
 
@@ -126,7 +126,7 @@ cpuTemp:
 	pop rbp
 	ret             ;se devuelve en eax el valor de la temp en C
 
-sys_getMem:
+sysGetMem:
 	push rbp
 	mov rbp, rsp
 
@@ -165,7 +165,7 @@ getBSDTimeInfo:
     leave
     ret
 
-sys_forceStart:
+sysForceStart:
 	
 	mov rsi,1		 ;force start	
 	call schedule

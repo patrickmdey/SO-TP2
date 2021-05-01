@@ -35,13 +35,13 @@
 
 #define SYSCALLS 23
 
-uint64_t sysCallDispatcher(t_registers *r) {
+uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
       {
             switch (r->rax)
             {
             case SYS_GETMEM_ID:
-                  sys_getMem(r->rdi, (uint8_t *)r->rsi);
+                  sysGetMem(r->rdi, (uint8_t*)r->rsi);
                   break;
 
             case SYS_RTC_TIME_ID:
@@ -53,7 +53,7 @@ uint64_t sysCallDispatcher(t_registers *r) {
                   break;
 
             case SYS_WRITE_ID:
-                  sys_write((char *)(r->rdi), (uint8_t)(r->rsi), (t_colour)(r->rdx), (t_colour)(r->r10));
+                  sysWrite((char*)(r->rdi), (uint8_t)(r->rsi), (t_colour)(r->rdx), (t_colour)(r->r10));
                   break;
 
             case SYS_GETCHAR_ID:
@@ -70,11 +70,11 @@ uint64_t sysCallDispatcher(t_registers *r) {
                   break;
 
             case SYS_LOAD_APP_ID:
-                  return addProcess((t_PCB *)r->rdi);
+                  return addProcess((t_PCB*)r->rdi);
                   break;
 
             case SYS_RUN_ID:
-                  sys_forceStart();
+                  sysForceStart();
                   break;
 
             case SYS_EXIT_ID:
@@ -85,7 +85,7 @@ uint64_t sysCallDispatcher(t_registers *r) {
                   return (uint64_t)getSnapshot();
                   break;
             case SYS_DRAW:
-                  draw((char *)(r->rdi), (t_colour)(r->rsi), (uint32_t)(r->rdx));
+                  draw((char*)(r->rdi), (t_colour)(r->rsi), (uint32_t)(r->rdx));
                   break;
             case SYS_MOVE_CURSOR:
                   moveCursor((uint32_t)r->rdi, (uint32_t)r->rsi);
@@ -94,37 +94,37 @@ uint64_t sysCallDispatcher(t_registers *r) {
                   moveCursorTo((uint32_t)r->rdi, (uint32_t)r->rsi);
                   break;
             case SYS_CURRENT_CURSOR:
-                  cursorPosition((int *)((uint64_t)(r->rdi)));
+                  cursorPosition((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_TICKS_ELAPSED:
                   return ticksElapsed();
                   break;
             case SYS_ASIGN_MEMORY:
-                  return (uint64_t) malloc((uint8_t)r->rdi);
+                  return (uint64_t)malloc((uint8_t)r->rdi);
                   break;
             case SYS_FREE_MEMORY:
-                  free((uint8_t *)r->rdi);
+                  free((uint8_t*)r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
                   getMemoryInfo();
                   break;
             case SYS_PS:
-                  return (uint64_t) ps((int *) ((uint64_t)(r->rdi)));
+                  return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void *) r->rdi);
+                  createProcess((void*)r->rdi);
                   break;
             case SYS_GET_PID:
                   return getPID();
                   break;
             case SYS_KILL:
-                  return killProcess((int) r->rdi);
+                  return killProcess((int)r->rdi);
                   break;
             case SYS_NICE:
-                  return changePriority((int) r->rdi, (int) r->rsi);
+                  return changePriority((int)r->rdi, (int)r->rsi);
                   break;
             case SYS_BLOCK:
-                  return (uint64_t) changeState((int) r->rdi);
+                  return (uint64_t)changeState((int)r->rdi);
                   break;
             }
       }

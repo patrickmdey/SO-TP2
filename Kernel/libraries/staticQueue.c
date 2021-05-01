@@ -44,7 +44,8 @@ void queueRemoveData(t_queue* queue, void* data) {
                   queue->front = 0;
             }
             queue->size--;
-      } else {
+      }
+      else {
             memset(data, 0, queue->dataSize);
       }
 }

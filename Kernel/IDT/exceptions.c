@@ -6,36 +6,36 @@
 #define INVALID_OPCODE_ID 6
 #define REGISTERS 16
 
-static void zero_division();
-static void invalid_op_code();
+static void zeroDivision();
+static void invalidOpcode();
 static void printRegisters(uint64_t* registers);
 
-static char* regNames[] = {"R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
+static char* regNames[] = { "R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
                            "R8: ", "RSI: ", "RDI: ", "RBP: ", "RDX: ", "RCX: ", "RBX: ",
-                           "RAX: ", "RIP: ", "RSP: "};
+                           "RAX: ", "RIP: ", "RSP: " };
 
 //Maneja la excepcion recibida y reinicia el proceso actual
 void exceptionDispatcher(int exception, void* stackframe) {
       putchar('\n');
       switch (exception) {
-            case ZERO_EXCEPTION_ID:
-                  zero_division();
-                  break;
+      case ZERO_EXCEPTION_ID:
+            zeroDivision();
+            break;
 
-            case INVALID_OPCODE_ID:
-                  invalid_op_code();
-                  break;
+      case INVALID_OPCODE_ID:
+            invalidOpcode();
+            break;
       }
       printRegisters(stackframe);
       putchar('\n');
       resetCurrentProcess();
 }
 
-static void zero_division() {
+static void zeroDivision() {
       printStringWC("Exception 0: division by zero is undefined\n", BLACK, RED);
 }
 
-static void invalid_op_code() {
+static void invalidOpcode() {
       printStringWC("Exception 6: invalid opcode\n", BLACK, RED);
 }
 

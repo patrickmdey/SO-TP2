@@ -2,9 +2,9 @@
 #include <buffer.h>
 
 //sacada de nvconsole
-uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
-      char *p = buffer;
-      char *p1, *p2;
+uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
+      char* p = buffer;
+      char* p1, * p2;
       uint32_t digits = 0;
 
       //Calculate characters for each digit
@@ -32,9 +32,9 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 }
 
 //sacada de nvconsole
-uint32_t uintToBaseWL(uint64_t value, char *buffer, uint32_t base, uint32_t lenght) {
-      char *p = buffer;
-      char *p1, *p2;
+uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght) {
+      char* p = buffer;
+      char* p1, * p2;
       uint32_t digits = 0;
 
       //Calculate characters for each digit
@@ -66,7 +66,7 @@ uint32_t uintToBaseWL(uint64_t value, char *buffer, uint32_t base, uint32_t leng
       return digits;
 }
 
-uint64_t strToHex(char *str, int *error) {
+uint64_t strToHex(char* str, int* error) {
       uint64_t num = 0, val;
       *error = 0;
       int len = strlen(str);
@@ -74,11 +74,14 @@ uint64_t strToHex(char *str, int *error) {
       for (int i = 0; str[i] != 0; i++) {
             if (str[i] >= '0' && str[i] <= '9') {
                   val = str[i] - '0';
-            } else if (str[i] >= 'a' && str[i] <= 'f') {
+            }
+            else if (str[i] >= 'a' && str[i] <= 'f') {
                   val = str[i] - 'a' + 10;
-            } else if (str[i] >= 'A' && str[i] <= 'F') {
+            }
+            else if (str[i] >= 'A' && str[i] <= 'F') {
                   val = str[i] - 'A' + 10;
-            } else {
+            }
+            else {
                   *error = 1;
                   return 0;
             }
@@ -107,9 +110,9 @@ uint8_t BSDToInt(uint8_t num) {
       return high * 10 + low;
 }
 
-char *strtok(char *string, char *result, const char delim) {
+char* strtok(char* string, char* result, const char delim) {
       static int currentIndex = 0;
-      static char ogString[BUFFER_SIZE] = {0};
+      static char ogString[BUFFER_SIZE] = { 0 };
 
       if (result == 0) {
             currentIndex = 0;
@@ -131,7 +134,8 @@ char *strtok(char *string, char *result, const char delim) {
             for (int i = 0; ogString[currentIndex] != 0 && ogString[currentIndex] != delim && currentIndex < BUFFER_SIZE; currentIndex++, i++) {
                   result[i] = string[currentIndex];
             }
-      } else {
+      }
+      else {
             if (currentIndex == BUFFER_SIZE || ogString[currentIndex] == 0) {
                   return 0;
             }
@@ -144,14 +148,15 @@ char *strtok(char *string, char *result, const char delim) {
       return result;
 }
 
-uint64_t strToInt(char *str, int *error) {
+uint64_t strToInt(char* str, int* error) {
       uint64_t num = 0;
       *error = 0;
       for (int i = 0; str[i] != 0; i++) {
             if (IS_DIGIT(str[i])) {
                   num *= 10;
                   num += str[i] - '0';
-            } else {
+            }
+            else {
                   *error = 1;
                   return -1;
             }
@@ -159,7 +164,7 @@ uint64_t strToInt(char *str, int *error) {
       return num;
 }
 
-uint8_t stringcmp(char *str1, char *str2) {
+uint8_t stringcmp(char* str1, char* str2) {
       int i = 0;
       while (str1[i] != 0 && str2[i] != 0 && str1[i] == str2[i]) {
             i++;
@@ -170,20 +175,20 @@ uint8_t stringcmp(char *str1, char *str2) {
       return str1[i] < str2[i] ? -1 : 1;
 }
 
-void cleanBuffer(t_buffer *buffer) {
+void cleanBuffer(t_buffer* buffer) {
       for (int i = 0; buffer->buffer[i] != 0; i++) {
             buffer->buffer[i] = 0;
       }
       buffer->index = 0;
 }
 
-void cleanString(char *str) {
+void cleanString(char* str) {
       for (int i = 0; str[i] != 0; i++) {
             str[i] = 0;
       }
 }
 
-int strlen(char *str) {
+int strlen(char* str) {
       int size = 0;
       for (int i = 0; str[i] != 0; i++) {
             size++;
@@ -191,7 +196,7 @@ int strlen(char *str) {
       return size;
 }
 
-int strcpy(char* dst, char* src){
+int strcpy(char* dst, char* src) {
       int i;
       for (i = 0; src[i] != 0; i++) {
             dst[i] = src[i];

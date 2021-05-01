@@ -15,9 +15,9 @@ void clearLineOnScreen();
 void initVideoDriver(t_colour BGColour, t_colour FontColour);
 void blinkCursor();
 void stopBlink();
-void draw(char *bitmap, t_colour colour, int multiplier);
+void draw(char* bitmap, t_colour colour, int multiplier);
 void moveCursor(int x, int y);
 void moveCursorTo(int x, int y);
-void cursorPosition(int *array);
+void cursorPosition(int* array);
 void clearScreenFromTo(int fromWidth, int fromHeight, int toWidth, int toHeight);
 #endif
