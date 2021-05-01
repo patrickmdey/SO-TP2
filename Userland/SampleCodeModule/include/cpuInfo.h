@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct {
-      char * cpuVendor;
+      char* cpuVendor;
       uint8_t model;
 } t_cpuInfo;
 

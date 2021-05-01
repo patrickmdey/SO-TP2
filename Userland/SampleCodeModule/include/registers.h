@@ -7,7 +7,7 @@
 #define REG_NAME 10
 
 typedef struct {
-      uint64_t * data;
+      uint64_t* data;
       char name[REGISTERS][REG_NAME];
 } t_registers;
 

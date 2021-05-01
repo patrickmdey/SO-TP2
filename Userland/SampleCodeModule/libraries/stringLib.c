@@ -3,7 +3,7 @@
 #include <utils.h>
 
 void printString(char* str) {
-      syscall(WRITE, (uint64_t)str, strlen(str), BLACK, WHITE, 0,0);
+      syscall(WRITE, (uint64_t)str, strlen(str), BLACK, WHITE, 0, 0);
 }
 
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour) {
@@ -15,11 +15,11 @@ void printStringLn(char* str) {
       putchar('\n');
 }
 
-char getchar(){
+char getchar() {
       return syscall(GETCHAR, 0, 0, 0, 0, 0, 0);
 }
 
-char getcharOnce(){
+char getcharOnce() {
       return syscall(GETCHAR, 1, 0, 0, 0, 0, 0);
 }
 
@@ -37,9 +37,9 @@ void printHex(uint64_t num) {
       printString(buffer);
 }
 
-void printHexWL(uint64_t num, int lenght) {
+void printHexWL(uint64_t num, int length) {
       char buffer[10];
-      uintToBaseWL(num, buffer, 16,8);
+      uintToBaseWL(num, buffer, 16, 8);
       printString(buffer);
 }
 
@@ -57,10 +57,10 @@ void deletechar() {
       putchar('\b');
 }
 
-void strcpy(char* dst, char* src){ 
+void strcpy(char* dst, char* src) {
       int i;
       for (i = 0; src[i] != 0; i++) {
-            dst[i]=src[i];
+            dst[i] = src[i];
       }
-      dst[i]=0;
+      dst[i] = 0;
 }

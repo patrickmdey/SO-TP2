@@ -5,7 +5,7 @@
 
 char* cpuVendor(char* result);
 uint64_t cpuModel();
-void getRegistersData(uint64_t * registers);
+void getRegistersData(uint64_t* registers);
 void check0Exception(void);
 
 #endif

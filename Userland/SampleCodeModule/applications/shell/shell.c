@@ -52,7 +52,7 @@ static void initShell(t_shellData* shellData) {
           {&loop, "loop", "creates loop process"},
           {&kill, "kill", "kills the process with the given pid"},
           {&block, "block", "changes process state between blocked and ready with given pid"},
-          {&nice, "nice", "changes the process with the given pid priority to the new priority"} 
+          {&nice, "nice", "changes the process with the given pid priority to the new priority"}
       };
 
       for (int i = 0; i < COMMANDS; i++) {
@@ -62,13 +62,12 @@ static void initShell(t_shellData* shellData) {
       }
 
       cleanBuffer(&shellData->buffer);
-      strcpy( shellData->username, "USER");
+      strcpy(shellData->username, "USER");
       shellText(shellData);
 }
 
 //procesa el caracter recibido actua segun el mismo
 static void processChar(char c, t_shellData* shellData) {
-      //uint8_t *dir1, *dir2;
 
       if (c != 0) {
             switch (c) {

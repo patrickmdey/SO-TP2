@@ -4,33 +4,33 @@
 #include <systemCalls.h>
 
 //dibuja bitmap
-void draw(char *bitmap, t_colour colour, int multiplier){
-      syscall(DRAW, (uint64_t)bitmap, colour, multiplier,0,0,0);
+void draw(char* bitmap, t_colour colour, int multiplier) {
+      syscall(DRAW, (uint64_t)bitmap, colour, multiplier, 0, 0, 0);
 }
 
-void moveCursor(int x, int y){
+void moveCursor(int x, int y) {
       syscall(MOVE_CURSOR, x, y, 0, 0, 0, 0);
 }
 
-void moveCursorTo(int x, int y){
+void moveCursorTo(int x, int y) {
       syscall(MOVE_CURSOR_TO, x, y, 0, 0, 0, 0);
 }
 
-void cursorPosition(int *array){
-      syscall(CURSOR_POSITION,(uint64_t)array,0,0,0,0,0);
+void cursorPosition(int* array) {
+      syscall(CURSOR_POSITION, (uint64_t)array, 0, 0, 0, 0, 0);
 }
 
-void getCurrentTime(char toReturn[9]){
+void getCurrentTime(char toReturn[9]) {
       char timeFormat[3][3];
-      uint8_t hours = syscall(RTC_TIME,HOURS,0,0,0,0,0);
-      uint8_t mins = syscall(RTC_TIME,MINUTES,0,0,0,0,0);
-      uint8_t secs = syscall(RTC_TIME,SECONDS,0,0,0,0,0);
+      uint8_t hours = syscall(RTC_TIME, HOURS, 0, 0, 0, 0, 0);
+      uint8_t mins = syscall(RTC_TIME, MINUTES, 0, 0, 0, 0, 0);
+      uint8_t secs = syscall(RTC_TIME, SECONDS, 0, 0, 0, 0, 0);
       intToStr(hours, timeFormat[0], 2);
       intToStr(mins, timeFormat[1], 2);
       intToStr(secs, timeFormat[2], 2);
       int k = 0;
       for (int i = 0; i < 3; i++) {
-            for(int j=0;j<2;j++)
+            for (int j = 0;j < 2;j++)
                   toReturn[k++] = timeFormat[i][j];
             if (i != 2) {
                   toReturn[k++] = ':';
@@ -39,9 +39,9 @@ void getCurrentTime(char toReturn[9]){
 }
 
 //sacada de nvconsole
-uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
-      char *p = buffer;
-      char *p1, *p2;
+uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
+      char* p = buffer;
+      char* p1, * p2;
       uint32_t digits = 0;
 
       //Calculate characters for each digit
@@ -69,9 +69,9 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 }
 
 //sacada de nvconsole
-uint32_t uintToBaseWL(uint64_t value, char *buffer, uint32_t base, uint32_t lenght) {
-      char *p = buffer;
-      char *p1, *p2;
+uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght) {
+      char* p = buffer;
+      char* p1, * p2;
       uint32_t digits = 0;
 
       //Calculate characters for each digit
@@ -103,7 +103,7 @@ uint32_t uintToBaseWL(uint64_t value, char *buffer, uint32_t base, uint32_t leng
       return digits;
 }
 
-uint64_t strToHex(char *str, int *error) {
+uint64_t strToHex(char* str, int* error) {
       uint64_t num = 0, val;
       *error = 0;
       int len = strlen(str);
@@ -111,12 +111,14 @@ uint64_t strToHex(char *str, int *error) {
       for (int i = 0; str[i] != 0; i++) {
             if (str[i] >= '0' && str[i] <= '9') {
                   val = str[i] - '0';
-            } else if (str[i] >= 'a' && str[i] <= 'f') {
+            }
+            else if (str[i] >= 'a' && str[i] <= 'f') {
                   val = str[i] - 'a' + 10;
-            } else if (str[i] >= 'A' && str[i] <= 'F') {
+            }
+            else if (str[i] >= 'A' && str[i] <= 'F') {
                   val = str[i] - 'A' + 10;
             }
-            else{
+            else {
                   *error = 1;
                   return 0;
             }
@@ -148,9 +150,9 @@ uint8_t BSDToInt(uint8_t num) {
 // next calls: call with NULL as string
 // if no more tokens are to return, NULL is returned
 // to reset, call with result = NULL
-char *strtok(char *string, char *result, const char delim) {
+char* strtok(char* string, char* result, const char delim) {
       static int currentIndex = 0;
-      static char ogString[BUFFER_SIZE] = {0};
+      static char ogString[BUFFER_SIZE] = { 0 };
 
       if (result == 0) {
             currentIndex = 0;
@@ -168,7 +170,8 @@ char *strtok(char *string, char *result, const char delim) {
             for (int i = 0; string[i] != 0 && i < BUFFER_SIZE; i++) {
                   ogString[i] = string[i];
             }
-      } else {
+      }
+      else {
             if (currentIndex == BUFFER_SIZE || ogString[currentIndex] == 0) {
                   return 0;
             }
@@ -184,14 +187,15 @@ char *strtok(char *string, char *result, const char delim) {
       return result;
 }
 
-uint64_t strToInt(char *str, int *error) {
+uint64_t strToInt(char* str, int* error) {
       uint64_t num = 0;
       *error = 0;
       for (int i = 0; str[i] != 0; i++) {
             if (IS_DIGIT(str[i])) {
                   num *= 10;
                   num += str[i] - '0';
-            } else {
+            }
+            else {
                   *error = 1;
                   return -1;
             }
@@ -199,7 +203,7 @@ uint64_t strToInt(char *str, int *error) {
       return num;
 }
 
-uint8_t stringcmp(char *str1, char *str2) {
+uint8_t stringcmp(char* str1, char* str2) {
       int i = 0;
       while (str1[i] != 0 && str2[i] != 0 && str1[i] == str2[i]) {
             i++;
@@ -210,20 +214,20 @@ uint8_t stringcmp(char *str1, char *str2) {
       return str1[i] < str2[i] ? -1 : 1;
 }
 
-void cleanBuffer(t_buffer *buffer) {
+void cleanBuffer(t_buffer* buffer) {
       for (int i = 0; i < BUFFER_SIZE; i++) {
             buffer->buffer[i] = 0;
       }
       buffer->index = 0;
 }
 
-void cleanString(char *str) {
+void cleanString(char* str) {
       for (int i = 0; str[i] != 0; i++) {
             str[i] = 0;
       }
 }
 
-int strlen(char *str) {
+int strlen(char* str) {
       int size = 0;
       for (int i = 0; str[i] != 0; i++) {
             size++;
@@ -231,32 +235,33 @@ int strlen(char *str) {
       return size;
 }
 
-void *memcpy(void *destination, const void *source, uint64_t length) {
+void* memcpy(void* destination, const void* source, uint64_t length) {
       /*
-	* memcpy does not support overlapping buffers, so always do it
-	* forwards. (Don't change this without adjusting memmove.)
-	*
-	* For speedy copying, optimize the common case where both pointers
-	* and the length are word-aligned, and copy word-at-a-time instead
-	* of byte-at-a-time. Otherwise, copy by bytes.
-	*
-	* The alignment logic below should be portable. We rely on
-	* the compiler to be reasonably intelligent about optimizing
-	* the divides and modulos out. Fortunately, it is.
-	*/
+      * memcpy does not support overlapping buffers, so always do it
+      * forwards. (Don't change this without adjusting memmove.)
+      *
+      * For speedy copying, optimize the common case where both pointers
+      * and the length are word-aligned, and copy word-at-a-time instead
+      * of byte-at-a-time. Otherwise, copy by bytes.
+      *
+      * The alignment logic below should be portable. We rely on
+      * the compiler to be reasonably intelligent about optimizing
+      * the divides and modulos out. Fortunately, it is.
+      */
       uint64_t i;
 
       if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
-          (uint64_t)source % sizeof(uint32_t) == 0 &&
-          length % sizeof(uint32_t) == 0) {
-            uint32_t *d = (uint32_t *)destination;
-            const uint32_t *s = (const uint32_t *)source;
+            (uint64_t)source % sizeof(uint32_t) == 0 &&
+            length % sizeof(uint32_t) == 0) {
+            uint32_t* d = (uint32_t*)destination;
+            const uint32_t* s = (const uint32_t*)source;
 
             for (i = 0; i < length / sizeof(uint32_t); i++)
                   d[i] = s[i];
-      } else {
-            uint8_t *d = (uint8_t *)destination;
-            const uint8_t *s = (const uint8_t *)source;
+      }
+      else {
+            uint8_t* d = (uint8_t*)destination;
+            const uint8_t* s = (const uint8_t*)source;
 
             for (i = 0; i < length; i++)
                   d[i] = s[i];
@@ -265,7 +270,7 @@ void *memcpy(void *destination, const void *source, uint64_t length) {
       return destination;
 }
 
-int isNum(char *str) {
+int isNum(char* str) {
       int index = 0;
       if (str[index] == '.') {
             return 0;
@@ -292,11 +297,11 @@ int isNum(char *str) {
       return 1;
 }
 
-void strToDouble(char *numStr, int *error, double *result) {
+void strToDouble(char* numStr, int* error, double* result) {
       *result = 0;
       int i = 0, k, sign = 0;
       double commaOffset = 0;
-      char integerPart[BUFFER_SIZE] = {0};
+      char integerPart[BUFFER_SIZE] = { 0 };
 
       if (numStr[i] == '-') {
             sign = 1;
@@ -321,7 +326,7 @@ void strToDouble(char *numStr, int *error, double *result) {
 }
 
 // https://www.geeksforgeeks.org/convert-floating-point-number-string/
-void doubleToString(char *res, double total, int afterpoint) {
+void doubleToString(char* res, double total, int afterpoint) {
       int sign = 0;
       if (total < 0) {
             res[0] = '-';
@@ -350,7 +355,7 @@ void doubleToString(char *res, double total, int afterpoint) {
       }
 }
 // https://www.geeksforgeeks.org/convert-floating-point-number-string/
-void reverse(char *str, int len) {
+void reverse(char* str, int len) {
       int i = 0, j = len - 1, temp;
       while (i < j) {
             temp = str[i];
@@ -382,8 +387,8 @@ int intToStr(int x, char str[], int d) {
       return i;
 }
 
-int abs (int n){
-      if(n < 0)
+int abs(int n) {
+      if (n < 0)
             return n * -1;
       else
             return n;

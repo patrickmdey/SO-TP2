@@ -4,7 +4,6 @@
 #include <shell.h>
 
 int main() {
-      // initApps();
       runShell();
       return 0;
 }

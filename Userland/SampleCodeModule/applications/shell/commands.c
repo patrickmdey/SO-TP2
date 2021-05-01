@@ -10,8 +10,8 @@
 
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
-void changeToChess(int argc, char** args, t_shellData* shellData){
-      syscall(CLEAR,0,0,0,0,0,0);
+void changeToChess(int argc, char** args, t_shellData* shellData) {
+      syscall(CLEAR, 0, 0, 0, 0, 0, 0);
       cleanBuffer(&shellData->buffer);
       sys_changeApp();
 }
@@ -23,13 +23,13 @@ void time(int argc, char** args, t_shellData* shellData) {
             putchar('\n');
             return;
       }
-      
+
       char dateFormat[3][3];
 
-      uint8_t day = syscall(RTC_TIME,DAY,0,0,0,0,0);
-      uint8_t month = syscall(RTC_TIME,MONTH,0,0,0,0,0);
-      uint8_t year = syscall(RTC_TIME,YEAR,0,0,0,0,0);
-      char aux[9] = {0};
+      uint8_t day = syscall(RTC_TIME, DAY, 0, 0, 0, 0, 0);
+      uint8_t month = syscall(RTC_TIME, MONTH, 0, 0, 0, 0, 0);
+      uint8_t year = syscall(RTC_TIME, YEAR, 0, 0, 0, 0, 0);
+      char aux[9] = { 0 };
       getCurrentTime(aux);
       printString(" >Current time: ");
       printString(aux);
@@ -55,8 +55,8 @@ void cpuInfo(int argc, char** args, t_shellData* shellData) {
             putchar('\n');
             return;
       }
-      char vendor[13] = {0};
-      t_cpuInfo cpuInfo = {vendor, 0};
+      char vendor[13] = { 0 };
+      t_cpuInfo cpuInfo = { vendor, 0 };
       cpuVendor(cpuInfo.cpuVendor);
       cpuInfo.model = cpuModel();
       printString(" > CPU Vendor: ");
@@ -68,7 +68,7 @@ void cpuInfo(int argc, char** args, t_shellData* shellData) {
 }
 
 //Hace un dump de 32 bytes de memria a partir de la direccion pedida
-void printmem(int argc, char** args,  t_shellData* shellData) {
+void printmem(int argc, char** args, t_shellData* shellData) {
       if (argc != 1) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -86,7 +86,7 @@ void printmem(int argc, char** args,  t_shellData* shellData) {
       int bytes = 32;
 
       uint8_t memData[bytes];
-      syscall(GET_MEM, memDir,(uint64_t)memData, 0, 0, 0, 0);
+      syscall(GET_MEM, memDir, (uint64_t)memData, 0, 0, 0, 0);
 
       char byteStr[bytes * 2];
       memToString(byteStr, memData, bytes);
@@ -104,7 +104,8 @@ void printmem(int argc, char** args,  t_shellData* shellData) {
                   putcharWC(byteStr[i], BLACK, BLUE);
                   putcharWC(byteStr[i + 1], BLACK, BLUE);
                   putchar(' ');
-            } else {
+            }
+            else {
                   putchar(byteStr[i]);
                   putchar(byteStr[i + 1]);
                   putchar(' ');
@@ -134,12 +135,7 @@ void checkZeroException(int argc, char** args, t_shellData* shellData) {
             putchar('\n');
             return;
       }
-
       check0Exception();
-      // int a = 0;
-      // int b = 20 / a;
-      // if (b == 0) {
-      //}
 }
 
 //causa una excepcion de tipo invalid opcode
@@ -163,14 +159,14 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
       putchar('\n');
 }
 
-void ps(int argc, char** args, t_shellData* shellData){
+void ps(int argc, char** args, t_shellData* shellData) {
       int index = 0;
-      char ** info = (char **) syscall(PS, (uint64_t) &index, 0, 0, 0, 0, 0);
-      for(int i = 0; i < index; i++) {
+      char** info = (char**)syscall(PS, (uint64_t)&index, 0, 0, 0, 0, 0);
+      for (int i = 0; i < index; i++) {
             printStringLn(info[i]);
-            free((uint8_t*) info[i]);
+            free((uint8_t*)info[i]);
       }
-      
+
       free((uint8_t*)info);
 }
 
@@ -181,48 +177,50 @@ void loopProcess() {
             // elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
             // if (elapsed%30 == 0) {
                   // printStringLn("");
-                  printStringWC("L:", BLACK, GREEN);
-                  //printString("pid ");
-                  printInt(pid);
-                  printStringLn("");
-                  // printStringLn(" says hello");
-            // }
+            printStringWC("L:", BLACK, GREEN);
+            //printString("pid ");
+            printInt(pid);
+            printStringLn("");
+            // printStringLn(" says hello");
+      // }
       }
       //syscall(EXIT, 0, 0, 0, 0, 0, 0);
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {
-      syscall(CREATE_PROCESS, (uint64_t) &loopProcess, 0, 0, 0, 0, 0);
+      syscall(CREATE_PROCESS, (uint64_t)&loopProcess, 0, 0, 0, 0, 0);
 }
 
 void kill(int argc, char** args, t_shellData* shellData) {
-      if(argc > 2){
+      if (argc > 2) {
             printStringLn("To many arguments");
             return;
       }
       int error = 0;
       int pid = strToInt(args[0], &error);
       int killed = syscall(KILL, pid, 0, 0, 0, 0, 0);
-      if(killed == 1) {
+      if (killed == 1) {
             printStringLn("Killed process");
-      } else if(killed == 0) {
+      }
+      else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
-      } else {
+      }
+      else {
             printStringLn("Error occured: no processes running");
       }
 }
 
 
-void nice(int argc, char ** args, t_shellData* shellData) {
+void nice(int argc, char** args, t_shellData* shellData) {
       int error = 0;
       int pid = strToInt(args[0], &error);
-      if(error){
+      if (error) {
             return;
       }
       int priority = strToInt(args[1], &error);
-      if(error){
+      if (error) {
             return;
       }
       error = syscall(NICE, pid, priority, 0, 0, 0, 0);
@@ -231,18 +229,19 @@ void nice(int argc, char ** args, t_shellData* shellData) {
       }
 }
 
-void block(int argc, char ** args, t_shellData* shellData) {
+void block(int argc, char** args, t_shellData* shellData) {
       int error = 0;
       int pid = strToInt(args[0], &error);
-      if(error){
+      if (error) {
             return;
       }
       int blocked = syscall(BLOCK, pid, 0, 0, 0, 0, 0);
-      if(blocked) {
+      if (blocked) {
             printString("Changed process ");
             printInt(pid);
             printStringLn(" state");
-      } else
+      }
+      else
             printStringLn("Couldn´t change process state");
 }
 
@@ -251,7 +250,8 @@ static void memToString(char* buffer, uint8_t* mem, int bytes) {
             if (mem[i] <= 0xF) {
                   buffer[i] = '0';
                   uintToBase(mem[i], buffer + i + 1, 16);
-            } else {
+            }
+            else {
                   uintToBase(mem[i], buffer + i, 16);
             }
       }

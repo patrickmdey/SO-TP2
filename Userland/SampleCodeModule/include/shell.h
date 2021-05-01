@@ -10,9 +10,9 @@ typedef struct t_command t_command;
 typedef struct t_shellData t_shellData;
 
 typedef struct t_command {
-      void (*command)(int, char **, t_shellData *shelldData);
-      char *name;
-      char *description;
+      void (*command)(int, char**, t_shellData* shelldData);
+      char* name;
+      char* description;
 } t_command;
 
 typedef struct t_shellData {

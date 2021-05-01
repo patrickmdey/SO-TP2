@@ -5,34 +5,34 @@
 #include <shell.h>
 
 //prints commands man
-void help(int argc, char** args, t_shellData * shellData);
+void help(int argc, char** args, t_shellData* shellData);
 
 //print registers, done in assembly
-void inforeg(int argc,char ** args, t_shellData * shellData);
+void inforeg(int argc, char** args, t_shellData* shellData);
 
 //recieves memory direction and prints 32 bytes after
-void printmem(int argc,char ** args, t_shellData * shellData);
+void printmem(int argc, char** args, t_shellData* shellData);
 
 //displays system time
-void time(int argc,char ** args, t_shellData * shellData);
+void time(int argc, char** args, t_shellData* shellData);
 
 //shows processor model and brand
-void cpuInfo(int argc,char ** args, t_shellData * shellData);
+void cpuInfo(int argc, char** args, t_shellData* shellData);
 
 //shows processor temp
-void cpuTemp(int argc,char ** args, t_shellData * shellData);
+void cpuTemp(int argc, char** args, t_shellData* shellData);
 
 //change username in shell
-void changeUsername(int argc, char** argv, t_shellData * shellData);
+void changeUsername(int argc, char** argv, t_shellData* shellData);
 
 //check zero exception
-void checkZeroException(int argc,char ** args, t_shellData * shellData);
+void checkZeroException(int argc, char** args, t_shellData* shellData);
 
 //check invalid op exception
-void checkInvalidOpcodeException(int argc, char **args, t_shellData * shellData);
+void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData);
 
 //shows arguments
-void showArgs(int argc, char **args, t_shellData * shellData);
+void showArgs(int argc, char** args, t_shellData* shellData);
 
 //change to chess game
 void changeToChess(int argc, char** args, t_shellData* shellData);
@@ -44,7 +44,7 @@ void loop();
 
 void kill(int argc, char** args, t_shellData* shellData);
 
-void nice(int argc, char ** args, t_shellData* shellData);
+void nice(int argc, char** args, t_shellData* shellData);
 
-void block(int argc, char ** args, t_shellData* shellData);
+void block(int argc, char** args, t_shellData* shellData);
 #endif
