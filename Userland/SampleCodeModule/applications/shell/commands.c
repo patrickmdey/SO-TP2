@@ -171,18 +171,17 @@ void ps(int argc, char** args, t_shellData* shellData) {
 }
 
 void loopProcess() {
-      // int elapsed;
+      int elapsed;
       int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
       while (1) {
-            // elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
-            // if (elapsed%30 == 0) {
+            elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
+            if (elapsed % 300 == 0) {
                   // printStringLn("");
-            printStringWC("L:", BLACK, GREEN);
             //printString("pid ");
-            printInt(pid);
-            printStringLn("");
-            // printStringLn(" says hello");
-      // }
+                  printInt(pid);
+                  printString(" ");
+                  // printStringLn(" says hello");
+            }
       }
       //syscall(EXIT, 0, 0, 0, 0, 0, 0);
 }
