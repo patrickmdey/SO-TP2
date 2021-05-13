@@ -67,3 +67,4 @@ bin/*
 .ssh
 .local
 .gdbinit
+.gdb_history

@@ -31,6 +31,7 @@ buddy:
 
 $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_IDT) $(OBJECTS_DRIVERS) $(OBJECTS_LIBRARIES)
 	$(LD) $(LDFLAGS) -T kernel.ld -o $@ $^
+	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $^
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
