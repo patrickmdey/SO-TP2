@@ -66,3 +66,4 @@ bin/*
 .vs-liveshare-keychain
 .ssh
 .local
+.gdbinit
