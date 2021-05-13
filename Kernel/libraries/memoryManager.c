@@ -1,6 +1,7 @@
 #include <memoryManager.h>
 #include <stringLib.h>
 #include <limits.h>
+#include <utils.h>
 
 #define TOTAL_MEM 1024 * 1000
 #define BLOCK_SIZE 64
@@ -9,8 +10,7 @@
 static int findBlocks(int amount);
 static void asignMemory(int firstIdx, int count, int size);
 
-uint8_t start[TOTAL_MEM];
-uint8_t* next = start;
+uint8_t * start = (uint8_t *) 0x600000;
 int nextindex = 0;
 
 typedef struct block_t {
@@ -64,7 +64,7 @@ void free(void* dir) {
     blockArray[idx].size = 0;
 }
 
-void getMemoryInfo(void) {
+char ** getMemoryInfo(uint64_t * size) {
     int freeMemory = 0;
     int usedMemory = 0;
     int blocksUsed = 0;
@@ -77,22 +77,28 @@ void getMemoryInfo(void) {
             usedMemory += blockArray[i].size;
         }
     }
-    printStringWC("INFORMACION DE MEMORIA\n", BLACK, BLUE);
-    printString("Memoria total: ");
-    printInt(TOTAL_MEM);
-    printStringLn(" bytes");
-    printString("Memoria en uso: ");
-    printInt(blocksUsed * 64);
-    printStringLn(" bytes");
-    printString("Memoria solicitada: ");
-    printInt(usedMemory);
-    printStringLn(" bytes");
-    printString("Memoria libre: ");
-    printInt(freeMemory * 64);
-    printStringLn(" bytes");
-    printString("Bloques en uso: ");
-    printInt(blocksUsed);
-    printStringLn("");
+    *size = 3;
+    char ** info = malloc(*size * sizeof(char *));
+    int i;
+    for(i = 0; i < *size; i++) {
+        info[i] = malloc(100);
+    }
+
+    int offset = 0;
+    offset += strcpy(info[0], "Memoria total: ");
+    offset += uintToBase(TOTAL_MEM, info[0] + offset, 10);
+    offset += strcpy(info[0] + offset, " bytes");
+    info[0][offset] = 0;
+    offset = 0;
+    offset += strcpy(info[1], "Memoria en uso: ");
+    offset += uintToBase(usedMemory * BLOCK_SIZE, info[1] + offset, 10);
+    offset += strcpy(info[1] + offset, " bytes");
+    info[1][offset] = 0;
+    offset = 0;
+    offset += strcpy(info[2], "Bloques en uso: ");
+    offset += uintToBase(blocksUsed, info[2] + offset, 10);
+    info[2][offset] = 0;
+    return info;
 }
 
 static void asignMemory(int firstIdx, int count, int size) {

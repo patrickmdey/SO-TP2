@@ -28,7 +28,7 @@ $(MODULE): $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_LIBRARIES) $(OBJECTS_APPLICATIONS
 sampleDataModule:
 	printf "This is sample data." >> $(SAMPLE_DATA) && dd if=/dev/zero bs=1 count=1 >> $(SAMPLE_DATA)
 clean:
-	rm -rf *.o applications/*.o applications/chess/*.o applications/shell/*.o asm/*.o *.bin libraries/*.o
+	rm -rf *.o applications/*.o applications/chess/*.o applications/shell/*.o asm/*.o *.bin libraries/*.o *.elf
 
 
 .PHONY: sampleCodeModule all clean

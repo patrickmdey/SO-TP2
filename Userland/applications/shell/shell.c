@@ -48,6 +48,7 @@ static void initShell(t_shellData* shellData) {
           {&checkInvalidOpcodeException, "checkInvalidOpcodeException", "triggers an invalid opcode exception"},
           {&showArgs, "showArgs", "prints the arguments passed to this command"},
           {&changeToChess, "chess", "starts or resumes a chess game"},
+          {&memoryInfo, "memoryinfo", "prints information of memory manager status"},
           {&ps, "ps", "prints a list with all running processes with their most relevant information"},
           {&loop, "loop", "creates loop process"},
           {&kill, "kill", "kills the process with the given pid"},
@@ -88,6 +89,7 @@ static void processChar(char c, t_shellData* shellData) {
                         deletechar();
                   }
                   break;
+            
 
             default:
                   if (shellData->buffer.index < BUFFER_SIZE) {

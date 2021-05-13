@@ -106,13 +106,13 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   free((uint8_t*)r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
-                  getMemoryInfo();
+                  return (uint64_t)getMemoryInfo((uint64_t *) r->rdi);
                   break;
             case SYS_PS:
                   return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void*)r->rdi);
+                  createProcess((void*)r->rdi, (uint8_t)r->rsi);
                   break;
             case SYS_GET_PID:
                   return getPID();

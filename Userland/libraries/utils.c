@@ -3,6 +3,11 @@
 #include <utils.h>
 #include <systemCalls.h>
 
+void createProcess(uint64_t entryPoint, int argc,  char** args){
+      uint8_t background = argc > 0 && args[argc - 1][0] == '&';
+      syscall(CREATE_PROCESS, entryPoint, background, 0, 0, 0, 0);
+}
+
 //dibuja bitmap
 void draw(char* bitmap, t_colour colour, int multiplier) {
       syscall(DRAW, (uint64_t)bitmap, colour, multiplier, 0, 0, 0);

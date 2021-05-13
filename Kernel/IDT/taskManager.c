@@ -50,13 +50,22 @@ static t_list* tasks;
 static t_PCB* current;
 
 static int currentPID = 0;
+static int currentTicks = 0;
 
 void* schedule(void* oldRSP, int forceStart) {
       if (forceStart) {
             return current->rsp;
       }
+
       current->rsp = oldRSP;
-      current = getNextProcess();
+
+      if (currentTicks >= current->priority) { // Change process
+            currentTicks = 0;
+            current = getNextProcess();
+      } else {
+            currentTicks++;
+      }
+      
       return current->rsp;
 }
 
@@ -68,17 +77,18 @@ void initTaskManager(void* entryPoint) {
       tasks->first = NULL;
       tasks->size = 0;
 
-      createProcess(entryPoint);
+      createProcess(entryPoint, 0);
       current = tasks->first;
       current->foreground = 1;
 }
 
-void createProcess(void* entryPoint) {
+void createProcess(void* entryPoint, uint8_t background) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
 
       process->entryPoint = entryPoint;
+      process->foreground = 1 - background;
       addProcess(process);
 }
 
@@ -93,7 +103,6 @@ int addProcess(t_PCB* process) {
       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1);
       process->pid = currentPID++;
       process->state = READY;
-      process->foreground = 0;
 
       char* arr = (char*)malloc(MAX_SIZE);
       if (arr == NULL)
@@ -121,6 +130,7 @@ void killCurrentProcess() {
       if (tasks->size == 1) {
             return;
       }
+      currentTicks = 0;
       free((void*)current->rbp);
       free((void*)current->buffer->queue);
       free((void*)current->buffer);
@@ -132,6 +142,9 @@ int killProcess(int pid) {
       if (pid == 0)
             return -1;
 
+      if (pid == current->pid) {
+            currentTicks = 0;
+      }
       return removePCB(tasks, pid);
 }
 
@@ -154,11 +167,11 @@ char removeKeyFromBuffer() {
 
 char** ps(int* index) {
       int size = tasks->size;
-      char** toReturn = malloc(size * sizeof(char));
+      char** toReturn = malloc((size) * sizeof(char));
 
       fillPs(toReturn, size);
 
-      *index = size + 1;
+      *index = size;
       return toReturn;
 
 }
@@ -254,15 +267,11 @@ static t_PCB* getForegroundProcess() {
 }
 
 static void fillPs(char** toReturn, int size) {
-      int i = 0, j = 0;
+      int i = 0;
       t_PCB* iterator = tasks->first;
       int offset;
 
-      toReturn[i] = malloc(150);
-      offset = strcpy(toReturn[i], "PID   PRIORITY   STATE     FOREGROUND        RSP             RBP");
-      toReturn[i++][offset] = 0;
-
-      while (j < size) {
+      while (i < size) {
             toReturn[i] = malloc(150);
             offset = 0;
             offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
@@ -278,6 +287,5 @@ static void fillPs(char** toReturn, int size) {
 
             iterator = iterator->next;
             i++;
-            j++;
       }
 }

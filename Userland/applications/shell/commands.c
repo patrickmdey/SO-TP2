@@ -8,6 +8,8 @@
 #include <chess.h>
 #include <memoryManager.h>
 
+#define PRINT_WAIT 9999999
+
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
 void changeToChess(int argc, char** args, t_shellData* shellData) {
@@ -159,12 +161,23 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
       putchar('\n');
 }
 
+void memoryInfo(int argc, char** args, t_shellData* shellData){
+      int size = 0;
+      char** info = (char**) syscall(GET_MEMORY_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+      for(int i = 0; i< size;i++) {
+            printStringLn(info[i]);
+            free(info[i]);
+      }
+      free(info);
+
+}
+
 void ps(int argc, char** args, t_shellData* shellData) {
-      int index = 0;
-      char** info = (char**)syscall(PS, (uint64_t)&index, 0, 0, 0, 0, 0);
-      printStringWC(info[0], BLACK, GREEN);
+      int size = 0;
+      char** info = (char**)syscall(PS, (uint64_t)&size, 0, 0, 0, 0, 0);
+      printStringWC("PID   PRIORITY   STATE     FOREGROUND        RSP             RBP", BLACK, GREEN);
       printStringLn(" ");
-      for (int i = 1; i < index; i++) {
+      for (int i = 0; i < size; i++) {
             printStringLn(info[i]);
             free((uint8_t*)info[i]);
       }
@@ -172,20 +185,19 @@ void ps(int argc, char** args, t_shellData* shellData) {
       free((uint8_t*)info);
 }
 
-void loopProcess() {
-      int elapsed;
+static void loopProcess() {
       int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
+      int i;
       while (1) {
-            // elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
-            // if (elapsed % 9 == 0) {
-            //       printInt(pid);
-            //       printString(" ");
-            // }
+            for (i = 0; i < PRINT_WAIT; i++);
+            printInt(pid);
+            printString(" ");
       }
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {
-      syscall(CREATE_PROCESS, (uint64_t)&loopProcess, 0, 0, 0, 0, 0);
+      createProcess((uint64_t) &loopProcess, argc, args);
+      // syscall(CREATE_PROCESS, (uint64_t)&loopProcess, 0, 0, 0, 0, 0);
 }
 
 void kill(int argc, char** args, t_shellData* shellData) {

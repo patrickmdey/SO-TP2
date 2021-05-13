@@ -6,9 +6,7 @@
 
 uint8_t * malloc(uint32_t size);
 
-void free(uint8_t* dir);
-
-void getMemoryInfo(void);
+void free(void* dir);
 
 
 #endif
