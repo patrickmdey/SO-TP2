@@ -162,7 +162,9 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
 void ps(int argc, char** args, t_shellData* shellData) {
       int index = 0;
       char** info = (char**)syscall(PS, (uint64_t)&index, 0, 0, 0, 0, 0);
-      for (int i = 0; i < index; i++) {
+      printStringWC(info[0], BLACK, GREEN);
+      printStringLn(" ");
+      for (int i = 1; i < index; i++) {
             printStringLn(info[i]);
             free((uint8_t*)info[i]);
       }
@@ -174,16 +176,12 @@ void loopProcess() {
       int elapsed;
       int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
       while (1) {
-            elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
-            if (elapsed % 300 == 0) {
-                  // printStringLn("");
-            //printString("pid ");
-                  printInt(pid);
-                  printString(" ");
-                  // printStringLn(" says hello");
-            }
+            // elapsed = syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
+            // if (elapsed % 9 == 0) {
+            //       printInt(pid);
+            //       printString(" ");
+            // }
       }
-      //syscall(EXIT, 0, 0, 0, 0, 0, 0);
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {

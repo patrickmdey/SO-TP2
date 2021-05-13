@@ -16,6 +16,7 @@
 static void* initializeStackFrame(void* entryPoint, void* baseStack);
 static t_PCB* getNextProcess();
 static t_PCB* getForegroundProcess();
+static void fillPs(char** toReturn, int size);
 
 //sacado de stackOverflow
 typedef struct {
@@ -153,31 +154,11 @@ char removeKeyFromBuffer() {
 
 char** ps(int* index) {
       int size = tasks->size;
-      int i = 0;
       char** toReturn = malloc(size * sizeof(char));
-      t_PCB* iterator = tasks->first;
-      int offset;
-      while (i < size) {
-            toReturn[i] = malloc(150);
-            offset = 0;
-            offset += strcpy(toReturn[i], "PID: ");
-            offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
-            offset += strcpy(toReturn[i] + offset, " PRIORITY: ");
-            offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
-            offset += strcpy(toReturn[i] + offset, " STATE: ");
-            offset += strcpy(toReturn[i] + offset, iterator->state == READY ? "READY" : "BLOCKED");
-            offset += strcpy(toReturn[i] + offset, " FOREGROUND: ");
-            offset += strcpy(toReturn[i] + offset, iterator->foreground == 1 ? "TRUE" : "FALSE");
-            offset += strcpy(toReturn[i] + offset, " RSP: ");
-            offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
-            offset += strcpy(toReturn[i] + offset, " RBP: ");
-            offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
-            toReturn[i][offset] = 0;
 
-            iterator = iterator->next;
-            i++;
-      }
-      *index = size;
+      fillPs(toReturn, size);
+
+      *index = size + 1;
       return toReturn;
 
 }
@@ -270,4 +251,33 @@ static t_PCB* getForegroundProcess() {
             }
       }
       return next;
+}
+
+static void fillPs(char** toReturn, int size) {
+      int i = 0, j = 0;
+      t_PCB* iterator = tasks->first;
+      int offset;
+
+      toReturn[i] = malloc(150);
+      offset = strcpy(toReturn[i], "PID   PRIORITY   STATE     FOREGROUND        RSP             RBP");
+      toReturn[i++][offset] = 0;
+
+      while (j < size) {
+            toReturn[i] = malloc(150);
+            offset = 0;
+            offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
+            offset += strcpy(toReturn[i] + offset, "     ");
+            offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
+            offset += strcpy(toReturn[i] + offset, "          ");
+            offset += strcpy(toReturn[i] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
+            offset += strcpy(toReturn[i] + offset, iterator->foreground == 1 ? "TRUE           " : "FALSE          ");
+            offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
+            offset += strcpy(toReturn[i] + offset, "          ");
+            offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
+            toReturn[i][offset] = 0;
+
+            iterator = iterator->next;
+            i++;
+            j++;
+      }
 }
