@@ -82,6 +82,10 @@ void initTaskManager(void* entryPoint) {
       current->foreground = 1;
 }
 
+uint64_t getCurrentPid() {
+      return current->pid;
+}
+
 void createProcess(void* entryPoint, char *name, uint8_t background) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)

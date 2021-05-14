@@ -30,6 +30,7 @@ extern t_queue taskManager;
 void initTaskManager(void* entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
+uint64_t getCurrentPid();
 void createProcess(void* entryPoint, char* name, uint8_t background);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
