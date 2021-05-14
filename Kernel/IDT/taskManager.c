@@ -59,7 +59,7 @@ void* schedule(void* oldRSP, int forceStart) {
 
       current->rsp = oldRSP;
 
-      if (currentTicks >= current->priority) { // Change process
+      if (current->state == BLOCKED || currentTicks >= current->priority) { // Change process
             currentTicks = 0;
             current = getNextProcess();
       } else {

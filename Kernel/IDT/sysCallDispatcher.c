@@ -7,6 +7,7 @@
 #include <videoDriver.h>
 #include <timerTick.h>
 #include <memoryManager.h>
+#include <sem.h>
 
 #define SYS_GETMEM_ID 0
 #define SYS_RTC_TIME_ID 1
@@ -32,8 +33,13 @@
 #define SYS_KILL 21
 #define SYS_NICE 22
 #define SYS_BLOCK 23
+#define SYS_SEM_OPEN 24
+#define SYS_SEM_INIT 25
+#define SYS_SEM_WAIT 26
+#define SYS_SEM_POST 27
+#define SYS_SEM_CLOSE 28
 
-#define SYSCALLS 23
+#define SYSCALLS 28
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -125,6 +131,21 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_BLOCK:
                   return (uint64_t)changeState((int)r->rdi);
+                  break;
+            case SYS_SEM_OPEN:
+                  return (uint64_t) semOpen((char*) r->rdi, (uint8_t) r->rsi);
+                  break;
+            case SYS_SEM_INIT:
+                  semInit((void *) r->rdi, (int) r->rsi);
+                  break;
+            case SYS_SEM_WAIT:
+                  semWait((void *)r->rdi);
+                  break;
+            case SYS_SEM_POST:
+                  semPost((void *) r->rdi);
+                  break;
+            case SYS_SEM_CLOSE:
+                  semClose((void *)r->rdi);
                   break;
             }
       }
