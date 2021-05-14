@@ -77,17 +77,18 @@ void initTaskManager(void* entryPoint) {
       tasks->first = NULL;
       tasks->size = 0;
 
-      createProcess(entryPoint, 0);
+      createProcess(entryPoint, "shell", 0);
       current = tasks->first;
       current->foreground = 1;
 }
 
-void createProcess(void* entryPoint, uint8_t background) {
+void createProcess(void* entryPoint, char *name, uint8_t background) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
 
       process->entryPoint = entryPoint;
+      process->name = name;
       process->foreground = 1 - background;
       addProcess(process);
 }
@@ -283,6 +284,8 @@ static void fillPs(char** toReturn, int size) {
             offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
             offset += strcpy(toReturn[i] + offset, "          ");
             offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
+            offset += strcpy(toReturn[i] + offset, "     ");
+            offset += strcpy(toReturn[i] + offset, iterator->name);
             toReturn[i][offset] = 0;
 
             iterator = iterator->next;

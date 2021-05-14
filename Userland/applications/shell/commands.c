@@ -8,7 +8,7 @@
 #include <chess.h>
 #include <memoryManager.h>
 
-#define PRINT_WAIT 9999999
+#define VERY_BIG_NUMBER 9999999
 
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
@@ -175,7 +175,7 @@ void memoryInfo(int argc, char** args, t_shellData* shellData){
 void ps(int argc, char** args, t_shellData* shellData) {
       int size = 0;
       char** info = (char**)syscall(PS, (uint64_t)&size, 0, 0, 0, 0, 0);
-      printStringWC("PID   PRIORITY   STATE     FOREGROUND        RSP             RBP", BLACK, GREEN);
+      printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP        NAME", BLACK, GREEN);
       printStringLn(" ");
       for (int i = 0; i < size; i++) {
             printStringLn(info[i]);
@@ -189,15 +189,14 @@ static void loopProcess() {
       int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
       int i;
       while (1) {
-            for (i = 0; i < PRINT_WAIT; i++);
+            for (i = 0; i < VERY_BIG_NUMBER; i++);
             printInt(pid);
             printString(" ");
       }
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {
-      createProcess((uint64_t) &loopProcess, argc, args);
-      // syscall(CREATE_PROCESS, (uint64_t)&loopProcess, 0, 0, 0, 0, 0);
+      createProcess((uint64_t) &loopProcess, "loop", argc, args);
 }
 
 void kill(int argc, char** args, t_shellData* shellData) {
