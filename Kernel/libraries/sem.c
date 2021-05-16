@@ -4,7 +4,7 @@
 #include <memoryManager.h>
 #include <taskManager.h>
 
-static t_sem * semCreate(char * name);
+static t_sem * semCreate(char * name, uint64_t value);
 static void freeSem(t_semNode * l);
 static void sleep(t_sem * sem);
 static void wakeup(t_sem * sem);
@@ -15,16 +15,14 @@ static int chan = 0;
 
 static t_semList semaphores;
 
-t_sem * semOpen(char * name, uint8_t create) {
-    if (create) {
-        return semCreate(name);
-    } else {
-        t_semNode * sem = findSemByName(&semaphores, name);
-        if(sem != NULL)
-            return sem->sem;
-        
-        return NULL;
+t_sem * semOpen(char * name, uint8_t create, uint64_t value) {
+    t_semNode * sem = findSemByName(&semaphores, name);
+    if (sem == NULL && create) {
+        return semCreate(name, value);
+    } else if (sem != NULL) {
+        return sem->sem;  
     }
+    return NULL;
 }
 
 void semWait(t_sem * s) {
@@ -149,11 +147,11 @@ static void freeRec(t_semNode* sem) {
 }
 
 
-static t_sem * semCreate(char * name) {
+static t_sem * semCreate(char * name, uint64_t value) {
     t_sem * sem = malloc(sizeof(t_sem));
     sem->name = name;
     sem->chan = chan++;
-    sem->value = 0;
+    sem->value = value;
     sem->waiting = malloc(sizeof(t_waitingPid *));
     insertSem(&semaphores, sem);
     return sem;

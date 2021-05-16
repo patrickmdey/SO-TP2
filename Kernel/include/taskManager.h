@@ -23,6 +23,10 @@ typedef struct t_PCB {
     int priority;
     int pid;
     char *name;
+
+    uint64_t arg1;
+    uint64_t arg2;
+    uint64_t arg3;
 } t_PCB;     //Process Control Block
 
 extern t_queue taskManager;
@@ -31,7 +35,7 @@ void initTaskManager(void* entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
-void createProcess(void* entryPoint, char* name, uint8_t background);
+void createProcess(void* entryPoint, char* name, uint8_t background, uint64_t arg1, uint64_t arg2, uint64_t arg3);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();

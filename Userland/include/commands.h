@@ -49,4 +49,7 @@ void kill(int argc, char** args, t_shellData* shellData);
 void nice(int argc, char** args, t_shellData* shellData);
 
 void block(int argc, char** args, t_shellData* shellData);
+
+void testSync(int argc, char** args, t_shellData* shellData);
+
 #endif

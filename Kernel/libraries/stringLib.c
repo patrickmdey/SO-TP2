@@ -65,7 +65,7 @@ void printHexWC(uint64_t num, t_colour bgColour, t_colour fontColour) {
       printStringWC(buffer, bgColour, fontColour);
 }
 
-void printInt(uint64_t num) {
+void printInt(int64_t num) {
       char buffer[10];
       uintToBase(num, buffer, 10);
       printString(buffer);

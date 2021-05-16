@@ -11,7 +11,7 @@
 #define IS_NUMBER(c) (c >= '0' && c <= '9' ? 1 : 0)
 #define ABS(c) (c >= 0 ? c : c * -1)
 
-uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base);
+uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint8_t BSDToInt(uint8_t num);
 uint64_t strToInt(char* str, int* error);
 uint64_t pow(uint64_t x, uint64_t y);

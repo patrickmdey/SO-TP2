@@ -2,10 +2,13 @@
 #include <buffer.h>
 
 //sacada de nvconsole
-uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
+uint32_t uintToBase(int64_t value, char* buffer, uint32_t base) {
       char* p = buffer;
       char* p1, * p2;
       uint32_t digits = 0;
+      uint8_t negative = value < 0;
+      if (negative)
+            value *= -1;
 
       //Calculate characters for each digit
       do {
@@ -13,6 +16,11 @@ uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
             *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
             digits++;
       } while (value /= base);
+
+      if (negative) {
+            *p = '-';
+            p++;
+      }
 
       // Terminate string in buffer.
       *p = 0;

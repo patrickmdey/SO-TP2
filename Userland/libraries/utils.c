@@ -3,9 +3,18 @@
 #include <utils.h>
 #include <systemCalls.h>
 
-void createProcess(uint64_t entryPoint, char* name, int argc, char** args){
+void createProcess(void * entryPoint, char* name, int argc, char** args){
       uint8_t background = argc > 0 && args[argc - 1][0] == '&';
-      syscall(CREATE_PROCESS, entryPoint, (uint64_t) name, background, 0, 0, 0);
+
+      // for(int i = 0; i<argc; i++)
+      //       printStringLn(args[i]);
+      
+      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, background, 
+                  (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);
+}
+
+void halt(void){
+      syscall(HALT, 0, 0, 0, 0, 0, 0);
 }
 
 //dibuja bitmap
@@ -44,10 +53,13 @@ void getCurrentTime(char toReturn[9]) {
 }
 
 //sacada de nvconsole
-uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
+uint32_t uintToBase(int64_t value, char* buffer, uint32_t base) {
       char* p = buffer;
       char* p1, * p2;
       uint32_t digits = 0;
+      uint8_t negative = value < 0;
+      if (negative)
+            value *= -1;
 
       //Calculate characters for each digit
       do {
@@ -55,6 +67,11 @@ uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base) {
             *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
             digits++;
       } while (value /= base);
+
+      if (negative) {
+            *p = '-';
+            p++;
+      }
 
       // Terminate string in buffer.
       *p = 0;
@@ -195,7 +212,12 @@ char* strtok(char* string, char* result, const char delim) {
 uint64_t strToInt(char* str, int* error) {
       uint64_t num = 0;
       *error = 0;
-      for (int i = 0; str[i] != 0; i++) {
+      int start = 0, sign = 1;
+      if (str[0] == '-') {
+            start = 1;
+            sign = -1;
+      }
+      for (int i = start; str[i] != 0; i++) {
             if (IS_DIGIT(str[i])) {
                   num *= 10;
                   num += str[i] - '0';
@@ -205,7 +227,7 @@ uint64_t strToInt(char* str, int* error) {
                   return -1;
             }
       }
-      return num;
+      return sign * num;
 }
 
 uint8_t stringcmp(char* str1, char* str2) {

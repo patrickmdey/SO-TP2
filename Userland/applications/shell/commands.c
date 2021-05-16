@@ -7,6 +7,7 @@
 #include <utils.h>
 #include <chess.h>
 #include <memoryManager.h>
+#include <test_sync.h>
 
 #define VERY_BIG_NUMBER 9999999
 
@@ -196,7 +197,7 @@ static void loopProcess() {
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {
-      createProcess((uint64_t) &loopProcess, "loop", argc, args);
+      createProcess(&loopProcess, "loop", argc, args);
 }
 
 void kill(int argc, char** args, t_shellData* shellData) {
@@ -220,6 +221,9 @@ void kill(int argc, char** args, t_shellData* shellData) {
       }
 }
 
+void testSync(int argc, char** args, t_shellData* shellData) {
+      createProcess(&test_sync, "test-sync", argc, args);
+}
 
 void nice(int argc, char** args, t_shellData* shellData) {
       int error = 0;

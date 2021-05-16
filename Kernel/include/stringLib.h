@@ -9,7 +9,7 @@ void sysStaticWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fo
 void printString(char* str);
 void printStringLn(char* str);
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour);
-void printInt(uint64_t num);
+void printInt(int64_t num);
 void printHex(uint64_t num);
 void printHexWLC(uint64_t num, int lenght, t_colour bgColour, t_colour fontColour);
 void printHexWC(uint64_t num, t_colour bgColour, t_colour fontColour);

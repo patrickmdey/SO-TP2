@@ -2,6 +2,7 @@
 #include <RTCTime.h>
 #include <stringLib.h>
 #include <lib.h>
+#include <interrupts.h>
 #include <taskManager.h>
 #include <keyboardDriver.h>
 #include <videoDriver.h>
@@ -38,8 +39,9 @@
 #define SYS_SEM_WAIT 26
 #define SYS_SEM_POST 27
 #define SYS_SEM_CLOSE 28
+#define SYS_HALT 29
 
-#define SYSCALLS 28
+#define SYSCALLS 29
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -118,7 +120,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void*)r->rdi, (char *) r->rsi , (uint8_t) r->rdx);
+                  createProcess((void*)r->rdi, (char *) r->rsi , (uint8_t) r->rdx, r->r10, r->r8, r->r9);
                   break;
             case SYS_GET_PID:
                   return getPID();
@@ -133,7 +135,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)changeState((int)r->rdi);
                   break;
             case SYS_SEM_OPEN:
-                  return (uint64_t) semOpen((char*) r->rdi, (uint8_t) r->rsi);
+                  return (uint64_t) semOpen((char*) r->rdi, (uint8_t) r->rsi, (uint64_t) r->rdx);
                   break;
             case SYS_SEM_INIT:
                   semInit((void *) r->rdi, (int) r->rsi);
@@ -146,6 +148,9 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_SEM_CLOSE:
                   semClose((void *)r->rdi);
+                  break;
+            case SYS_HALT:
+                  _hlt();
                   break;
             }
       }

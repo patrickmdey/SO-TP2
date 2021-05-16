@@ -53,7 +53,8 @@ static void initShell(t_shellData* shellData) {
           {&loop, "loop", "creates loop process"},
           {&kill, "kill", "kills the process with the given pid"},
           {&block, "block", "changes process state between blocked and ready with given pid"},
-          {&nice, "nice", "changes the process with the given pid priority to the new priority"}
+          {&nice, "nice", "changes the process with the given pid priority to the new priority"},
+          {&testSync, "testSync", "tests sem"}
       };
 
       for (int i = 0; i < COMMANDS; i++) {

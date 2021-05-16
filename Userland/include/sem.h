@@ -8,7 +8,7 @@ typedef struct t_sem {
     int value;
 } t_sem;
 
-t_sem * semOpen(char * name, uint8_t create);
+t_sem * semOpen(char * name, uint8_t create, uint64_t value);
 
 void semInit(t_sem * sem, int value);
 

@@ -29,7 +29,7 @@ typedef struct t_semList {
 } t_semList;
 
 
-t_sem * semOpen(char * name, uint8_t create);
+t_sem * semOpen(char * name, uint8_t create, uint64_t value);
 
 void semInit(t_sem * sem, int value);
 

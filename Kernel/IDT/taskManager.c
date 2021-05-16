@@ -13,7 +13,7 @@
 
 #define SIZE_OF_STACK 4 * 1024
 
-static void* initializeStackFrame(void* entryPoint, void* baseStack);
+static void* initializeStackFrame(void* entryPoint, void* baseStack, uint64_t arg1, uint64_t arg2, uint64_t arg3);
 static t_PCB* getNextProcess();
 static t_PCB* getForegroundProcess();
 static void fillPs(char** toReturn, int size);
@@ -77,7 +77,7 @@ void initTaskManager(void* entryPoint) {
       tasks->first = NULL;
       tasks->size = 0;
 
-      createProcess(entryPoint, "shell", 0);
+      createProcess(entryPoint, "shell", 0, 0, 0, 0);
       current = tasks->first;
       current->foreground = 1;
 }
@@ -86,7 +86,7 @@ uint64_t getCurrentPid() {
       return current->pid;
 }
 
-void createProcess(void* entryPoint, char *name, uint8_t background) {
+void createProcess(void* entryPoint, char *name, uint8_t background, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
@@ -94,6 +94,9 @@ void createProcess(void* entryPoint, char *name, uint8_t background) {
       process->entryPoint = entryPoint;
       process->name = name;
       process->foreground = 1 - background;
+      process->arg1 = arg1;
+      process->arg2 = arg2;
+      process->arg3 = arg3;
       addProcess(process);
 }
 
@@ -105,7 +108,8 @@ int addProcess(t_PCB* process) {
       if (process->rbp == NULL)
             return -1;
 
-      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1);
+      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1, 
+                                          process->arg1, process->arg2, process->arg3);
       process->pid = currentPID++;
       process->state = READY;
 
@@ -154,7 +158,8 @@ int killProcess(int pid) {
 }
 
 void resetCurrentProcess() {
-      current->rsp = initializeStackFrame(current->entryPoint, (void*)(current->rbp + SIZE_OF_STACK - 1));
+      current->rsp = initializeStackFrame(current->entryPoint, (void*)(current->rbp + SIZE_OF_STACK - 1),
+                                          current->arg1, current->arg2, current->arg3);
       sysForceStart();
 }
 
@@ -211,7 +216,7 @@ int getPID() {
 
 
 //guarda el contexto de un proceso
-static void* initializeStackFrame(void* entryPoint, void* baseStack) {
+static void* initializeStackFrame(void* entryPoint, void* baseStack, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
       t_stackFrame* frame = (t_stackFrame*)(baseStack - sizeof(t_stackFrame));
 
       //todos los registros
@@ -223,10 +228,10 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack) {
       frame->r10 = 0x006;
       frame->r9 = 0x007;
       frame->r8 = 0x008;
-      frame->rsi = 0x009;
-      frame->rdi = 0x00A;
+      frame->rsi = arg2;
+      frame->rdi = arg1;
       frame->rbp = (uint64_t)baseStack; //0x00D
-      frame->rdx = 0x00B;
+      frame->rdx = arg3;
       frame->rcx = 0x00C;
       frame->rbx = 0x00D;
       frame->rax = 0x00E;

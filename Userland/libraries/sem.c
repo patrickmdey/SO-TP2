@@ -1,8 +1,8 @@
 #include <sem.h>
 #include <systemCalls.h>
 
-t_sem * semOpen(char *name, uint8_t create){
-    return (t_sem *) syscall(SEM_OPEN, (uint64_t) name, (uint64_t) create, 0, 0, 0, 0);
+t_sem * semOpen(char *name, uint8_t create, uint64_t value){
+    return (t_sem *) syscall(SEM_OPEN, (uint64_t) name, (uint64_t) create, value, 0, 0, 0);
 }
 
 void semInit(t_sem * sem, int value) {
