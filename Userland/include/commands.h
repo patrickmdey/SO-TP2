@@ -52,4 +52,8 @@ void block(int argc, char** args, t_shellData* shellData);
 
 void testSync(int argc, char** args, t_shellData* shellData);
 
+void testSyncNoSem(int argc, char** args, t_shellData* shellData);
+
+void sem(int argc, char** args, t_shellData* shellData);
+
 #endif

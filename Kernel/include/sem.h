@@ -42,6 +42,8 @@ void semClose(t_sem * sem);
 
 void semDestroy(t_sem * sem);
 
+char** semInfo(int* index);
+
 t_semList * createSemList();
 
 void freeSemList(t_semList* l);

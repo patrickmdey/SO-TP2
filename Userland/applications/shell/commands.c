@@ -221,8 +221,29 @@ void kill(int argc, char** args, t_shellData* shellData) {
       }
 }
 
+void sem(int argc, char** args, t_shellData* shellData){
+      int size = 0;
+      char** info = (char**)syscall(SEM_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+      if(size == 0){
+            printStringLn("No active semaphores");
+            return;
+      }
+      printStringWC("PROCESS_WAITING   NAME   VALUE   STATE", BLACK, GREEN);
+      printStringLn(" ");
+      for (int i = 0; i < size; i++) {
+            printStringLn(info[i]);
+            free((uint8_t*)info[i]);
+      }
+
+      free((uint8_t*)info);
+}
+
 void testSync(int argc, char** args, t_shellData* shellData) {
       createProcess(&test_sync, "test-sync", argc, args);
+}
+
+void testSyncNoSem(int argc, char** args, t_shellData* shellData) {
+      createProcess(&test_no_sync, "test-sync-n", argc, args);
 }
 
 void nice(int argc, char** args, t_shellData* shellData) {

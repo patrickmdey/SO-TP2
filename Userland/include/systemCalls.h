@@ -38,7 +38,8 @@ typedef enum{
     SEM_WAIT = 26,
     SEM_POST = 27,
     SEM_CLOSE = 28,
-    YIELD = 29
+    YIELD = 29,
+    SEM_INFO = 30
 } syscallID;
 
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);

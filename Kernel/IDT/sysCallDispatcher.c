@@ -40,8 +40,9 @@
 #define SYS_SEM_POST 27
 #define SYS_SEM_CLOSE 28
 #define SYS_YIELD 29
+#define SEM_INFO 30
 
-#define SYSCALLS 29
+#define SYSCALLS 30
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -114,13 +115,13 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   free((uint8_t*)r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
-                  return (uint64_t)getMemoryInfo((uint64_t *) r->rdi);
+                  return (uint64_t)getMemoryInfo((uint64_t*)r->rdi);
                   break;
             case SYS_PS:
                   return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void*)r->rdi, (char *) r->rsi , (uint8_t) r->rdx, r->r10, r->r8, r->r9);
+                  createProcess((void*)r->rdi, (char*)r->rsi, (uint8_t)r->rdx, r->r10, r->r8, r->r9);
                   break;
             case SYS_GET_PID:
                   return getPID();
@@ -135,25 +136,28 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)changeState((int)r->rdi);
                   break;
             case SYS_SEM_OPEN:
-                  return (uint64_t) semOpen((char*) r->rdi, (uint8_t) r->rsi, (uint64_t) r->rdx);
+                  return (uint64_t)semOpen((char*)r->rdi, (uint8_t)r->rsi, (uint64_t)r->rdx);
                   break;
             case SYS_SEM_INIT:
-                  semInit((void *) r->rdi, (int) r->rsi);
+                  semInit((void*)r->rdi, (int)r->rsi);
                   break;
             case SYS_SEM_WAIT:
-                  semWait((void *)r->rdi);
+                  semWait((void*)r->rdi);
                   break;
             case SYS_SEM_POST:
-                  semPost((void *) r->rdi);
+                  semPost((void*)r->rdi);
                   break;
             case SYS_SEM_CLOSE:
-                  semClose((void *)r->rdi);
+                  semClose((void*)r->rdi);
                   break;
             case SYS_YIELD:
                   int_20();
                   break;
+            case SEM_INFO:
+                  return (uint64_t)semInfo((int*)r->rdi);
+                  break;
             }
-      
+
       }
       return 0;
 }

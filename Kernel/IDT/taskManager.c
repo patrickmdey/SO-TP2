@@ -301,15 +301,15 @@ static int fillPs(char** toReturn, int size) {
             if(iterator->state != KILLED){
                   toReturn[j] = malloc(150);
                   offset = 0;
-                  offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
+                  offset += uintToBase(iterator->pid, toReturn[j] + offset, 10);
                   offset += strcpy(toReturn[j] + offset, "     ");
-                  offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
+                  offset += uintToBase(iterator->priority, toReturn[j] + offset, 10);
                   offset += strcpy(toReturn[j] + offset, "          ");
-                  offset += strcpy(toReturn[i] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
+                  offset += strcpy(toReturn[j] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
                   offset += strcpy(toReturn[j] + offset, iterator->foreground == 1 ? "TRUE           " : "FALSE          ");
-                  offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
+                  offset += uintToBase((uint64_t)iterator->rsp, toReturn[j] + offset, 16);
                   offset += strcpy(toReturn[j] + offset, "          ");
-                  offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
+                  offset += uintToBase((uint64_t)iterator->rbp, toReturn[j] + offset, 16);
                   offset += strcpy(toReturn[j] + offset, "     ");
                   offset += strcpy(toReturn[j] + offset, iterator->name);
                   toReturn[j][offset] = 0;
