@@ -4,6 +4,7 @@ GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
+GLOBAL int_20
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
@@ -104,6 +105,11 @@ _syscallHandler:
 	pop rdi
 
 	iretq
+
+int_20:
+	sti
+	int 20h
+	ret
 
 _hlt:
 	sti

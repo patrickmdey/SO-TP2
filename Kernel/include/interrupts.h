@@ -28,6 +28,7 @@ void _cli(void);
 void _sti(void);
 
 void _hlt(void);
+void int_20(void);
 
 void picMasterMask(uint8_t mask);
 

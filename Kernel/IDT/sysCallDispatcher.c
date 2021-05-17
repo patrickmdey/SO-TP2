@@ -39,7 +39,7 @@
 #define SYS_SEM_WAIT 26
 #define SYS_SEM_POST 27
 #define SYS_SEM_CLOSE 28
-#define SYS_HALT 29
+#define SYS_YIELD 29
 
 #define SYSCALLS 29
 
@@ -149,8 +149,8 @@ uint64_t sysCallDispatcher(t_registers* r) {
             case SYS_SEM_CLOSE:
                   semClose((void *)r->rdi);
                   break;
-            case SYS_HALT:
-                  _hlt();
+            case SYS_YIELD:
+                  int_20();
                   break;
             }
       }

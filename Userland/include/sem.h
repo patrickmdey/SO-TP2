@@ -6,6 +6,8 @@
 typedef struct t_sem {
     char * name;
     int value;
+    int chan;
+    struct t_waitingPid * waiting;
 } t_sem;
 
 t_sem * semOpen(char * name, uint8_t create, uint64_t value);

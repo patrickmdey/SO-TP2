@@ -189,6 +189,7 @@ char** ps(int* index) {
 uint8_t changeState(int pid) {
       if (pid == 0)
             return 0;
+      
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;

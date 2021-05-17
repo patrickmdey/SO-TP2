@@ -17,15 +17,13 @@ void test_sync() {
 
     printStringLn("CREATING PROCESSES...(WITH SEM)");
 
-    t_sem sem = { "sem", 1 };
-    //semInit(&sem, 1);
-
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "1", "1", "100", "&" };
         char* array2[4] = { "1", "-1", "100", "&" };
         createProcess(&inc, "inc", 4, array1);
-        createProcess(&inc, "inc", 4, array2);
+        createProcess(&inc, "dec", 4, array2);
     }
+    while (1);
 }
 
 void test_no_sync() {
@@ -42,12 +40,10 @@ void test_no_sync() {
         createProcess(&inc, "inc", 4, array2);
     }
 
-    ps(0, 0, 0);
     while (1);
 }
 
 void inc(char* semC, char* valueC, char* NC) {
-    printStringLn("ACA");
     int error = 0;
     int sem = strToInt(semC, &error);
     if (error) {
@@ -55,19 +51,20 @@ void inc(char* semC, char* valueC, char* NC) {
         // syscall exit
         return;
     }
-    int value = strToInt(valueC, &error);
+    int64_t value = strToInt(valueC, &error);
     if (error) {
         printStringLn("Errors parsing value");
         return;
 
     }
-    int N = strToInt(NC, &error);
+    int64_t N = strToInt(NC, &error);
     if (error) {
         printStringLn("Errors parsing N");
         return;
     }
-    uint64_t i;
-    t_sem* semp;
+
+    int64_t i;
+    t_sem * semp;
     if (sem) {
         semp = semOpen(SEM_ID, 1, 1);
         printStringLn("OPENED SEM");
@@ -78,20 +75,19 @@ void inc(char* semC, char* valueC, char* NC) {
     }
 
     for (i = 0; i < N; i++) {
-        if (sem)
+        if (sem) {
             semWait(semp);
+        }
 
         slowInc(&global, value);
-        // int64_t aux = global;
-        // for (int j = 0; j < 10000; j++);
-        // global = aux + value;
 
-        if (sem)
+        if (sem) {
             semPost(semp);
+        }
     }
 
     if (sem) {
-        semClose(semp);
+        //semClose(semp);
         printStringLn("CLOSED SEM");
     }
 
@@ -99,8 +95,8 @@ void inc(char* semC, char* valueC, char* NC) {
     printInt(global);
     printStringLn(" ");
     printStringLn("FINISHED");
-    int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
-    syscall(KILL, pid, 0, 0, 0, 0, 0);
+    /*int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
+    syscall(KILL, pid, 0, 0, 0, 0, 0);*/
     while (1);
     printStringLn("Flasheo");
 }
@@ -108,8 +104,6 @@ void inc(char* semC, char* valueC, char* NC) {
 void slowInc(int64_t* p, int64_t inc) {
     int64_t aux = *p;
     aux += inc;
-    //printStringLn("HALTING");
-    halt();
-    //printStringLn("CONTINUING");
+    yield();
     *p = aux;
 }

@@ -13,8 +13,8 @@ void createProcess(void * entryPoint, char* name, int argc, char** args){
                   (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);
 }
 
-void halt(void){
-      syscall(HALT, 0, 0, 0, 0, 0, 0);
+void yield(void){
+      syscall(YIELD, 0, 0, 0, 0, 0, 0);
 }
 
 //dibuja bitmap
@@ -209,8 +209,8 @@ char* strtok(char* string, char* result, const char delim) {
       return result;
 }
 
-uint64_t strToInt(char* str, int* error) {
-      uint64_t num = 0;
+int64_t strToInt(char* str, int* error) {
+      int64_t num = 0;
       *error = 0;
       int start = 0, sign = 1;
       if (str[0] == '-') {

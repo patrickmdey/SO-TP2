@@ -13,7 +13,7 @@ static void freeRec(t_semNode* sem);
 
 static int chan = 0;
 
-static t_semList semaphores;
+static t_semList semaphores = {NULL, 0};
 
 t_sem * semOpen(char * name, uint8_t create, uint64_t value) {
     t_semNode * sem = findSemByName(&semaphores, name);
@@ -27,15 +27,15 @@ t_sem * semOpen(char * name, uint8_t create, uint64_t value) {
 
 void semWait(t_sem * s) {
     if (s->value > 0) {
-        s->value--;
+        (s->value)--;
     } else {
         sleep(s);
-        s->value--;
+        // (s->value)--; <- decremento en wakup en lugar de aca
     }
 }
 
 void semPost(t_sem * s){
-    s->value++;
+    (s->value)++;
     wakeup(s);
 }
 
@@ -78,6 +78,7 @@ void insertSem(t_semList* l, t_sem * sem) {
 
     t_semNode * node = malloc(sizeof(t_semNode));
     node->sem = sem;
+    node->next = NULL;
 
     if (l->first == NULL) {
         l->first = node;
@@ -152,7 +153,7 @@ static t_sem * semCreate(char * name, uint64_t value) {
     sem->name = name;
     sem->chan = chan++;
     sem->value = value;
-    sem->waiting = malloc(sizeof(t_waitingPid *));
+    sem->waiting = NULL;
     insertSem(&semaphores, sem);
     return sem;
 }
@@ -161,6 +162,7 @@ static void sleep(t_sem * sem) {
     uint64_t pid = getCurrentPid();
     t_waitingPid * toCreate = malloc(sizeof(t_waitingPid));
     toCreate->pid = pid;
+    toCreate->next = NULL;
     if (sem->waiting == NULL) {
         sem->waiting = toCreate;
     } else {
@@ -171,14 +173,15 @@ static void sleep(t_sem * sem) {
         curr->next = toCreate;
     }
     changeState(pid);
-    _hlt();
+    int_20();
 }
 
 static void wakeup(t_sem * sem) {
     if(sem->waiting == NULL)
         return;
-        
+
     uint64_t pid = sem->waiting->pid;
     sem->waiting = sem->waiting->next;
     changeState(pid);
+    (sem->value)--;
 }

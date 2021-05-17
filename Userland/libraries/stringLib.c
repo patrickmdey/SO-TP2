@@ -43,7 +43,7 @@ void printHexWL(uint64_t num, int length) {
       printString(buffer);
 }
 
-void printInt(uint64_t num) {
+void printInt(int64_t num) {
       char buffer[100];
       uintToBase(num, buffer, 10);
       printString(buffer);

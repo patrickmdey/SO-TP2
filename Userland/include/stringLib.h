@@ -7,7 +7,7 @@
 void printString(char* str);
 void printStringLn(char* str);
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour);
-void printInt(uint64_t num);
+void printInt(int64_t num);
 void printDouble(double num);
 void printHex(uint64_t num);
 void printHexWL(uint64_t num, int length);
