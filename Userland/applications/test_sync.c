@@ -23,7 +23,8 @@ void test_sync() {
         createProcess(&inc, "inc", 4, array1);
         createProcess(&inc, "dec", 4, array2);
     }
-    while (1);
+
+    exit();
 }
 
 void test_no_sync() {
@@ -40,7 +41,7 @@ void test_no_sync() {
         createProcess(&inc, "inc", 4, array2);
     }
 
-    while (1);
+    exit();
 }
 
 void inc(char* semC, char* valueC, char* NC) {
@@ -87,7 +88,7 @@ void inc(char* semC, char* valueC, char* NC) {
     }
 
     if (sem) {
-        //semClose(semp);
+        semClose(semp);
         printStringLn("CLOSED SEM");
     }
 
@@ -95,9 +96,7 @@ void inc(char* semC, char* valueC, char* NC) {
     printInt(global);
     printStringLn(" ");
     printStringLn("FINISHED");
-    /*int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
-    syscall(KILL, pid, 0, 0, 0, 0, 0);*/
-    while (1);
+    exit();
     printStringLn("Flasheo");
 }
 

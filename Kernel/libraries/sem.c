@@ -20,6 +20,7 @@ t_sem * semOpen(char * name, uint8_t create, uint64_t value) {
     if (sem == NULL && create) {
         return semCreate(name, value);
     } else if (sem != NULL) {
+        (sem->sem->processAmount)++;
         return sem->sem;  
     }
     return NULL;
@@ -44,8 +45,16 @@ void semInit(t_sem * sem, int value){
 }
 
 void semClose(t_sem * sem) {
-    // remove from list
-    free(sem->waiting);
+    (sem->processAmount)--;
+    if (sem->processAmount == 0)
+        semDestroy(sem);
+}
+
+void semDestroy(t_sem * sem) {
+    removeSem(&semaphores, sem->chan);
+    if (sem->waiting != NULL) {
+        free(sem->waiting);
+    }
     free(sem);
 }
 
@@ -154,6 +163,7 @@ static t_sem * semCreate(char * name, uint64_t value) {
     sem->chan = chan++;
     sem->value = value;
     sem->waiting = NULL;
+    sem->processAmount = 1;
     insertSem(&semaphores, sem);
     return sem;
 }
@@ -181,7 +191,9 @@ static void wakeup(t_sem * sem) {
         return;
 
     uint64_t pid = sem->waiting->pid;
+    t_waitingPid * aux = sem->waiting;
     sem->waiting = sem->waiting->next;
     changeState(pid);
+    free(aux);
     (sem->value)--;
 }

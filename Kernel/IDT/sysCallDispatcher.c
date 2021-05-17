@@ -18,7 +18,7 @@
 #define SYS_CLEAR_ID 5
 #define SYS_LOAD_APP_ID 6
 #define SYS_RUN_ID 7
-#define SYS_EXIT_ID 8
+#define SYS_EXIT 8
 #define SYS_INFOREG_ID 9
 #define SYS_DRAW 10
 #define SYS_MOVE_CURSOR 11
@@ -85,8 +85,8 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   sysForceStart();
                   break;
 
-            case SYS_EXIT_ID:
-                  killCurrentProcess();
+            case SYS_EXIT:
+                  exit();
                   break;
 
             case SYS_INFOREG_ID:
@@ -153,6 +153,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   int_20();
                   break;
             }
+      
       }
       return 0;
 }

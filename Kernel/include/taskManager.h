@@ -5,7 +5,7 @@
 
 #define READY 1
 #define BLOCKED 2
-
+#define KILLED 3
 
 #include <stdint.h>
 #include <buffer.h>
@@ -40,6 +40,8 @@ int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();
 int killProcess(int pid);
+
+void exit();
 
 int getPID();
 char** ps(int* index);

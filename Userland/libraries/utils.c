@@ -17,6 +17,10 @@ void yield(void){
       syscall(YIELD, 0, 0, 0, 0, 0, 0);
 }
 
+void exit() {
+      syscall(EXIT, 0, 0, 0, 0, 0, 0);
+}
+
 //dibuja bitmap
 void draw(char* bitmap, t_colour colour, int multiplier) {
       syscall(DRAW, (uint64_t)bitmap, colour, multiplier, 0, 0, 0);

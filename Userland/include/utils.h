@@ -12,6 +12,7 @@
 #define MAX(a, b) (a > b ? a : b)
 
 void yield(void);
+void exit();
 void createProcess(void * entryPoint, char* name, int argc, char ** args);
 uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);

@@ -16,7 +16,7 @@
 static void* initializeStackFrame(void* entryPoint, void* baseStack, uint64_t arg1, uint64_t arg2, uint64_t arg3);
 static t_PCB* getNextProcess();
 static t_PCB* getForegroundProcess();
-static void fillPs(char** toReturn, int size);
+static int fillPs(char** toReturn, int size);
 
 //sacado de stackOverflow
 typedef struct {
@@ -59,7 +59,7 @@ void* schedule(void* oldRSP, int forceStart) {
 
       current->rsp = oldRSP;
 
-      if (current->state == BLOCKED || currentTicks >= current->priority) { // Change process
+      if (current->state != READY || currentTicks >= current->priority) { // Change process
             currentTicks = 0;
             current = getNextProcess();
       } else {
@@ -154,7 +154,19 @@ int killProcess(int pid) {
       if (pid == current->pid) {
             currentTicks = 0;
       }
-      return removePCB(tasks, pid);
+
+      t_PCB* pcb = findPCB(tasks, pid);
+      if (pcb == NULL)
+            return 0;
+
+      pcb->state = KILLED;
+
+      return 1;
+}
+
+void exit() {
+      killProcess(current->pid);
+      int_20();
 }
 
 void resetCurrentProcess() {
@@ -179,9 +191,9 @@ char** ps(int* index) {
       int size = tasks->size;
       char** toReturn = malloc((size) * sizeof(char));
 
-      fillPs(toReturn, size);
+      *index = fillPs(toReturn, size);
 
-      *index = size;
+      //*index = size;
       return toReturn;
 
 }
@@ -250,18 +262,21 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack, uint64_t ar
 
 static t_PCB* getNextProcess() {
       int i = 0, size = tasks->size;
-      t_PCB* cur = current;
-
+      t_PCB* curr = current;
       do {
-            if (cur->next != NULL)
-                  cur = cur->next;
+            t_PCB * aux = curr->next;
+            if (curr->state == KILLED) {
+                  removePCB(tasks, curr->pid);
+            }
+            if (aux != NULL)
+                  curr = aux;
             else {
-                  cur = tasks->first;
+                  curr = tasks->first;
             }
             i++;
-      } while (i < size && cur->state != READY);
+      } while (i < size && curr->state != READY);
 
-      return cur;
+      return curr;
 }
 
 static t_PCB* getForegroundProcess() {
@@ -277,28 +292,31 @@ static t_PCB* getForegroundProcess() {
       return next;
 }
 
-static void fillPs(char** toReturn, int size) {
-      int i = 0;
+static int fillPs(char** toReturn, int size) {
+      int i = 0, j = 0;
       t_PCB* iterator = tasks->first;
       int offset;
 
       while (i < size) {
-            toReturn[i] = malloc(150);
-            offset = 0;
-            offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
-            offset += strcpy(toReturn[i] + offset, "     ");
-            offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
-            offset += strcpy(toReturn[i] + offset, "          ");
-            offset += strcpy(toReturn[i] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
-            offset += strcpy(toReturn[i] + offset, iterator->foreground == 1 ? "TRUE           " : "FALSE          ");
-            offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
-            offset += strcpy(toReturn[i] + offset, "          ");
-            offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
-            offset += strcpy(toReturn[i] + offset, "     ");
-            offset += strcpy(toReturn[i] + offset, iterator->name);
-            toReturn[i][offset] = 0;
-
+            if(iterator->state != KILLED){
+                  toReturn[j] = malloc(150);
+                  offset = 0;
+                  offset += uintToBase(iterator->pid, toReturn[i] + offset, 10);
+                  offset += strcpy(toReturn[j] + offset, "     ");
+                  offset += uintToBase(iterator->priority, toReturn[i] + offset, 10);
+                  offset += strcpy(toReturn[j] + offset, "          ");
+                  offset += strcpy(toReturn[i] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
+                  offset += strcpy(toReturn[j] + offset, iterator->foreground == 1 ? "TRUE           " : "FALSE          ");
+                  offset += uintToBase((uint64_t)iterator->rsp, toReturn[i] + offset, 16);
+                  offset += strcpy(toReturn[j] + offset, "          ");
+                  offset += uintToBase((uint64_t)iterator->rbp, toReturn[i] + offset, 16);
+                  offset += strcpy(toReturn[j] + offset, "     ");
+                  offset += strcpy(toReturn[j] + offset, iterator->name);
+                  toReturn[j][offset] = 0;
+                  j++;
+            }
             iterator = iterator->next;
             i++;
       }
+      return j;
 }
