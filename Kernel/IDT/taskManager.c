@@ -200,8 +200,8 @@ void yield() {
 }
 
 uint8_t block(int pid) {
-      if (pid == 0)
-            return 0;
+      // if (pid == 0)
+      //       return 0;
       
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
@@ -221,6 +221,17 @@ uint8_t changePriority(int pid, int priority) {
             return 0;
 
       pcb->priority = priority;
+      return 1;
+}
+
+uint8_t changeForeground(int pid) {      
+      t_PCB* pcb = findPCB(tasks, pid);
+      if (pcb == NULL)
+            return 0;
+      if (pcb->foreground == 1)
+            pcb->foreground = 0;
+      else if (pcb->foreground == 0)
+            pcb->foreground = 1;
       return 1;
 }
 

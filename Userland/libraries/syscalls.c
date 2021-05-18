@@ -48,8 +48,12 @@ int sysNice(int pid, int priority){
     return syscall(NICE, pid, priority, 0, 0, 0, 0);
 }
 
-int sysBlock(int pid){
+uint8_t sysBlock(int pid){
     return syscall(BLOCK, pid, 0, 0, 0, 0, 0);
+}
+
+uint8_t sysChangeForeground(int pid){
+    return syscall(FOREGROUND, pid, 0, 0, 0, 0, 0);
 }
 
 uint64_t *sysInfoReg(){

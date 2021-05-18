@@ -24,4 +24,7 @@ uint8_t removeFd(uint64_t fd);
 t_fdNode * findFd(uint64_t fd);
 uint64_t getFdSize();
 
+void pipeWrite(t_fdNode * node, char c);
+void pipeWriteStr(t_fdNode * node, char * str);
+
 #endif

@@ -33,13 +33,14 @@ typedef enum{
     KILL = 21,
     NICE = 22,
     BLOCK = 23,
-    SEM_OPEN = 24,
-    SEM_INIT = 25,
-    SEM_WAIT = 26,
-    SEM_POST = 27,
-    SEM_CLOSE = 28,
-    YIELD = 29,
-    SEM_INFO = 30
+    FOREGROUND = 24,
+    SEM_OPEN = 25,
+    SEM_INIT = 26,
+    SEM_WAIT = 27,
+    SEM_POST = 28,
+    SEM_CLOSE = 29,
+    YIELD = 30,
+    SEM_INFO = 31
 } syscallID;
 
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);
@@ -69,7 +70,9 @@ char **sysSemInfo(int *size);
 
 int sysNice(int pid, int priority);
 
-int sysBlock(int pid);
+uint8_t sysBlock(int pid);
+
+uint8_t sysChangeForeground(int pid);
 
 uint64_t *sysInfoReg();
 

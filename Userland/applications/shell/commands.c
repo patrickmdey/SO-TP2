@@ -162,10 +162,10 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
       putchar('\n');
 }
 
-void memoryInfo(int argc, char** args, t_shellData* shellData){
+void memoryInfo(int argc, char** args, t_shellData* shellData) {
       int size = 0;
       char** info = sysGetMeminfo(&size);
-      for(int i = 0; i< size;i++) {
+      for (int i = 0; i < size;i++) {
             printStringLn(info[i]);
             free(info[i]);
       }
@@ -200,6 +200,86 @@ void loop(int argc, char** args, t_shellData* shellData) {
       sysCreateProcess(&loopProcess, "loop", argc, args);
 }
 
+static void catProcess() {
+      sysBlock(0);
+      char c;
+      char toPrint[100];
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  sysBlock(0);
+                  ps(0, 0, 0);
+                  sysExit();
+            }
+            putchar(c);
+            if (c == '\n') {
+                  toPrint[i] = 0;
+                  printStringLn(toPrint);
+                  i = 0;
+            }
+            toPrint[i++] = c;
+      }
+}
+
+void cat(int argc, char** args, t_shellData* shellData) {
+      sysCreateProcess(&catProcess, "cat", argc, args);
+}
+
+static void filterProcess() {
+      sysBlock(0);
+      char c;
+      char toPrint[100];
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  ps(0, 0, 0);
+                  sysBlock(0);
+                  sysExit();
+            }
+            putchar(c);
+            if (c == '\n') {
+                  toPrint[i] = 0;
+                  printStringLn(toPrint);
+                  i = 0;
+            }
+            if (IS_VOCAL(c))
+                  toPrint[i++] = c;
+      }
+}
+
+void filter(int argc, char** args, t_shellData* shellData) {
+      sysCreateProcess(&filterProcess, "filter", argc, args);
+}
+
+void wcProcess() {
+      sysBlock(0);
+      char c;
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  sysBlock(0);
+                  sysExit();
+            }
+            else if (c == '#') {
+                  printInt(i);
+                  i = 0;
+                  putchar('\n');
+            }
+            else {
+                  if (c == '\n')
+                        i++;
+                  putchar(c);
+            }
+      }
+}
+
+void wc(int argc, char** args, t_shellData* shellData) {
+      sysCreateProcess(&wcProcess, "wc", argc, args);
+}
+
 void kill(int argc, char** args, t_shellData* shellData) {
       if (argc > 2) {
             printStringLn("To many arguments");
@@ -221,10 +301,10 @@ void kill(int argc, char** args, t_shellData* shellData) {
       }
 }
 
-void sem(int argc, char** args, t_shellData* shellData){
+void sem(int argc, char** args, t_shellData* shellData) {
       int size = 0;
       char** info = sysSemInfo(&size);
-      if(size == 0){
+      if (size == 0) {
             printStringLn("No active semaphores");
             return;
       }

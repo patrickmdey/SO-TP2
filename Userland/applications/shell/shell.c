@@ -56,7 +56,11 @@ static void initShell(t_shellData* shellData) {
           {&nice, "nice", "changes the process with the given pid priority to the new priority"},
           {&testSync, "testSync", "tests syncronization using semaphores"},
           {&testSyncNoSem, "testSyncNoSem", "tests syncronization without using semaphores"},
-          {&sem, "sem", "prints a list with all opened semaphores with their most relevant information"}
+          {&sem, "sem", "prints a list with all opened semaphores with their most relevant information"},
+          {&cat, "cat", "prints to stdout the content of the fd"},
+          {&filter, "filter", "prints the vocals to stdout the content of the fd"},
+          {&wc, "wc", "counts the amount of lines in a given input"}
+
       };
 
       for (int i = 0; i < COMMANDS; i++) {
@@ -175,7 +179,7 @@ void help(int argc, char** args, t_shellData* shellData) {
       printStringLn("These shell commands are defined internally.  Type 'help' to see this list.");
       for (int i = 0; i < COMMANDS; i++) {
             printString(" >");
-            printStringWC(shellData->commands[i].name, BLACK, PINK);
+            printStringWC(shellData->commands[i].name, BLACK, BLUE);
             printString(": ");
             printStringLn(shellData->commands[i].description);
       }

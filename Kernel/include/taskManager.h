@@ -56,5 +56,6 @@ void writeKeyOnBuffer(char key);
 char removeKeyFromBuffer();
 
 uint8_t changePriority(int pid, int priority);
+uint8_t changeForeground(int pid);
 
 #endif

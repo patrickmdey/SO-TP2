@@ -56,4 +56,9 @@ void testSyncNoSem(int argc, char** args, t_shellData* shellData);
 
 void sem(int argc, char** args, t_shellData* shellData);
 
+void cat(int argc, char** args, t_shellData* shellData);
+
+void filter(int argc, char** args, t_shellData* shellData);
+
+void wc(int argc, char** args, t_shellData* shellData);
 #endif
