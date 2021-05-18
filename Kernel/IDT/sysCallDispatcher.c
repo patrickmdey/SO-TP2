@@ -133,7 +133,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return changePriority((int)r->rdi, (int)r->rsi);
                   break;
             case SYS_BLOCK:
-                  return (uint64_t)changeState((int)r->rdi);
+                  return (uint64_t)block((int)r->rdi);
                   break;
             case SYS_SEM_OPEN:
                   return (uint64_t)semOpen((char*)r->rdi, (uint8_t)r->rsi, (uint64_t)r->rdx);
@@ -151,7 +151,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   semClose((void*)r->rdi);
                   break;
             case SYS_YIELD:
-                  int_20();
+                  yield();
                   break;
             case SEM_INFO:
                   return (uint64_t)semInfo((int*)r->rdi);

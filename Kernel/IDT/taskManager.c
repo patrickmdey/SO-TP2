@@ -60,8 +60,13 @@ void* schedule(void* oldRSP, int forceStart) {
       current->rsp = oldRSP;
 
       if (current->state != READY || currentTicks >= current->priority) { // Change process
+            t_PCB * aux = current;
+            uint8_t state = aux->state;
             currentTicks = 0;
             current = getNextProcess();
+            if (state == YIELD)
+                  aux->state = READY;
+
       } else {
             currentTicks++;
       }
@@ -189,16 +194,20 @@ char removeKeyFromBuffer() {
 
 char** ps(int* index) {
       int size = tasks->size;
-      char** toReturn = malloc((size) * sizeof(char));
+      char** toReturn = malloc((size) * sizeof(char *));
 
       *index = fillPs(toReturn, size);
 
-      //*index = size;
       return toReturn;
 
 }
 
-uint8_t changeState(int pid) {
+void yield() {
+      current->state = YIELD;
+      int_20();
+}
+
+uint8_t block(int pid) {
       if (pid == 0)
             return 0;
       

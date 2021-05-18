@@ -24,6 +24,8 @@ void test_sync() {
         createProcess(&inc, "dec", 4, array2);
     }
 
+    ps(0, 0, 0);
+    while(1);
     exit();
 }
 
@@ -38,9 +40,9 @@ void test_no_sync() {
         char* array1[4] = { "0", "1", "100", "&" };
         char* array2[4] = { "0", "-1", "100", "&" };
         createProcess(&inc, "inc", 4, array1);
-        createProcess(&inc, "inc", 4, array2);
+        createProcess(&inc, "dec", 4, array2);
     }
-
+    while(1);
     exit();
 }
 
@@ -49,29 +51,27 @@ void inc(char* semC, char* valueC, char* NC) {
     int sem = strToInt(semC, &error);
     if (error) {
         printStringLn("Errors parsing sem");
-        // syscall exit
-        return;
+        exit();
     }
     int64_t value = strToInt(valueC, &error);
     if (error) {
         printStringLn("Errors parsing value");
-        return;
-
+        exit();
     }
+
     int64_t N = strToInt(NC, &error);
     if (error) {
         printStringLn("Errors parsing N");
-        return;
+        exit();
     }
 
     int64_t i;
     t_sem * semp;
     if (sem) {
         semp = semOpen(SEM_ID, 1, 1);
-        printStringLn("OPENED SEM");
         if (!semp) {
             printStringLn("ERROR OPENING SEM");
-            return;
+            exit();
         }
     }
 

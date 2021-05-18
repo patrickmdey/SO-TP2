@@ -5,7 +5,8 @@
 
 #define READY 1
 #define BLOCKED 2
-#define KILLED 3
+#define YIELD 3
+#define KILLED 4
 
 #include <stdint.h>
 #include <buffer.h>
@@ -45,7 +46,8 @@ void exit();
 
 int getPID();
 char** ps(int* index);
-uint8_t changeState(int pid);
+uint8_t block(int pid);
+void yield();
 
 void writeKeyOnBuffer(char key);
 char removeKeyFromBuffer();

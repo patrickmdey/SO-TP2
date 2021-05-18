@@ -3,15 +3,14 @@
 #include <interrupts.h>
 #include <memoryManager.h>
 #include <taskManager.h>
+#include <semList.h>
 
 #include <stringLib.h>
 
+
 static t_sem* semCreate(char* name, uint64_t value);
-static void freeSem(t_semNode* l);
 static void sleep(t_sem* sem);
 static void wakeup(t_sem* sem);
-static t_semNode* deleteSem(t_semNode* sem, int chan, int* flag);
-static void freeRec(t_semNode* sem);
 static int fillSemInfo(char** toReturn, int size);
 
 static int chan = 0;
@@ -20,10 +19,10 @@ static t_semList semaphores = { NULL, 0 };
 
 t_sem* semOpen(char* name, uint8_t create, uint64_t value) {
     t_semNode* sem = findSemByName(&semaphores, name);
+    printStringLn("SEM OPEN");
     if (sem == NULL && create) {
         return semCreate(name, value);
-    }
-    else if (sem != NULL) {
+    } else if (sem != NULL) {
         (sem->sem->processAmount)++;
         return sem->sem;
     }
@@ -63,113 +62,19 @@ void semDestroy(t_sem* sem) {
     free(sem);
 }
 
-t_semList* createSemList() {
-    return malloc(sizeof(t_semList));
-}
-
-void freeSemList(t_semList* l) {
-    if (l == NULL)
-        return;
-    freeRec(l->first);
-    free((void*)l);
-}
-
 char** semInfo(int* index) {
     int size = semaphores.size;
-    char** toReturn = malloc((size) * sizeof(char));
+    t_semNode* current = semaphores.first;
+    while (current != NULL) {
+        size += current->sem->processAmount;
+        current = current->next;
+    }
+    char** toReturn = malloc((size) * sizeof(char*));
 
     *index = fillSemInfo(toReturn, size);
     return toReturn;
 
 }
-
-uint8_t removeSem(t_semList* l, int chan) {
-    if (l == NULL)
-        return -1;
-    int flag = 0;
-    l->first = deleteSem(l->first, chan, &flag);
-    if (flag)
-        l->size--;
-    return flag;
-}
-
-
-void insertSem(t_semList* l, t_sem* sem) {
-    if (l == NULL) {
-        return;
-    }
-
-    t_semNode* node = malloc(sizeof(t_semNode));
-    node->sem = sem;
-    node->next = NULL;
-
-    if (l->first == NULL) {
-        l->first = node;
-        l->size++;
-        return;
-    }
-
-    t_semNode* current = l->first;
-    while (current->next != NULL) {
-        current = current->next;
-    }
-
-    current->next = node;
-    l->size++;
-}
-
-t_semNode* findSem(t_semList* l, int chan) {
-    if (l == NULL)
-        return NULL;
-    t_semNode* sem = l->first;
-    while (sem != NULL && sem->sem->chan != chan) {
-        sem = sem->next;
-    }
-    return sem;
-}
-
-t_semNode* findSemByName(t_semList* l, char* name) {
-    if (l == NULL)
-        return NULL;
-
-    t_semNode* sem = l->first;
-    while (sem != NULL && stringcmp(sem->sem->name, name)) {
-        sem = sem->next;
-    }
-    return sem;
-}
-
-static void freeSem(t_semNode* sem) {
-    free(sem->sem->waiting);
-    free(&(sem->sem));
-    free(sem);
-}
-
-static t_semNode* deleteSem(t_semNode* sem, int chan, int* flag) {
-    if (sem == NULL) {
-        return NULL;
-    }
-
-    if (sem->sem->chan == chan) {
-        t_semNode* next = sem->next;
-        freeSem(sem);
-        *flag = 1;
-        return next;
-    }
-
-    sem->next = deleteSem(sem->next, chan, flag);
-    return sem;
-}
-
-static void freeRec(t_semNode* sem) {
-    if (sem == NULL)
-        return;
-
-    t_semNode* next = sem->next;
-    free(sem);
-    freeRec(next);
-}
-
 
 static t_sem* semCreate(char* name, uint64_t value) {
     t_sem* sem = malloc(sizeof(t_sem));
@@ -189,15 +94,14 @@ static void sleep(t_sem* sem) {
     toCreate->next = NULL;
     if (sem->waiting == NULL) {
         sem->waiting = toCreate;
-    }
-    else {
+    } else {
         t_waitingPid* curr = sem->waiting;
         while (curr->next != NULL) {
             curr = curr->next;
         }
         curr->next = toCreate;
     }
-    changeState(pid);
+    block(pid);
     int_20();
 }
 
@@ -208,7 +112,7 @@ static void wakeup(t_sem* sem) {
     uint64_t pid = sem->waiting->pid;
     t_waitingPid* aux = sem->waiting;
     sem->waiting = sem->waiting->next;
-    changeState(pid);
+    block(pid);
     free(aux);
     (sem->value)--;
 }
@@ -219,23 +123,31 @@ static int fillSemInfo(char** toReturn, int size) {
     t_waitingPid* waitingIterator;
     int offset;
 
-    while (i < size) {
+    while (nodeIterator != NULL) {
         toReturn[j] = malloc(150);
         offset = 0;
         waitingIterator = nodeIterator->sem->waiting;
-        offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
-        offset += strcpy(toReturn[j] + offset, "                 ");
+        if (waitingIterator != NULL) {
+            offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
+            offset += strcpy(toReturn[j] + offset, "                 ");
+            waitingIterator = waitingIterator->next;
+        }
+        else {
+            offset += uintToBase(0, toReturn[j] + offset, 10);
+            offset += strcpy(toReturn[j] + offset, "                 ");
+        }
         offset += strcpy(toReturn[j] + offset, nodeIterator->sem->name);
         offset += strcpy(toReturn[j] + offset, "    ");
         offset += uintToBase(nodeIterator->sem->value, toReturn[j] + offset, 10);
         offset += strcpy(toReturn[j] + offset, "       ");
-        offset += strcpy(toReturn[j] + offset, nodeIterator->sem->value < 0 ? "BLOCKED     " : "UNBLOCKED");
+        offset += strcpy(toReturn[j] + offset, nodeIterator->sem->value == 0 ? "BLOCKED     " : "UNBLOCKED");
         toReturn[j++][offset] = 0;
-        for (int k = 1; k <= 3; k++) {
+
+        while (waitingIterator != NULL) {
+            toReturn[j] = malloc(150);
             offset = 0;
             offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
             toReturn[j][offset] = 0;
-
             j++;
             waitingIterator = waitingIterator->next;
         }
@@ -244,3 +156,4 @@ static int fillSemInfo(char** toReturn, int size) {
     }
     return j;
 }
+
