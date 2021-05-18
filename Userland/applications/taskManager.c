@@ -1,5 +1,5 @@
 #include <taskManager.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <shell.h>
 #include <chess.h>
 #include <stringLib.h>

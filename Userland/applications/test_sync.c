@@ -3,7 +3,7 @@
 #include <stringLib.h>
 #include <sem.h>
 #include <commands.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 
 #define TOTAL_PAIR_PROCESSES 2
 #define SEM_ID "sem"
@@ -20,13 +20,13 @@ void test_sync() {
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "1", "1", "100", "&" };
         char* array2[4] = { "1", "-1", "100", "&" };
-        createProcess(&inc, "inc", 4, array1);
-        createProcess(&inc, "dec", 4, array2);
+        sysCreateProcess(&inc, "inc", 4, array1);
+        sysCreateProcess(&inc, "dec", 4, array2);
     }
 
     ps(0, 0, 0);
     while(1);
-    exit();
+    sysExit();
 }
 
 void test_no_sync() {
@@ -39,11 +39,11 @@ void test_no_sync() {
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "0", "1", "100", "&" };
         char* array2[4] = { "0", "-1", "100", "&" };
-        createProcess(&inc, "inc", 4, array1);
-        createProcess(&inc, "dec", 4, array2);
+        sysCreateProcess(&inc, "inc", 4, array1);
+        sysCreateProcess(&inc, "dec", 4, array2);
     }
     while(1);
-    exit();
+    sysExit();
 }
 
 void inc(char* semC, char* valueC, char* NC) {
@@ -51,18 +51,18 @@ void inc(char* semC, char* valueC, char* NC) {
     int sem = strToInt(semC, &error);
     if (error) {
         printStringLn("Errors parsing sem");
-        exit();
+        sysExit();
     }
     int64_t value = strToInt(valueC, &error);
     if (error) {
         printStringLn("Errors parsing value");
-        exit();
+        sysExit();
     }
 
     int64_t N = strToInt(NC, &error);
     if (error) {
         printStringLn("Errors parsing N");
-        exit();
+        sysExit();
     }
 
     int64_t i;
@@ -71,7 +71,7 @@ void inc(char* semC, char* valueC, char* NC) {
         semp = semOpen(SEM_ID, 1, 1);
         if (!semp) {
             printStringLn("ERROR OPENING SEM");
-            exit();
+            sysExit();
         }
     }
 
@@ -96,13 +96,13 @@ void inc(char* semC, char* valueC, char* NC) {
     printInt(global);
     printStringLn(" ");
     printStringLn("FINISHED");
-    exit();
+    sysExit();
     printStringLn("Flasheo");
 }
 
 void slowInc(int64_t* p, int64_t inc) {
     int64_t aux = *p;
     aux += inc;
-    yield();
+    sysYield();
     *p = aux;
 }

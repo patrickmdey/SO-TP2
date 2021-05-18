@@ -5,7 +5,7 @@
 #include <registers.h>
 #include <stdint.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
 
 #include <stdint.h>
@@ -30,7 +30,7 @@ void runShell() {
             c = getchar();
             processChar(c, &shellData);
       }
-      syscall(EXIT, 0, 0, 0, 0, 0, 0);
+      sysExit();
 }
 
 
@@ -76,7 +76,7 @@ static void processChar(char c, t_shellData* shellData) {
       if (c != 0) {
             switch (c) {
             case CLEAR_SCREEN:
-                  syscall(CLEAR, 0, 0, 0, 0, 0, 0);
+                  sysClear(0,0,0,0);
                   cleanBuffer(&shellData->buffer);
                   shellText(shellData);
                   break;
@@ -143,7 +143,7 @@ void inforeg(int argc, char** args, t_shellData* shellData) {
             putchar('\n');
             return;
       }
-      uint64_t* regData = (uint64_t*)syscall(INFOREG, 0, 0, 0, 0, 0, 0);
+      uint64_t* regData = sysInfoReg();
       for (int i = 0; i < REGISTERS; i++) {
             printString(" > ");
             printString(regNames[i]);

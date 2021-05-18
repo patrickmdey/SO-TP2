@@ -1,6 +1,6 @@
 #include <memoryManager.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 
 uint8_t* malloc(uint32_t size) {
     return (uint8_t*)syscall(ASIGN_MEMORY, size, 0, 0, 0, 0, 0);

@@ -11,9 +11,6 @@
 #define ABS(c) (c >= 0 ? c : c * -1)
 #define MAX(a, b) (a > b ? a : b)
 
-void yield(void);
-void exit();
-void createProcess(void * entryPoint, char* name, int argc, char ** args);
 uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);
 uint8_t BSDToInt(uint8_t num);
@@ -30,10 +27,6 @@ void strToDouble(char* numStr, int* error, double* result);
 void doubleToString(char* res, double total, int afterpoint);
 void reverse(char* str, int len);
 int intToStr(int x, char str[], int d);
-void draw(char* bitmap, t_colour colour, int multiplier);
-void moveCursor(int x, int y);
-void moveCursorTo(int x, int y);
-void cursorPosition(int* array);
 void getCurrentTime(char toReturn[9]);
 int abs(int n);
 

@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <utils.h>
 
-#define TOTAL_MEM 1024 * 1000
+#define TOTAL_MEM 1024 * 5000
 #define BLOCK_SIZE 64
 #define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
 
@@ -71,14 +71,13 @@ char ** getMemoryInfo(uint64_t * size) {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
             freeMemory++;
-        }
-        else {
+        } else {
             blocksUsed++;
             usedMemory += blockArray[i].size;
         }
     }
     *size = 3;
-    char ** info = malloc(*size * sizeof(char *));
+    char ** info = malloc((*size) * sizeof(char *));
     int i;
     for(i = 0; i < *size; i++) {
         info[i] = malloc(100);
@@ -91,7 +90,7 @@ char ** getMemoryInfo(uint64_t * size) {
     info[0][offset] = 0;
     offset = 0;
     offset += strcpy(info[1], "Memoria en uso: ");
-    offset += uintToBase(usedMemory * BLOCK_SIZE, info[1] + offset, 10);
+    offset += uintToBase(usedMemory, info[1] + offset, 10);
     offset += strcpy(info[1] + offset, " bytes");
     info[1][offset] = 0;
     offset = 0;

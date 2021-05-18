@@ -4,7 +4,7 @@
 #include <registers.h>
 #include <stdint.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
 
 static char bitmaps[7][210] = {
@@ -63,38 +63,38 @@ int processCommand(t_chessData * chessData) {
 void drawBoard(t_chessData *chessData){
 
 
-    moveCursorTo(704,20);
+    sysMoveCursorTo(704,20);
     printString("~~CHESS GAME~~");
-    moveCursorTo(704, 104);
+    sysMoveCursorTo(704, 104);
     printString("~~MOVE LOG~~");
-    moveCursorTo(chessData->chrono1.x,chessData->chrono1.y);
+    sysMoveCursorTo(chessData->chrono1.x,chessData->chrono1.y);
     printString(chessData->player1); printString(" > ");
     chronoTime(chessData->chrono1.time);
 
-    moveCursorTo(chessData->chrono2.x,chessData->chrono2.y);
+    sysMoveCursorTo(chessData->chrono2.x,chessData->chrono2.y);
     printString(chessData->player2); printString(" > ");
     chronoTime(chessData->chrono2.time);
 
     char bitmap[] = "X";
-    moveCursorTo(0,0);
+    sysMoveCursorTo(0,0);
     int mult = 70;
        for(int i = 0; i<BOARD_SIZE;i++){
          for(int j = 0; j<BOARD_SIZE;j++){
              if((i + chessData->orientation) % 2 == 0){
                  if(j%2==0)
-                     draw(bitmap, LIGHT_BROWN, mult);
+                     sysDraw(bitmap, LIGHT_BROWN, mult);
                  else
-                     draw(bitmap, DARK_BROWN, mult);   
+                     sysDraw(bitmap, DARK_BROWN, mult);   
              }
              else{
                  if(j%2==0)
-                     draw(bitmap, DARK_BROWN, mult);
+                     sysDraw(bitmap, DARK_BROWN, mult);
                  else
-                     draw(bitmap, LIGHT_BROWN, mult);
+                     sysDraw(bitmap, LIGHT_BROWN, mult);
              }
-             moveCursor(mult,0);
+             sysMoveCursor(mult,0);
          }
-        moveCursor(5,32);
+        sysMoveCursor(5,32);
         switch(chessData->orientation){
             case 0: printInt(8-i); break;       //ORIGINAL
             case 1: putchar('H'-i); break;      //BLANCO A LA DERECHA
@@ -102,12 +102,12 @@ void drawBoard(t_chessData *chessData){
             case 3: putchar('A'+i); break;      //BLANCO A LA IZQ
             default: break;
         }  
-         moveCursor(-BOARD_SIZE*mult-8-5,mult-16*2);
+         sysMoveCursor(-BOARD_SIZE*mult-8-5,mult-16*2);
        }
 
-    moveCursor(0,5);
+    sysMoveCursor(0,5);
     for(int i = 0; i<8;i++){
-        moveCursor(35,0);
+        sysMoveCursor(35,0);
         switch(chessData->orientation){
             case 0: putchar('A'+i); break;
             case 1: printInt(8-i); break;
@@ -115,9 +115,9 @@ void drawBoard(t_chessData *chessData){
             case 3: printInt(1+i); break;
             default: break;
         }
-        moveCursor(27,0);
+        sysMoveCursor(27,0);
     }
-    moveCursorTo(0,0);
+    sysMoveCursorTo(0,0);
     
     switch(chessData->orientation){
 
@@ -125,10 +125,10 @@ void drawBoard(t_chessData *chessData){
             for(int i = 0; i<BOARD_SIZE;i++){
                 for(int j = 0; j<BOARD_SIZE;j++){
                     t_piece aux = chessData->board[i][j];
-                    draw(bitmaps[aux.type], aux.colour, 5);
-                    moveCursor(5*14,0);
+                    sysDraw(bitmaps[aux.type], aux.colour, 5);
+                    sysMoveCursor(5*14,0);
                 }
-            moveCursor(-8*5*14,5*14);
+            sysMoveCursor(-8*5*14,5*14);
             }
             break;
 
@@ -136,10 +136,10 @@ void drawBoard(t_chessData *chessData){
             for(int j = BOARD_SIZE-1; j>=0; j--){
                 for(int i = 0; i<BOARD_SIZE;i++){
                     t_piece aux = chessData->board[i][j];
-                    draw(bitmaps[aux.type], aux.colour, 5);
-                    moveCursor(5*14,0);
+                    sysDraw(bitmaps[aux.type], aux.colour, 5);
+                    sysMoveCursor(5*14,0);
                 }
-            moveCursor(-8*5*14,5*14);
+            sysMoveCursor(-8*5*14,5*14);
             }
             break;
 
@@ -147,10 +147,10 @@ void drawBoard(t_chessData *chessData){
             for(int i = BOARD_SIZE-1; i>=0; i--){
                 for(int j = BOARD_SIZE-1; j>=0; j--){
                     t_piece aux = chessData->board[i][j];
-                    draw(bitmaps[aux.type], aux.colour, 5);
-                    moveCursor(5*14,0);
+                    sysDraw(bitmaps[aux.type], aux.colour, 5);
+                    sysMoveCursor(5*14,0);
                 }
-            moveCursor(-8*5*14,5*14);
+            sysMoveCursor(-8*5*14,5*14);
             }
             break;
 
@@ -158,16 +158,16 @@ void drawBoard(t_chessData *chessData){
             for(int j = 0; j<BOARD_SIZE; j++){
                 for(int i = BOARD_SIZE-1; i>=0;i--){
                     t_piece aux = chessData->board[i][j];
-                    draw(bitmaps[aux.type], aux.colour, 5);
-                    moveCursor(5*14,0);
+                    sysDraw(bitmaps[aux.type], aux.colour, 5);
+                    sysMoveCursor(5*14,0);
                 }
-            moveCursor(-8*5*14,5*14);
+            sysMoveCursor(-8*5*14,5*14);
             }
             break;
         default:
             break;
      }
-    moveCursor(-8*5*14,5*14+32);
+    sysMoveCursor(-8*5*14,5*14+32);
     putchar('\n');
     putchar('\n');
 }
@@ -456,7 +456,7 @@ static int exchangePiece(t_chessData *chessData, int fromRow, int fromCol, int t
 }
 
 void cleanChessScreen(t_chessData *chessData){
-    syscall(CLEAR,0,0,(70*BOARD_SIZE)+24,768,0,0);
+    sysClear(0, 0, (70*BOARD_SIZE)+24, 768);
     cleanBuffer(&chessData->buffer);
 }
 
@@ -533,7 +533,7 @@ void setBoard(t_chessData *chessData){
 void resetGame(t_chessData *chessData){
     chessData->lost = 0;
     setBoard(chessData);
-    syscall(CLEAR, 0, 0, 0, 0, 0, 0);
+    sysClear(0, 0, 0, 0);
     chessData->currentPlayer = chessData->player1;
     chessData->nextPlayer = chessData->player2;
 

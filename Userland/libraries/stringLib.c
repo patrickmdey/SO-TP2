@@ -1,5 +1,5 @@
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
 
 void printString(char* str) {
@@ -50,7 +50,7 @@ void printInt(int64_t num) {
 }
 
 void clear() {
-      syscall(CLEAR, 0, 0, 0, 0, 0, 0);
+      sysClear(0,0,0,0);
 }
 
 void deletechar() {

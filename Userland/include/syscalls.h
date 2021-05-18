@@ -1,5 +1,5 @@
-#ifndef SYSTEM_CALLS
-#define SYSTEM_CALLS
+#ifndef SYSCALLS
+#define SYSCALLS
 
 //dataTypes
 #include <RTCTime.h>
@@ -45,6 +45,45 @@ typedef enum{
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);
 void sys_changeApp();
 
+int sysGetTicksElapsed();
 
+void sysExit();
 
+void sysClear(int fromWidth, int fromHeight, int toWidth, int toHeight);
+
+uint8_t sysRTCTime(uint8_t type);
+
+void sysGetMem(uint64_t memDir, uint8_t* memData);
+
+int sysTemp();
+
+char **sysGetMeminfo(int *size);
+
+char **sysPs(int *size);
+
+int sysGetPid();
+
+int sysKill(int pid);
+
+char **sysSemInfo(int *size);
+
+int sysNice(int pid, int priority);
+
+int sysBlock(int pid);
+
+uint64_t *sysInfoReg();
+
+void sysCreateProcess(void * entryPoint, char* name, int argc, char** args);
+
+void sysCreateProcess(void * entryPoint, char* name, int argc, char** args);
+
+void sysYield(void);
+
+void sysDraw(char* bitmap, t_colour colour, int multiplier);
+
+void sysMoveCursor(int x, int y);
+
+void sysMoveCursorTo(int x, int y);
+
+void sysCursorPosition(int* array);
 #endif

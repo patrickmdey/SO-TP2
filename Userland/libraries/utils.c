@@ -1,42 +1,7 @@
 #include <buffer.h>
 #include <stringLib.h>
 #include <utils.h>
-#include <systemCalls.h>
-
-void createProcess(void * entryPoint, char* name, int argc, char** args){
-      uint8_t background = argc > 0 && args[argc - 1][0] == '&';
-
-      // for(int i = 0; i<argc; i++)
-      //       printStringLn(args[i]);
-      
-      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, background, 
-                  (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);
-}
-
-void yield(void){
-      syscall(YIELD, 0, 0, 0, 0, 0, 0);
-}
-
-void exit() {
-      syscall(EXIT, 0, 0, 0, 0, 0, 0);
-}
-
-//dibuja bitmap
-void draw(char* bitmap, t_colour colour, int multiplier) {
-      syscall(DRAW, (uint64_t)bitmap, colour, multiplier, 0, 0, 0);
-}
-
-void moveCursor(int x, int y) {
-      syscall(MOVE_CURSOR, x, y, 0, 0, 0, 0);
-}
-
-void moveCursorTo(int x, int y) {
-      syscall(MOVE_CURSOR_TO, x, y, 0, 0, 0, 0);
-}
-
-void cursorPosition(int* array) {
-      syscall(CURSOR_POSITION, (uint64_t)array, 0, 0, 0, 0, 0);
-}
+#include <syscalls.h>
 
 void getCurrentTime(char toReturn[9]) {
       char timeFormat[3][3];

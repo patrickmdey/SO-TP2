@@ -1,5 +1,5 @@
 #include <sem.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 
 t_sem * semOpen(char *name, uint8_t create, uint64_t value){
     return (t_sem *) syscall(SEM_OPEN, (uint64_t) name, (uint64_t) create, value, 0, 0, 0);

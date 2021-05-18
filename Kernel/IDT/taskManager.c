@@ -216,7 +216,7 @@ uint8_t block(int pid) {
             return 0;
       if (pcb->state == READY)
             pcb->state = BLOCKED;
-      else
+      else if (pcb->state == BLOCKED)
             pcb->state = READY;
       return 1;
 }
@@ -283,7 +283,7 @@ static t_PCB* getNextProcess() {
                   curr = tasks->first;
             }
             i++;
-      } while (i < size && curr->state != READY);
+      } while (curr->state != READY);
 
       return curr;
 }

@@ -3,7 +3,7 @@
 #include <cpuInfo.h>
 #include <lib.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
 #include <chess.h>
 #include <memoryManager.h>
@@ -14,7 +14,7 @@
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
 void changeToChess(int argc, char** args, t_shellData* shellData) {
-      syscall(CLEAR, 0, 0, 0, 0, 0, 0);
+      sysClear(0, 0, 0, 0);
       cleanBuffer(&shellData->buffer);
       sys_changeApp();
 }
@@ -29,9 +29,9 @@ void time(int argc, char** args, t_shellData* shellData) {
 
       char dateFormat[3][3];
 
-      uint8_t day = syscall(RTC_TIME, DAY, 0, 0, 0, 0, 0);
-      uint8_t month = syscall(RTC_TIME, MONTH, 0, 0, 0, 0, 0);
-      uint8_t year = syscall(RTC_TIME, YEAR, 0, 0, 0, 0, 0);
+      uint8_t day = sysRTCTime(DAY);
+      uint8_t month = sysRTCTime(MONTH);
+      uint8_t year = sysRTCTime(YEAR);
       char aux[9] = { 0 };
       getCurrentTime(aux);
       printString(" >Current time: ");
@@ -89,7 +89,7 @@ void printmem(int argc, char** args, t_shellData* shellData) {
       int bytes = 32;
 
       uint8_t memData[bytes];
-      syscall(GET_MEM, memDir, (uint64_t)memData, 0, 0, 0, 0);
+      sysGetMem(memDir, memData);
 
       char byteStr[bytes * 2];
       memToString(byteStr, memData, bytes);
@@ -126,7 +126,7 @@ void cpuTemp(int argc, char** args, t_shellData* shellData) {
             return;
       }
       printString("CPU temp: ");
-      printInt(syscall(TEMP, 0, 0, 0, 0, 0, 0));
+      printInt(sysTemp());
       printStringLn(" C");
       putchar('\n');
 }
@@ -164,7 +164,7 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
 
 void memoryInfo(int argc, char** args, t_shellData* shellData){
       int size = 0;
-      char** info = (char**) syscall(GET_MEMORY_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+      char** info = sysGetMeminfo(&size);
       for(int i = 0; i< size;i++) {
             printStringLn(info[i]);
             free(info[i]);
@@ -175,7 +175,7 @@ void memoryInfo(int argc, char** args, t_shellData* shellData){
 
 void ps(int argc, char** args, t_shellData* shellData) {
       int size = 0;
-      char** info = (char**)syscall(PS, (uint64_t)&size, 0, 0, 0, 0, 0);
+      char** info = sysPs(&size);
       printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP        NAME", BLACK, GREEN);
       printStringLn(" ");
       for (int i = 0; i < size; i++) {
@@ -187,7 +187,7 @@ void ps(int argc, char** args, t_shellData* shellData) {
 }
 
 static void loopProcess() {
-      int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
+      int pid = sysGetPid();
       int i;
       while (1) {
             for (i = 0; i < VERY_BIG_NUMBER; i++);
@@ -197,7 +197,7 @@ static void loopProcess() {
 }
 
 void loop(int argc, char** args, t_shellData* shellData) {
-      createProcess(&loopProcess, "loop", argc, args);
+      sysCreateProcess(&loopProcess, "loop", argc, args);
 }
 
 void kill(int argc, char** args, t_shellData* shellData) {
@@ -207,7 +207,7 @@ void kill(int argc, char** args, t_shellData* shellData) {
       }
       int error = 0;
       int pid = strToInt(args[0], &error);
-      int killed = syscall(KILL, pid, 0, 0, 0, 0, 0);
+      int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
       }
@@ -223,7 +223,7 @@ void kill(int argc, char** args, t_shellData* shellData) {
 
 void sem(int argc, char** args, t_shellData* shellData){
       int size = 0;
-      char** info = (char**)syscall(SEM_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+      char** info = sysSemInfo(&size);
       if(size == 0){
             printStringLn("No active semaphores");
             return;
@@ -239,11 +239,11 @@ void sem(int argc, char** args, t_shellData* shellData){
 }
 
 void testSync(int argc, char** args, t_shellData* shellData) {
-      createProcess(&test_sync, "test-sync", argc, args);
+      sysCreateProcess(&test_sync, "test-sync", argc, args);
 }
 
 void testSyncNoSem(int argc, char** args, t_shellData* shellData) {
-      createProcess(&test_no_sync, "test-sync-n", argc, args);
+      sysCreateProcess(&test_no_sync, "test-sync-n", argc, args);
 }
 
 void nice(int argc, char** args, t_shellData* shellData) {
@@ -256,7 +256,7 @@ void nice(int argc, char** args, t_shellData* shellData) {
       if (error) {
             return;
       }
-      error = syscall(NICE, pid, priority, 0, 0, 0, 0);
+      error = sysNice(pid, priority);
       if (error == 0) {
             printStringLn("Not found");
       }
@@ -268,7 +268,7 @@ void block(int argc, char** args, t_shellData* shellData) {
       if (error) {
             return;
       }
-      int blocked = syscall(BLOCK, pid, 0, 0, 0, 0, 0);
+      int blocked = sysBlock(pid);
       if (blocked) {
             printString("Changed process ");
             printInt(pid);

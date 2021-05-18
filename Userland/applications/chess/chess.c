@@ -5,52 +5,52 @@
 #include <registers.h>
 #include <stdint.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
 
-static void initChess(t_chessData * chessData);
-static void processChar(char c, t_chessData * chessData);
-static void chessText(t_chessData * chessData);
-static void addToLog(t_chessData *chessData, int *currentY);
-static void resetLog(t_chessData *chessData);
-static void rePrintLog(t_chessData *chessData, int *currentY);
+static void initChess(t_chessData* chessData);
+static void processChar(char c, t_chessData* chessData);
+static void chessText(t_chessData* chessData);
+static void addToLog(t_chessData* chessData, int* currentY);
+static void resetLog(t_chessData* chessData);
+static void rePrintLog(t_chessData* chessData, int* currentY);
 
-void runChess(){
+void runChess() {
       t_chessData chessData;
       initChess(&chessData);
       char c;
       int elapsed;
       while (1) {
-            elapsed = syscall(GET_TICKS_ELAPSED,0,0,0,0,0,0);
+            elapsed = sysGetTicksElapsed();
             c = getcharOnce();
-            if(!chessData.lost){
-                if(elapsed % 18 == 0){
-                      chessData.currentChrono->time++;
-                      if(abs(chessData.currentChrono->time - chessData.nextChrono->time) >= 60){
-                            chessData.lost = 1;
-                            putchar('\n');
-                            chessText(&chessData);
-                            printStringWC(" You ran out of time! YOU LOSE -- Press any key to restart",BLACK,RED);
-			    }
-                      else {
-                          int array[2] = {0};
-                          cursorPosition(array);
-                          moveCursorTo(chessData.currentChrono->x, chessData.currentChrono->y);
-                          printString(chessData.currentPlayer);
-                          printString(" > ");
-                          chronoTime(chessData.currentChrono->time);
-                          moveCursorTo(array[0],array[1]);
-                      }
-                }
+            if (!chessData.lost) {
+                  if (elapsed % 18 == 0) {
+                        chessData.currentChrono->time++;
+                        if (abs(chessData.currentChrono->time - chessData.nextChrono->time) >= 60) {
+                              chessData.lost = 1;
+                              putchar('\n');
+                              chessText(&chessData);
+                              printStringWC(" You ran out of time! YOU LOSE -- Press any key to restart", BLACK, RED);
+                        }
+                        else {
+                              int array[2] = { 0 };
+                              sysCursorPosition(array);
+                              sysMoveCursorTo(chessData.currentChrono->x, chessData.currentChrono->y);
+                              printString(chessData.currentPlayer);
+                              printString(" > ");
+                              chronoTime(chessData.currentChrono->time);
+                              sysMoveCursorTo(array[0], array[1]);
+                        }
+                  }
             }
-            
-            if(c != 0)
-                  processChar(c,&chessData);
+
+            if (c != 0)
+                  processChar(c, &chessData);
       }
-      syscall(EXIT, 0, 0, 0, 0, 0, 0);
+      sysExit();
 }
 
-static void initChess(t_chessData * chessData){
+static void initChess(t_chessData* chessData) {
 
       chessData->lost = 0;
       strcpy(chessData->player1, "PLAYER 1");
@@ -62,113 +62,113 @@ static void initChess(t_chessData * chessData){
       chessData->chrono1.x = 700;
       chessData->chrono1.y = 45;
       chessData->currentChrono = &(chessData->chrono1);
-      
-      
+
+
 
       chessData->chrono2.time = 0;      //5 minutos
       chessData->chrono2.x = 700;
       chessData->chrono2.y = 61;
       chessData->nextChrono = &(chessData->chrono2);
 
-      
+
       //putchar('\n');
-      
+
       setBoard(chessData);
       drawBoard(chessData);
       chessText(chessData);
 
 }
 
-static void processChar(char c, t_chessData * chessData) {
-    int command;
-    static int currentY = 136;
+static void processChar(char c, t_chessData* chessData) {
+      int command;
+      static int currentY = 136;
       if (c != 0) {
-            if(chessData->lost){
+            if (chessData->lost) {
                   currentY = 136;
-			resetLog(chessData);	  
+                  resetLog(chessData);
                   resetGame(chessData);
                   chessText(chessData);
                   return;
             }
 
             switch (c) {
-                  case '\t':
-                        syscall(CLEAR,0,0,0,0,0,0);
-                        cleanBuffer(&chessData->buffer);
-                        sys_changeApp();
-                        rePrintLog(chessData,&currentY);
+            case '\t':
+                  sysClear(0, 0, 0, 0);
+                  cleanBuffer(&chessData->buffer);
+                  sys_changeApp();
+                  rePrintLog(chessData, &currentY);
+                  drawBoard(chessData);
+                  chessText(chessData);
+
+                  break;
+            case '\n':
+                  command = processCommand(chessData);
+                  if (command == 0) {                        //COMANDO INVALIDO
+                        putchar('\n');
+                        chessText(chessData);
+                        printString("Invalid command");
+                        sysMoveCursor(-(strlen("Invalid command")) * 8, -16);
+                        int aux = (strlen(chessData->buffer.buffer) + 1);
+                        for (int i = 0;i < aux;i++)
+                              putchar(' ');
+                        sysMoveCursor(-aux * 8, 0);
+                  }
+                  else if (command == 1) {
+                        addToLog(chessData, &currentY);                    //COMANDO VALIDO
+                        char* aux = chessData->currentPlayer;
+                        chessData->currentPlayer = chessData->nextPlayer;
+                        chessData->nextPlayer = aux;
+                        t_chrono* auxChrono = chessData->currentChrono;
+                        chessData->currentChrono = chessData->nextChrono;
+                        chessData->nextChrono = auxChrono;
+                        cleanChessScreen(chessData);
                         drawBoard(chessData);
                         chessText(chessData);
-
-                        break;
-                  case '\n':
-                        command = processCommand(chessData);
-                        if(command == 0) {                        //COMANDO INVALIDO
-                            putchar('\n');
-                            chessText(chessData);
-                            printString("Invalid command");
-                            moveCursor(-(strlen("Invalid command"))*8,-16);
-                            int aux = (strlen(chessData->buffer.buffer)+1);
-                            for(int i = 0;i<aux;i++)
-                                putchar(' ');
-                            moveCursor(-aux*8,0);
-				}
-                        else if (command ==1){
-                            addToLog(chessData, &currentY);                    //COMANDO VALIDO
-                            char *aux = chessData->currentPlayer;
-                            chessData->currentPlayer = chessData->nextPlayer;
-                            chessData->nextPlayer = aux;
-                            t_chrono *auxChrono = chessData->currentChrono;
-                            chessData->currentChrono = chessData->nextChrono;
-                            chessData->nextChrono = auxChrono;
-                            cleanChessScreen(chessData);
-                            drawBoard(chessData);
-                            chessText(chessData);
-                        }
-                        else{
-                            chessData->lost = 1;
-                            cleanChessScreen(chessData);
-                            drawBoard(chessData);
-                            chessText(chessData);
-                            printStringWC(" YOU WIN -- Press any key to restart",BLACK,GREEN);
-                        }
-
-                        cleanBuffer(&chessData->buffer);
-                        
-                        break;
-                  case '\b':
-                        if (chessData->buffer.index > 0) {
-                              chessData->buffer.buffer[--chessData->buffer.index] = 0;
-                              deletechar();
-                        }
-                        break;
-                  case 'r':         //FALTA VER QUE LAS LOS MOVIMIENTOS FUNCIONEN
-                        rotateBoard(chessData);
+                  }
+                  else {
+                        chessData->lost = 1;
                         cleanChessScreen(chessData);
-                        drawBoard(chessData); 
+                        drawBoard(chessData);
                         chessText(chessData);
-                        break;
+                        printStringWC(" YOU WIN -- Press any key to restart", BLACK, GREEN);
+                  }
 
-                  default:
-                        if (chessData->buffer.index < BUFFER_SIZE) {
-                              chessData->buffer.buffer[chessData->buffer.index++] = c;
-                              putchar(c);
-                        }
+                  cleanBuffer(&chessData->buffer);
+
+                  break;
+            case '\b':
+                  if (chessData->buffer.index > 0) {
+                        chessData->buffer.buffer[--chessData->buffer.index] = 0;
+                        deletechar();
+                  }
+                  break;
+            case 'r':         //FALTA VER QUE LAS LOS MOVIMIENTOS FUNCIONEN
+                  rotateBoard(chessData);
+                  cleanChessScreen(chessData);
+                  drawBoard(chessData);
+                  chessText(chessData);
+                  break;
+
+            default:
+                  if (chessData->buffer.index < BUFFER_SIZE) {
+                        chessData->buffer.buffer[chessData->buffer.index++] = c;
+                        putchar(c);
+                  }
             }
 
       }
 }
 
 //muestra en pantalla el texto para ingresar comando
-static void chessText(t_chessData * chessData) {
+static void chessText(t_chessData* chessData) {
       printStringWC(chessData->currentPlayer, BLACK, WHITE);
       printStringWC(" $ > ", BLACK, WHITE);
 }
 
-static void addToLog(t_chessData * chessData, int *currentY){
+static void addToLog(t_chessData* chessData, int* currentY) {
       static int i = 0;
 
-      if(*currentY >= 786-64){
+      if (*currentY >= 786 - 64) {
             i = 0;
             *currentY = 136;
       }
@@ -176,37 +176,37 @@ static void addToLog(t_chessData * chessData, int *currentY){
       int pos = 0;
       int n = strlen("PLAYER N");
       char aux[] = " > ";
-      for(; pos< n; pos++)
+      for (; pos < n; pos++)
             chessData->currentLog[i][pos] = chessData->currentPlayer[pos];
 
-      for(int k=0; k<3;pos++,k++)   
+      for (int k = 0; k < 3;pos++, k++)
             chessData->currentLog[i][pos] = aux[k];
 
-      for(int h = 0; h < 5; h++, pos++)
+      for (int h = 0; h < 5; h++, pos++)
             chessData->currentLog[i][pos] = chessData->buffer.buffer[h];
-      
+
       chessData->currentLog[i][pos] = 0;
 
-      moveCursorTo(700,*currentY);
+      sysMoveCursorTo(700, *currentY);
       printString(chessData->currentPlayer); printString(" > ");
       printString(chessData->buffer.buffer);
-      (*currentY)+=16;
+      (*currentY) += 16;
       i++;
 }
 
-static void resetLog(t_chessData *chessData){
-    for(int i = 0; i<35;i++)
-        for(int j = 0; j<17;j++)
-            chessData->currentLog[i][j] = 0;
+static void resetLog(t_chessData* chessData) {
+      for (int i = 0; i < 35;i++)
+            for (int j = 0; j < 17;j++)
+                  chessData->currentLog[i][j] = 0;
 }
 
-static void rePrintLog(t_chessData *chessData, int *currentY){
-    *currentY = 136;
-    for(int i = 0; i<35 && chessData->currentLog[i][0] != 0; i++){
-      moveCursorTo(700, *currentY);
-      printString(chessData->currentLog[i]);
-      (*currentY)+=16;
-    }
+static void rePrintLog(t_chessData* chessData, int* currentY) {
+      *currentY = 136;
+      for (int i = 0; i < 35 && chessData->currentLog[i][0] != 0; i++) {
+            sysMoveCursorTo(700, *currentY);
+            printString(chessData->currentLog[i]);
+            (*currentY) += 16;
+      }
 }
 
 
@@ -264,7 +264,7 @@ static void rePrintLog(t_chessData *chessData, int *currentY){
 // _XXXXXXXXXXXX_\n
 // ______________
 // "
-    
+
 // "
 // ______________\n
 // _______X______\n
