@@ -1,7 +1,9 @@
 #include <list.h>
+#include <staticQueue.h>
 
 static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
+static void freePCB(t_PCB* pcb);
 
 t_list* createList() {
     return malloc(sizeof(t_list));
@@ -61,13 +63,6 @@ int getSize(t_list* l) {
     return l->size;
 }
 
-static void freePCB(t_PCB* pcb) {
-    free(pcb->rbp);
-    free(pcb->buffer->queue);
-    free(pcb->buffer);
-    free(pcb);
-}
-
 static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
     if (pcb == NULL) {
         return NULL;
@@ -82,6 +77,13 @@ static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
 
     pcb->next = deletePCB(pcb->next, pid, flag);
     return pcb;
+}
+
+static void freePCB(t_PCB* pcb) {
+    free(pcb->rbp);
+    // freeQueue(pcb->buffer);
+    // destruir fd creado?
+    free(pcb);
 }
 
 static void freeRec(t_PCB* pcb) {

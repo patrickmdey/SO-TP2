@@ -9,6 +9,7 @@
 #include <taskManager.h>
 #include <interrupts.h>
 #include <memoryManager.h>
+#include <pipe.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -48,6 +49,7 @@ int main() {
       initMemory();
       initTaskManager((void *) 0x400000);
       initVideoDriver(BLACK, WHITE);
+      initPipes();
       loadIDT();
       sysForceStart();
       _hlt();

@@ -1,21 +1,36 @@
 #include <stringLib.h>
 #include <videoDriver.h>
 #include <utils.h>
+#include <pipe.h>
+#include <staticQueue.h>
 
 void sysWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour) {
       if (lenght <= 0 || string == 0 || bgColour < 0 || fontColour < 0) {
             return;
       }
 
-      for (int i = 0; string[i] != 0 && i < lenght; i++) {
-            if (string[i] == '\n') {
-                  changeLineOnScreen();
-            }
-            else if (string[i] == '\b') {
-                  removeCharFromScreen();
-            }
-            else {
-                  printCharOnScreen(string[i], bgColour, fontColour, 1);
+      uint64_t fd = getCurrentOut();
+      if (fd != STDOUT) {
+            t_fdNode * node = findFd(fd);
+            pipeWriteStr(node, string);
+            /*t_fdNode * node = findFd(fd);
+            char key;
+            for (int i = 0; string[i] != 0 && i < lenght; i++) {
+                  if (string[i] == '\b') {
+                        queueRemoveData(node->buffer, &key);
+                  } else {
+                        queueInsert(node->buffer, string[i]);
+                  }
+            }*/
+      } else {
+            for (int i = 0; string[i] != 0 && i < lenght; i++) {
+                  if (string[i] == '\n') {
+                        changeLineOnScreen();
+                  } else if (string[i] == '\b') {
+                        removeCharFromScreen();
+                  } else {
+                        printCharOnScreen(string[i], bgColour, fontColour, 1);
+                  }
             }
       }
 }

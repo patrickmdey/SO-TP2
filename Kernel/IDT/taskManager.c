@@ -4,11 +4,11 @@
 #include <videoDriver.h>
 #include <staticQueue.h>
 #include <lib.h>
+#include <pipe.h>
 
 #include <list.h>
 #include <memoryManager.h>
 
-#include <stringLib.h>
 #include <utils.h>
 
 #define SIZE_OF_STACK 4 * 1024
@@ -92,7 +92,7 @@ uint64_t getCurrentPid() {
 }
 
 void createProcess(void* entryPoint, char *name, uint8_t background, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
-      t_PCB* process = malloc(sizeof(t_PCB));
+      t_PCB * process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
 
@@ -102,6 +102,10 @@ void createProcess(void* entryPoint, char *name, uint8_t background, uint64_t ar
       process->arg1 = arg1;
       process->arg2 = arg2;
       process->arg3 = arg3;
+
+      process->in = STDIN;
+      process->out = STDOUT;
+
       addProcess(process);
 }
 
@@ -118,22 +122,8 @@ int addProcess(t_PCB* process) {
       process->pid = currentPID++;
       process->state = READY;
 
-      char* arr = (char*)malloc(MAX_SIZE);
-      if (arr == NULL)
-            return -1;
+      //process->buffer = queueInit(sizeof(char));
 
-      t_queue* queue = malloc(sizeof(t_queue));
-      if (queue == NULL)
-            return -1;
-
-      queue->queue = arr;
-      queue->front = 0;
-      queue->rear = -1;
-      queue->size = 0;
-      queue->dim = MAX_SIZE;
-      queue->dataSize = sizeof(char);
-
-      process->buffer = queue;
       process->next = NULL;
       insertPCB(tasks, process);
       return 1;
@@ -146,8 +136,8 @@ void killCurrentProcess() {
       }
       currentTicks = 0;
       free((void*)current->rbp);
-      free((void*)current->buffer->queue);
-      free((void*)current->buffer);
+      /*free((void*)current->buffer->queue);
+      free((void*)current->buffer);*/
 
       removePCB(tasks, current->pid);
 }
@@ -180,15 +170,17 @@ void resetCurrentProcess() {
       sysForceStart();
 }
 
-void writeKeyOnBuffer(char key) {
-      t_PCB* foreground = getForegroundProcess();
-      queueInsert(foreground->buffer, &key);
+void writeKeyOnBuffer(char key) { // INPUT DE TECLADO
+      //t_PCB* foreground = getForegroundProcess();
+      t_fdNode * in = findFd(STDIN);
+      //queueInsert(in->buffer, &key);
+      pipeWrite(in, key);
 }
-
 
 char removeKeyFromBuffer() {
       char key;
-      queueRemoveData(current->buffer, &key);
+      t_fdNode * in = findFd(STDIN);
+      queueRemoveData(in->buffer, &key);
       return key;
 }
 
@@ -234,6 +226,10 @@ uint8_t changePriority(int pid, int priority) {
 
 int getPID() {
       return current->pid;
+}
+
+uint64_t getCurrentOut() {
+      return current->out;
 }
 
 
@@ -283,7 +279,7 @@ static t_PCB* getNextProcess() {
                   curr = tasks->first;
             }
             i++;
-      } while (curr->state != READY);
+      } while (i < size && curr->state != READY);
 
       return curr;
 }

@@ -16,14 +16,17 @@ typedef struct t_PCB {
     void* entryPoint;
     void* rsp;
     void* rbp;
-    t_queue* buffer;
+    //t_queue* buffer;
 
     struct t_PCB* next;
     uint8_t state;
     uint8_t foreground;
     int priority;
     int pid;
-    char *name;
+    char* name;
+
+    uint64_t in;
+    uint64_t out;
 
     uint64_t arg1;
     uint64_t arg2;
