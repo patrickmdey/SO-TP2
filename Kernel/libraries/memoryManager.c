@@ -127,6 +127,8 @@ static int findBlocks(int amount) {
             if (count == amount) {
                 return firstIdx;
             }
+        } else {
+            count = 0;
         }
     }
     return -1;

@@ -8,19 +8,19 @@
 void help(int argc, char** args, t_shellData* shellData);
 
 //print registers, done in assembly
-void inforeg(int argc, char** args, t_shellData* shellData);
+void inforeg(int argc, char** args);
 
 //recieves memory direction and prints 32 bytes after
-void printmem(int argc, char** args, t_shellData* shellData);
+void printmem(int argc, char** args);
 
 //displays system time
-void time(int argc, char** args, t_shellData* shellData);
+void time(int argc, char** args);
 
 //shows processor model and brand
-void cpuInfo(int argc, char** args, t_shellData* shellData);
+void cpuInfo(int argc, char** args);
 
 //shows processor temp
-void cpuTemp(int argc, char** args, t_shellData* shellData);
+void cpuTemp(int argc, char** args);
 
 //change username in shell
 void changeUsername(int argc, char** argv, t_shellData* shellData);
@@ -32,33 +32,33 @@ void checkZeroException(int argc, char** args, t_shellData* shellData);
 void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData);
 
 //shows arguments
-void showArgs(int argc, char** args, t_shellData* shellData);
+void showArgs(int argc, char** args);
 
 //change to chess game
-void changeToChess(int argc, char** args, t_shellData* shellData);
+//void changeToChess(int argc, char** args, t_shellData* shellData);
 
-void memoryInfo(int argc, char** args, t_shellData* shellData);
+void memoryInfo(int argc, char** args);
 
 //print all running process info
-void ps(int argc, char** args, t_shellData* shellData);
+void ps(int argc, char** args);
 
-void loop(int argc, char** args, t_shellData* shellData);
+void loop(int argc, char** args);
 
-void kill(int argc, char** args, t_shellData* shellData);
+void kill(int argc, char** arg);
 
-void nice(int argc, char** args, t_shellData* shellData);
+void nice(int argc, char** args);
 
-void block(int argc, char** args, t_shellData* shellData);
+void block(int argc, char** args);
 
-void testSync(int argc, char** args, t_shellData* shellData);
+void testSync(int argc, char** args);
 
-void testSyncNoSem(int argc, char** args, t_shellData* shellData);
+void testSyncNoSem(int argc, char** args);
 
-void sem(int argc, char** args, t_shellData* shellData);
+void sem(int argc, char** args);
 
-void cat(int argc, char** args, t_shellData* shellData);
+void cat(int argc, char** args);
 
-void filter(int argc, char** args, t_shellData* shellData);
+void filter(int argc, char** args);
 
-void wc(int argc, char** args, t_shellData* shellData);
+void wc(int argc, char** args);
 #endif

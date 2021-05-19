@@ -12,8 +12,8 @@ static t_fdList fdList = { NULL, 0 };
 static uint64_t nextFd = 0;
 
 void initPipes() {
-    createFd(); //STDIN
-    createFd();//STDOUT
+    createFd(); // STDIN
+    createFd(); // STDOUT
 }
 
 void insertFd(t_fdNode* fdNode) {

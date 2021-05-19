@@ -60,14 +60,15 @@ uint64_t *sysInfoReg(){
     return (uint64_t*)syscall(INFOREG, 0, 0, 0, 0, 0, 0);
 }
 
-void sysCreateProcess(void * entryPoint, char* name, int argc, char** args){
-      uint8_t background = argc > 0 && args[argc - 1][0] == '&';
+void sysCreateProcess(void * entryPoint, char * name, int argc, char** argv){
+      // uint8_t background = argc > 0 && args[argc - 1][0] == '&';
 
       // for(int i = 0; i<argc; i++)
       //       printStringLn(args[i]);
       
-      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, background, 
-                  (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);
+      /*syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, background, 
+                  (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);*/
+      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, argc, (uint64_t) argv, 0, 0);
 }
 
 void sysYield(void){

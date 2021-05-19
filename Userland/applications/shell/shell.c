@@ -12,14 +12,14 @@
 #include <stddef.h> 
 
 #include <memoryManager.h>
+#include <test_sync.h>
+
+#define MAX_PIPE_PROCESS 2
+
 static void initShell(t_shellData* shellData);
 static void shellText(t_shellData* shellData);
 static void processCommand(t_shellData* shellData);
 static void processChar(char c, t_shellData* shellData);
-
-static char* regNames[] = { "R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
-                           "R8: ", "RSI: ", "RDI: ", "RBP: ", "RDX: ", "RCX: ", "RBX: ",
-                           "RAX: ", "RIP: ", "RSP: " };
 
 void runShell() {
       t_shellData shellData;
@@ -37,36 +37,38 @@ void runShell() {
 //inicia la shell y todas sus estructuras 
 static void initShell(t_shellData* shellData) {
       t_command commandsData[] = {
-          {&help, "help", "shows the list of commands and their use"},
-          {&inforeg, "inforeg", "prints the value of all the registers on screen, press ctrl + s to update values"},
-          {&printmem, "printmem", "recieves an hexadecimal direction and makes a memory dump of 32 bytes on screen"},
-          {&time, "time", "prints the current system time on screen"},
-          {&cpuInfo, "cpuInfo", "prints the processor brand and model on screen"},
-          {&cpuTemp, "cpuTemp", "prints the current processor temperature on screen"},
-          {&changeUsername, "changeUsername", "changes the shell prompt username"},
-          {&checkZeroException, "checkZeroException", "triggers a zero division exception"},
-          {&checkInvalidOpcodeException, "checkInvalidOpcodeException", "triggers an invalid opcode exception"},
-          {&showArgs, "showArgs", "prints the arguments passed to this command"},
-          {&changeToChess, "chess", "starts or resumes a chess game"},
-          {&memoryInfo, "memoryInfo", "prints information of memory manager status"},
-          {&ps, "ps", "prints a list with all running processes with their most relevant information"},
-          {&loop, "loop", "creates loop process"},
-          {&kill, "kill", "kills the process with the given pid"},
-          {&block, "block", "changes process state between blocked and ready with given pid"},
-          {&nice, "nice", "changes the process with the given pid priority to the new priority"},
-          {&testSync, "testSync", "tests syncronization using semaphores"},
-          {&testSyncNoSem, "testSyncNoSem", "tests syncronization without using semaphores"},
-          {&sem, "sem", "prints a list with all opened semaphores with their most relevant information"},
-          {&cat, "cat", "prints to stdout the content of the fd"},
-          {&filter, "filter", "prints the vocals to stdout the content of the fd"},
-          {&wc, "wc", "counts the amount of lines in a given input"}
+          {&help, NULL, "help", "shows the list of commands and their use", 1},
+          {&changeUsername, NULL, "changeUsername", "changes the shell prompt username", 1},
+          {&checkZeroException, NULL, "checkZeroException", "triggers a zero division exception", 1},
+          {&checkInvalidOpcodeException, NULL, "checkInvalidOpcodeException", "triggers an invalid opcode exception", 1},
+          {NULL, &inforeg, "inforeg", "prints the value of all the registers on screen, press ctrl + s to update values", 0},
+          {NULL, &printmem, "printmem", "recieves an hexadecimal direction and makes a memory dump of 32 bytes on screen", 0},
+          {NULL, &time, "time", "prints the current system time on screen", 0},
+          {NULL, &cpuInfo, "cpuInfo", "prints the processor brand and model on screen", 0},
+          {NULL, &cpuTemp, "cpuTemp", "prints the current processor temperature on screen", 0},
+          {NULL, &showArgs, "showArgs", "prints the arguments passed to this command", 0},
+          /*{&changeToChess, "chess", "starts or resumes a chess game"},*/
+          {NULL, &memoryInfo, "memoryInfo", "prints information of memory manager status", 0},
+          {NULL, &ps, "ps", "prints a list with all running processes with their most relevant information", 0},
+          {NULL, &loop, "loop", "creates loop process", 0},
+          {NULL, &kill, "kill", "kills the process with the given pid", 0},
+          {NULL, &block, "block", "changes process state between blocked and ready with given pid", 0},
+          {NULL, &nice, "nice", "changes the process with the given pid priority to the new priority", 0},
+          {NULL, &test_sync, "testSync", "tests syncronization using semaphores", 0},
+          {NULL, &test_no_sync, "testSyncNoSem", "tests syncronization without using semaphores", 0},
+          {NULL, &sem, "sem", "prints a list with all opened semaphores with their most relevant information", 0},
+          {NULL, &cat, "cat", "prints to stdout the content of the fd", 0},
+          {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
+          {NULL, &wc, "wc", "counts the amount of lines in a given input", 0}
 
       };
 
       for (int i = 0; i < COMMANDS; i++) {
+            shellData->commands[i].builtIn = commandsData[i].builtIn;
             shellData->commands[i].command = commandsData[i].command;
             shellData->commands[i].name = commandsData[i].name;
             shellData->commands[i].description = commandsData[i].description;
+            shellData->commands[i].isBuiltIn = commandsData[i].isBuiltIn;
       }
 
       cleanBuffer(&shellData->buffer);
@@ -74,9 +76,8 @@ static void initShell(t_shellData* shellData) {
       shellText(shellData);
 }
 
-//procesa el caracter recibido actua segun el mismo
+// procesa el caracter recibido actua segun el mismo
 static void processChar(char c, t_shellData* shellData) {
-
       if (c != 0) {
             switch (c) {
             case CLEAR_SCREEN:
@@ -96,8 +97,6 @@ static void processChar(char c, t_shellData* shellData) {
                         deletechar();
                   }
                   break;
-            
-
             default:
                   if (shellData->buffer.index < BUFFER_SIZE) {
                         shellData->buffer.buffer[shellData->buffer.index++] = c;
@@ -108,26 +107,62 @@ static void processChar(char c, t_shellData* shellData) {
 }
 
 //procesa el comando, tokenizando lo ingresado.
-static void processCommand(t_shellData* shellData) {
-      int argc = 0;
-      char arg1[BUFFER_SIZE] = { 0 }, arg2[BUFFER_SIZE] = { 0 }, arg3[BUFFER_SIZE] = { 0 }, arg4[BUFFER_SIZE] = { 0 };
-      char* argv[MAX_ARGS] = { arg1, arg2, arg3, arg4 };
-      char command[BUFFER_SIZE] = { 0 };
+static void processCommand(t_shellData * shellData) {
+      int argc[MAX_PIPE_PROCESS] = {0};
+      char ** argv[MAX_PIPE_PROCESS];
+
+      int i, j, k;
+      for (i = 0; i < MAX_PIPE_PROCESS; i++) {
+            argv[i] = (char **) malloc(MAX_ARGS * sizeof(char *));
+            for (j = 0; j < MAX_ARGS; j++) {
+                  argv[i][j] = (char *) malloc(BUFFER_SIZE * sizeof(char));
+                  for (k = 0; k < BUFFER_SIZE; k++)
+                        argv[i][j][k] = 0;
+            }
+      }
+      
+      char command[MAX_PIPE_PROCESS][BUFFER_SIZE] = {{0}};
+
+      char process[MAX_PIPE_PROCESS][BUFFER_SIZE] = {{0}};
+      int idx = 0;
 
       strtok(0, 0, ' ');
-      strtok(shellData->buffer.buffer, command, ' ');    //parse buffer
-      strtok(0, command, ' ');                           //parse buffer
+      strtok(shellData->buffer.buffer, process[idx], '|');
+      while (idx < 2 && strtok(NULL, process[idx], '|')) {
+            idx++;
+      }
 
-      while (argc < MAX_ARGS && strtok(0, argv[argc], ' ')) {
-            argc++;
-      };
+
+      for (i = 0; i < idx; i++) {
+            argc[i] = 0;
+            strtok(0, 0, ' ');
+            strtok(process[i], command[i], ' ');    //parse buffer
+            strtok(NULL, command[i], ' ');          //parse buffer
+
+
+            while (argc[i] < MAX_ARGS && strtok(NULL, argv[i][argc[i]], ' ')) {
+                  argc[i]++;
+            };
+
+      }
 
       strtok(0, 0, ' ');
 
-      for (int i = 0; i < COMMANDS; i++) {
-            if (stringcmp(shellData->commands[i].name, command) == 0) {
-                  shellData->commands[i].command(argc, argv, shellData);
-                  return;
+      k = 0;
+      for (i = 0; i < COMMANDS; i++) {
+            for (j = 0; j < idx; j++) {
+                  if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
+                        if (shellData->commands[i].isBuiltIn) {
+                              shellData->commands[i].builtIn(argc[j], argv[j], shellData);
+                        } else {
+                              sysCreateProcess(shellData->commands[i].command, 
+                              shellData->commands[i].name, argc[j], argv[j]);
+                              sysYield();
+                        }
+                        k++;
+                        if (k == idx)
+                              return;
+                  }
             }
       }
       printStringLn("Invalid command");
@@ -138,23 +173,6 @@ static void processCommand(t_shellData* shellData) {
 static void shellText(t_shellData* shellData) {
       printStringWC(shellData->username, BLACK, WHITE);
       printStringWC(" $ > ", BLACK, WHITE);
-}
-
-//muestra la informacion recoletada sobre los registros obtenidos al haber presionado ctrl + s
-void inforeg(int argc, char** args, t_shellData* shellData) {
-      if (argc != 0) {
-            printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
-      }
-      uint64_t* regData = sysInfoReg();
-      for (int i = 0; i < REGISTERS; i++) {
-            printString(" > ");
-            printString(regNames[i]);
-            printHexWL(regData[i], 8);
-            putchar('\n');
-      }
-      putchar('\n');
 }
 
 //cambia el nombre del usuario mostrado en la shell

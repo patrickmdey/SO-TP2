@@ -122,7 +122,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void*)r->rdi, (char*)r->rsi, (uint8_t)r->rdx, r->r10, r->r8, r->r9);
+                  createProcess((uint64_t) r->rdi, (char *) r->rsi, r->rdx, (char **) r->r10);
                   break;
             case SYS_GET_PID:
                   return getPID();

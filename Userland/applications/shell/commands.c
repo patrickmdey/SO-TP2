@@ -5,22 +5,29 @@
 #include <stringLib.h>
 #include <syscalls.h>
 #include <utils.h>
+#include <registers.h>
 #include <chess.h>
 #include <memoryManager.h>
 #include <test_sync.h>
 
 #define VERY_BIG_NUMBER 9999999
 
+
+static char* regNames[] = { "R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
+                           "R8: ", "RSI: ", "RDI: ", "RBP: ", "RDX: ", "RCX: ", "RBX: ",
+                           "RAX: ", "RIP: ", "RSP: " };
+
+
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
-void changeToChess(int argc, char** args, t_shellData* shellData) {
-      sysClear(0, 0, 0, 0);
-      cleanBuffer(&shellData->buffer);
-      sys_changeApp();
-}
+// void changeToChess(int argc, char** args, t_shellData shellData) {
+//       sysClear(0, 0, 0, 0);
+//       cleanBuffer(&shellData->buffer);
+//       sys_changeApp();
+// }
 
 //devuelve el tiempo acutal del sistema
-void time(int argc, char** args, t_shellData* shellData) {
+void time(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -49,10 +56,11 @@ void time(int argc, char** args, t_shellData* shellData) {
             }
       }
       putchar('\n');
+      sysExit();
 }
 
 //devuelve el modelo y vendedor del cpu
-void cpuInfo(int argc, char** args, t_shellData* shellData) {
+void cpuInfo(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -68,22 +76,40 @@ void cpuInfo(int argc, char** args, t_shellData* shellData) {
       printInt(cpuInfo.model);
       putchar('\n');
       putchar('\n');
+      sysExit();
 }
 
-//Hace un dump de 32 bytes de memria a partir de la direccion pedida
-void printmem(int argc, char** args, t_shellData* shellData) {
-      if (argc != 1) {
+//muestra la informacion recoletada sobre los registros obtenidos al haber presionado ctrl + s
+void inforeg(int argc, char ** args) {
+      if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
             return;
+      }
+      uint64_t* regData = sysInfoReg();
+      for (int i = 0; i < REGISTERS; i++) {
+            printString(" > ");
+            printString(regNames[i]);
+            printHexWL(regData[i], 8);
+            putchar('\n');
+      }
+      putchar('\n');
+      sysExit();
+}
+
+
+//Hace un dump de 32 bytes de memria a partir de la direccion pedida
+void printmem(int argc, char** args) {
+      if (argc != 1) {
+            printStringLn("Invalid ammount of arguments.");
+            sysExit();
       }
 
       int error = 0;
       uint64_t memDir = strToHex(args[0], &error);
       if (error) {
             printStringLn("Invalid argument for function printmem (must be a hex value).");
-            putchar('\n');
-            return;
+            sysExit();
       }
 
       int bytes = 32;
@@ -119,20 +145,20 @@ void printmem(int argc, char** args, t_shellData* shellData) {
 }
 
 //Imprime la temperatura actual del cpu
-void cpuTemp(int argc, char** args, t_shellData* shellData) {
+void cpuTemp(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
+            sysExit();
       }
       printString("CPU temp: ");
       printInt(sysTemp());
       printStringLn(" C");
       putchar('\n');
+      sysExit();
 }
 
 //causa una excepcion de dividir por cero
-void checkZeroException(int argc, char** args, t_shellData* shellData) {
+void checkZeroException(int argc, char** args, t_shellData* shellDat) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -142,7 +168,7 @@ void checkZeroException(int argc, char** args, t_shellData* shellData) {
 }
 
 //causa una excepcion de tipo invalid opcode
-void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData) {
+void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellDat) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -152,7 +178,7 @@ void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData) 
 }
 
 //Muestra los argumentos pasados al comando
-void showArgs(int argc, char** args, t_shellData* shellData) {
+void showArgs(int argc, char** args) {
       for (int i = 0; i < argc && i < MAX_ARGS; i++) {
             printString("arg[");
             printInt(i);
@@ -160,9 +186,10 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
             printStringLn(args[i]);
       }
       putchar('\n');
+      sysExit();
 }
 
-void memoryInfo(int argc, char** args, t_shellData* shellData) {
+void memoryInfo(int argc, char** args) {
       int size = 0;
       char** info = sysGetMeminfo(&size);
       for (int i = 0; i < size;i++) {
@@ -170,10 +197,11 @@ void memoryInfo(int argc, char** args, t_shellData* shellData) {
             free(info[i]);
       }
       free(info);
+      sysExit();
 
 }
 
-void ps(int argc, char** args, t_shellData* shellData) {
+void ps(int argc, char** args) {
       int size = 0;
       char** info = sysPs(&size);
       printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP        NAME", BLACK, GREEN);
@@ -184,9 +212,10 @@ void ps(int argc, char** args, t_shellData* shellData) {
       }
 
       free((uint8_t*)info);
+      sysExit();
 }
 
-static void loopProcess() {
+void loop(int argc, char** args) {
       int pid = sysGetPid();
       int i;
       while (1) {
@@ -194,13 +223,14 @@ static void loopProcess() {
             printInt(pid);
             printString(" ");
       }
+      sysExit();
 }
 
-void loop(int argc, char** args, t_shellData* shellData) {
+/*void loop(int argc, char** args) {
       sysCreateProcess(&loopProcess, "loop", argc, args);
-}
+}*/
 
-static void catProcess() {
+void cat(int argc, char** args) {
       sysBlock(0);
       char c;
       char toPrint[100];
@@ -209,7 +239,6 @@ static void catProcess() {
             c = getchar();
             if (c == '\t') {
                   sysBlock(0);
-                  ps(0, 0, 0);
                   sysExit();
             }
             putchar(c);
@@ -222,11 +251,11 @@ static void catProcess() {
       }
 }
 
-void cat(int argc, char** args, t_shellData* shellData) {
+/*void cat(int argc, char** args) {
       sysCreateProcess(&catProcess, "cat", argc, args);
-}
+}*/
 
-static void filterProcess() {
+void filter(int argc, char** args) {
       sysBlock(0);
       char c;
       char toPrint[100];
@@ -234,7 +263,7 @@ static void filterProcess() {
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  ps(0, 0, 0);
+                  //ps(0, 0);
                   sysBlock(0);
                   sysExit();
             }
@@ -249,11 +278,11 @@ static void filterProcess() {
       }
 }
 
-void filter(int argc, char** args, t_shellData* shellData) {
+/*void filter(int argc, char** args) {
       sysCreateProcess(&filterProcess, "filter", argc, args);
-}
+}*/
 
-void wcProcess() {
+void wc(int argc, char** args) {
       sysBlock(0);
       char c;
       int i = 0;
@@ -276,22 +305,18 @@ void wcProcess() {
       }
 }
 
-void wc(int argc, char** args, t_shellData* shellData) {
-      sysCreateProcess(&wcProcess, "wc", argc, args);
-}
-
-void kill(int argc, char** args, t_shellData* shellData) {
-      if (argc > 2) {
-            printStringLn("To many arguments");
-            return;
+void kill(int argc, char** args) {
+      printInt(argc);
+      if (argc > 1) {
+            printStringLn("Too many arguments");
+            sysExit();
       }
       int error = 0;
       int pid = strToInt(args[0], &error);
       int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
-      }
-      else if (killed == 0) {
+      } else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
@@ -299,9 +324,10 @@ void kill(int argc, char** args, t_shellData* shellData) {
       else {
             printStringLn("Error occured: no processes running");
       }
+      sysExit();
 }
 
-void sem(int argc, char** args, t_shellData* shellData) {
+void sem(int argc, char** args) {
       int size = 0;
       char** info = sysSemInfo(&size);
       if (size == 0) {
@@ -316,17 +342,18 @@ void sem(int argc, char** args, t_shellData* shellData) {
       }
 
       free((uint8_t*)info);
+      sysExit();
 }
 
-void testSync(int argc, char** args, t_shellData* shellData) {
+/*void testSync(int argc, char** args) {
       sysCreateProcess(&test_sync, "test-sync", argc, args);
 }
 
-void testSyncNoSem(int argc, char** args, t_shellData* shellData) {
+void testSyncNoSem(int argc, char** args) {
       sysCreateProcess(&test_no_sync, "test-sync-n", argc, args);
-}
+}*/
 
-void nice(int argc, char** args, t_shellData* shellData) {
+void nice(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
@@ -340,9 +367,11 @@ void nice(int argc, char** args, t_shellData* shellData) {
       if (error == 0) {
             printStringLn("Not found");
       }
+
+      sysExit();
 }
 
-void block(int argc, char** args, t_shellData* shellData) {
+void block(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
@@ -356,6 +385,8 @@ void block(int argc, char** args, t_shellData* shellData) {
       }
       else
             printStringLn("Couldn´t change process state");
+
+      sysExit();
 }
 
 static void memToString(char* buffer, uint8_t* mem, int bytes) {
@@ -368,4 +399,6 @@ static void memToString(char* buffer, uint8_t* mem, int bytes) {
                   uintToBase(mem[i], buffer + i, 16);
             }
       }
+
+      sysExit();
 }
