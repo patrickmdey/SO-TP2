@@ -18,11 +18,9 @@ void sysWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColo
             for (int i = 0; string[i] != 0 && i < lenght; i++) {
                   if (string[i] == '\n') {
                         changeLineOnScreen();
-                  }
-                  else if (string[i] == '\b') {
+                  } else if (string[i] == '\b') {
                         removeCharFromScreen();
-                  }
-                  else {
+                  } else {
                         printCharOnScreen(string[i], bgColour, fontColour, 1);
                   }
             }

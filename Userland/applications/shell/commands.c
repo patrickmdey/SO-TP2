@@ -270,10 +270,6 @@ void filter(int argc, char** args) {
       }
 }
 
-/*void filter(int argc, char** args) {
-      sysCreateProcess(&filterProcess, "filter", argc, args);
-}*/
-
 void wc(int argc, char** args) {
       sysBlock(0);
       char c;

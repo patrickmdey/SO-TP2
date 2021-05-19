@@ -115,16 +115,16 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)malloc((uint8_t)r->rdi);
                   break;
             case SYS_FREE_MEMORY:
-                  free((uint8_t*)r->rdi);
+                  free((void *) r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
                   return (uint64_t)getMemoryInfo((uint64_t*)r->rdi);
                   break;
             case SYS_PS:
-                  return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
+                  return (uint64_t) ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((void *) r->rdi, (char *) r->rsi, (int64_t) r->rdx, (int64_t) r->r10, r->r9, (char **) r->r8);
+                  createProcess((void *) r->rdi, (char *) r->rsi, (int64_t) r->rdx, (int64_t) r->r10, r->r8, (char **) r->r9);
                   break;
             case SYS_GET_PID:
                   return getPID();

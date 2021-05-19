@@ -41,6 +41,7 @@ void test_no_sync(int argc, char ** argv) {
         sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
     
+    while(1);
     sysExit();
 }
 
@@ -60,7 +61,6 @@ void inc(int argc, char ** argv) {
         printStringLn("Errors parsing value");
         sysExit();
     }
-
     int64_t N = strToInt(argv[2], &error);
     if (error) {
         printStringLn("Errors parsing N");
@@ -90,7 +90,9 @@ void inc(int argc, char ** argv) {
     }
 
     if (sem) {
+        printStringLn("Opening sem");
         semClose(semp);
+        printStringLn("Closing Sem");
         printStringLn("CLOSED SEM");
     }
 

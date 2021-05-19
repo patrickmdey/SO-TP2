@@ -108,7 +108,7 @@ static void processChar(char c, t_shellData* shellData) {
 
 //procesa el comando, tokenizando lo ingresado.
 static void processCommand(t_shellData * shellData) {
-      int argc[MAX_PIPE_PROCESS] = {0};
+      uint8_t argc[MAX_PIPE_PROCESS] = {0};
       char ** argv[MAX_PIPE_PROCESS];
 
       int i, j, k;
@@ -144,10 +144,7 @@ static void processCommand(t_shellData * shellData) {
 
       strtok(0, 0, ' ');
 
-      k = 0; 
-      // aa | bb
-      // aa[STDIN, fd]
-      // bb[fd, STDOUT]
+      k = 0;
       int64_t fd[MAX_PIPE_PROCESS][2] = {
             {-1, -1}, 
             {-1, -1}
@@ -157,15 +154,17 @@ static void processCommand(t_shellData * shellData) {
             fd[0][1] = aux;
             fd[1][0] = aux;
       }
+      int invalidCommand[MAX_PIPE_PROCESS] = {1, 1};
       for (i = 0; i < COMMANDS; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
+                        invalidCommand[j] = 0;
                         if (shellData->commands[i].isBuiltIn) {
                               shellData->commands[i].builtIn(argc[j], argv[j], shellData);
                         } else {
                               sysCreateProcess(shellData->commands[i].command, 
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
-                              sysYield();
+                              //sysYield();
                         }
                         k++;
                         if (k == idx) {
@@ -174,7 +173,16 @@ static void processCommand(t_shellData * shellData) {
                   }
             }
       }
-      printStringLn("Invalid command");
+      for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos 
+        if (invalidCommand[i]) {
+          printString("Invalid command: ");
+          printStringLn(command[i]);
+          for (j = 0; j < argc[i]; j++) {
+            free(argv[i][j]);
+          }
+          free(argv[i]);
+        }
+      }
 }
 
 

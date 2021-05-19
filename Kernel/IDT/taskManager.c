@@ -64,18 +64,19 @@ void* schedule(void* oldRSP, int forceStart) {
             uint8_t state = aux->state;
             currentTicks = 0;
             current = getNextProcess();
+            /*printString("pid:");
+            printInt(current->pid);*/
             if (state == YIELD)
                   aux->state = READY;
 
-      }
-      else {
+      } else {
             currentTicks++;
       }
 
       return current->rsp;
 }
 
-void initTaskManager(void* entryPoint) {
+void initTaskManager(void * entryPoint) {
       tasks = malloc(sizeof(t_list));
       if (tasks == NULL)
             return;
@@ -92,7 +93,7 @@ uint64_t getCurrentPid() {
       return current->pid;
 }
 
-void createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, int argc, char ** argv) {
+void createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
@@ -103,17 +104,17 @@ void createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, in
       process->foreground = 1 - background;
       process->argv = argv;
       process->argc = argc - background;
+
       if (current == NULL) {
             process->in = STDIN;
             process->out = STDOUT;
       } else {
-            process->in = /*(background) ? -1 : */( (fdIn == -1) ? current->in : fdIn ); // si esta en background seteo a -1, 
+            process->in = (background) ? -1 : ( (fdIn == -1) ? current->in : fdIn ); // si esta en background seteo a -1, 
                   // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
             process->out = (fdOut == -1) ? current->out : fdOut;
       }
-
-      printInt(process->in);
-      printInt(process->out);
+      /*printInt(process->in);
+      printInt(process->out);*/
 
       addProcess(process);
 }
@@ -181,14 +182,14 @@ void resetCurrentProcess() {
 
 void writeKeyOnBuffer(char key) { // INPUT DE TECLADO
       //t_PCB* foreground = getForegroundProcess();
-      t_fdNode * in = findFd(current->in);
+      t_fdNode * in = findFd(STDIN);
       //queueInsert(in->buffer, &key);
       pipeWrite(in, key);
 }
 
 char removeKeyFromBuffer() { // getchar
       char key = 0;
-      t_fdNode * in = findFd(STDIN);
+      t_fdNode * in = findFd(current->in);
       if (in != NULL) {
             queueRemoveData(in->buffer, &key);
       }
