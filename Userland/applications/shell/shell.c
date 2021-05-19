@@ -112,14 +112,6 @@ static void processCommand(t_shellData * shellData) {
       char ** argv[MAX_PIPE_PROCESS];
 
       int i, j, k;
-      for (i = 0; i < MAX_PIPE_PROCESS; i++) {
-            argv[i] = (char **) malloc(MAX_ARGS * sizeof(char *));
-            for (j = 0; j < MAX_ARGS; j++) {
-                  argv[i][j] = (char *) malloc(BUFFER_SIZE * sizeof(char));
-                  for (k = 0; k < BUFFER_SIZE; k++)
-                        argv[i][j][k] = 0;
-            }
-      }
       
       char command[MAX_PIPE_PROCESS][BUFFER_SIZE] = {{0}};
 
@@ -128,27 +120,43 @@ static void processCommand(t_shellData * shellData) {
 
       strtok(0, 0, ' ');
       strtok(shellData->buffer.buffer, process[idx], '|');
-      while (idx < 2 && strtok(NULL, process[idx], '|')) {
+      while (idx < MAX_PIPE_PROCESS && strtok(NULL, process[idx], '|')) {
             idx++;
       }
 
-
       for (i = 0; i < idx; i++) {
+            argv[i] = (char **) malloc(MAX_ARGS * sizeof(char *));
             argc[i] = 0;
             strtok(0, 0, ' ');
-            strtok(process[i], command[i], ' ');    //parse buffer
-            strtok(NULL, command[i], ' ');          //parse buffer
+            strtok(process[i], command[i], ' ');    // parse buffer
+            strtok(NULL, command[i], ' ');          // parse buffer
 
 
+            argv[i][0] = (char *) malloc(BUFFER_SIZE * sizeof(char));
             while (argc[i] < MAX_ARGS && strtok(NULL, argv[i][argc[i]], ' ')) {
                   argc[i]++;
+                  argv[i][argc[i]] = (char *) malloc(BUFFER_SIZE * sizeof(char));
             };
+            if (argc[i] != MAX_ARGS)
+                  free(argv[i][argc[i]]);
 
       }
 
       strtok(0, 0, ' ');
 
-      k = 0;
+      k = 0; 
+      // aa | bb
+      // aa[STDIN, fd]
+      // bb[fd, STDOUT]
+      int64_t fd[MAX_PIPE_PROCESS][2] = {
+            {-1, -1}, 
+            {-1, -1}
+      };
+      if (idx == MAX_PIPE_PROCESS) {
+            int aux = sysGetFd();
+            fd[0][1] = aux;
+            fd[1][0] = aux;
+      }
       for (i = 0; i < COMMANDS; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
@@ -156,12 +164,13 @@ static void processCommand(t_shellData * shellData) {
                               shellData->commands[i].builtIn(argc[j], argv[j], shellData);
                         } else {
                               sysCreateProcess(shellData->commands[i].command, 
-                              shellData->commands[i].name, argc[j], argv[j]);
+                                    shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
                               sysYield();
                         }
                         k++;
-                        if (k == idx)
+                        if (k == idx) {
                               return;
+                        }
                   }
             }
       }

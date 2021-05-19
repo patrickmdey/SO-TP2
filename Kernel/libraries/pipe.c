@@ -37,11 +37,17 @@ void insertFd(t_fdNode* fdNode) {
     l->size++;
 }
 
-void pipeWrite(t_fdNode * node, char c) {
+void pipeWrite(t_fdNode* node, char c) {
+    if (node == NULL)
+        return;
+        
     queueInsert(node->buffer, &c);
 }
 
-void pipeWriteStr(t_fdNode * node, char * str) {
+void pipeWriteStr(t_fdNode* node, char* str) {
+    if (node == NULL)
+        return;
+
     for (int i = 0; str[i]; i++) {
         pipeWrite(node, str[i]);
     }
@@ -71,6 +77,10 @@ t_fdNode* findFd(uint64_t fd) {
 
 uint64_t getFdSize() {
     return fdList.size;
+}
+
+int64_t getFd() {
+    return createFd();
 }
 
 static uint64_t createFd() {

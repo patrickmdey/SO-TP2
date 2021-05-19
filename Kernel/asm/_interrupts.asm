@@ -107,7 +107,6 @@ _syscallHandler:
 	iretq
 
 int_20:
-	sti
 	int 20h
 	ret
 

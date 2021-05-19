@@ -10,7 +10,7 @@
 
 int64_t global;
 
-void test_sync() {
+void test_sync(int argc, char ** argv) {
     uint64_t i;
 
     global = 0;
@@ -20,16 +20,14 @@ void test_sync() {
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "1", "1", "100", "&" };
         char* array2[4] = { "1", "-1", "100", "&" };
-        sysCreateProcess(&inc, "inc", 4, array1);
-        sysCreateProcess(&inc, "dec", 4, array2);
+        sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
+        sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
 
-    ps(0, 0, 0);
-    while(1);
     sysExit();
 }
 
-void test_no_sync() {
+void test_no_sync(int argc, char ** argv) {
     uint64_t i;
 
     global = 0;
@@ -39,27 +37,31 @@ void test_no_sync() {
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "0", "1", "100", "&" };
         char* array2[4] = { "0", "-1", "100", "&" };
-        sysCreateProcess(&inc, "inc", 4, array1);
-        sysCreateProcess(&inc, "dec", 4, array2);
+        sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
+        sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
-    while(1);
+    
     sysExit();
 }
 
-void inc(char* semC, char* valueC, char* NC) {
+void inc(int argc, char ** argv) {
+    if (argc < 3) {
+        printStringLn("Not enough arguments");
+        sysExit();
+    }
     int error = 0;
-    int sem = strToInt(semC, &error);
+    int sem = strToInt(argv[0], &error);
     if (error) {
         printStringLn("Errors parsing sem");
         sysExit();
     }
-    int64_t value = strToInt(valueC, &error);
+    int64_t value = strToInt(argv[1], &error);
     if (error) {
         printStringLn("Errors parsing value");
         sysExit();
     }
 
-    int64_t N = strToInt(NC, &error);
+    int64_t N = strToInt(argv[2], &error);
     if (error) {
         printStringLn("Errors parsing N");
         sysExit();
@@ -97,7 +99,6 @@ void inc(char* semC, char* valueC, char* NC) {
     printStringLn(" ");
     printStringLn("FINISHED");
     sysExit();
-    printStringLn("Flasheo");
 }
 
 void slowInc(int64_t* p, int64_t inc) {

@@ -25,8 +25,8 @@ typedef struct t_PCB {
     int pid;
     char* name;
 
-    uint64_t in;
-    uint64_t out;
+    int64_t in;
+    int64_t out;
 
     int argc;
     char ** argv;
@@ -38,7 +38,7 @@ void initTaskManager(void* entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
-void createProcess(void* entryPoint, char* name, int argc, char ** argv);
+void createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, int argc, char ** argv);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();
@@ -50,6 +50,8 @@ int getPID();
 char** ps(int* index);
 uint8_t block(int pid);
 void yield();
+
+uint64_t getCurrentOut();
 
 void writeKeyOnBuffer(char key);
 char removeKeyFromBuffer();

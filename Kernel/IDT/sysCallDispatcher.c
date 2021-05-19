@@ -9,17 +9,18 @@
 #include <timerTick.h>
 #include <memoryManager.h>
 #include <sem.h>
+#include <pipe.h>
 
-#define SYS_GETMEM_ID 0
-#define SYS_RTC_TIME_ID 1
-#define SYS_TEMP_ID 2
-#define SYS_WRITE_ID 3
-#define SYS_GETCHAR_ID 4
-#define SYS_CLEAR_ID 5
-#define SYS_LOAD_APP_ID 6
-#define SYS_RUN_ID 7
+#define SYS_GETMEM 0
+#define SYS_RTC_TIME 1
+#define SYS_TEMP 2
+#define SYS_WRITE 3
+#define SYS_GETCHAR 4
+#define SYS_CLEAR 5
+#define SYS_LOAD_APP 6
+#define SYS_RUN 7
 #define SYS_EXIT 8
-#define SYS_INFOREG_ID 9
+#define SYS_INFOREG 9
 #define SYS_DRAW 10
 #define SYS_MOVE_CURSOR 11
 #define SYS_MOVE_CURSOR_TO 12
@@ -41,49 +42,50 @@
 #define SYS_SEM_POST 28
 #define SYS_SEM_CLOSE 29
 #define SYS_YIELD 30
-#define SEM_INFO 31
+#define SYS_SEM_INFO 31
+#define SYS_GET_FD 32
 
-#define SYSCALLS 31
+#define SYSCALLS 32
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
       {
             switch (r->rax)
             {
-            case SYS_GETMEM_ID:
+            case SYS_GETMEM:
                   sysGetMem(r->rdi, (uint8_t*)r->rsi);
                   break;
 
-            case SYS_RTC_TIME_ID:
+            case SYS_RTC_TIME:
                   return getDecimalTimeInfo((t_timeInfo)(r->rdi));
                   break;
 
-            case SYS_TEMP_ID:
+            case SYS_TEMP:
                   return cpuTemp();
                   break;
 
-            case SYS_WRITE_ID:
+            case SYS_WRITE:
                   sysWrite((char*)(r->rdi), (uint8_t)(r->rsi), (t_colour)(r->rdx), (t_colour)(r->r10));
                   break;
 
-            case SYS_GETCHAR_ID:
+            case SYS_GETCHAR:
                   if ((int)(r->rdi) == 1)
                         return getcharOnce();
                   return getchar();
                   break;
 
-            case SYS_CLEAR_ID:
+            case SYS_CLEAR:
                   if ((int)(r->rdi) == 0 && (int)(r->rsi) == 0 && (int)(r->rdx) == 0 && (int)(r->r10) == 0)
                         clearScreen();
                   else
                         clearScreenFromTo((int)(r->rdi), (int)(r->rsi), (int)(r->rdx), (int)(r->r10));
                   break;
 
-            case SYS_LOAD_APP_ID:
+            case SYS_LOAD_APP:
                   return addProcess((t_PCB*)r->rdi);
                   break;
 
-            case SYS_RUN_ID:
+            case SYS_RUN:
                   sysForceStart();
                   break;
 
@@ -91,7 +93,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   exit();
                   break;
 
-            case SYS_INFOREG_ID:
+            case SYS_INFOREG:
                   return (uint64_t)getSnapshot();
                   break;
             case SYS_DRAW:
@@ -122,7 +124,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  createProcess((uint64_t) r->rdi, (char *) r->rsi, r->rdx, (char **) r->r10);
+                  createProcess((void *) r->rdi, (char *) r->rsi, (int64_t) r->rdx, (int64_t) r->r10, r->r9, (char **) r->r8);
                   break;
             case SYS_GET_PID:
                   return getPID();
@@ -157,8 +159,11 @@ uint64_t sysCallDispatcher(t_registers* r) {
             case SYS_YIELD:
                   yield();
                   break;
-            case SEM_INFO:
+            case SYS_SEM_INFO:
                   return (uint64_t)semInfo((int*)r->rdi);
+                  break;
+            case SYS_GET_FD:
+                  return (uint64_t) getFd();
                   break;
             }
 

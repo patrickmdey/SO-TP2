@@ -24,16 +24,16 @@ int sysTemp() {
     return syscall(TEMP, 0, 0, 0, 0, 0, 0);
 }
 
-char** sysGetMeminfo(int* size) {
-    return (char**)syscall(GET_MEMORY_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+char** sysGetMeminfo(int * size) {
+    return (char **) syscall(GET_MEMORY_INFO, (uint64_t) size, 0, 0, 0, 0, 0);
 }
 
 char** sysPs(int * size) {
     return (char**)syscall(PS, (uint64_t) size, 0, 0, 0, 0, 0);
 }
 
-char **sysSemInfo(int *size){
-    return (char**)syscall(SEM_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
+char **sysSemInfo(int * size){
+    return (char**)syscall(SEM_INFO, (uint64_t) size, 0, 0, 0, 0, 0);
 }
 
 int sysGetPid(){
@@ -42,6 +42,10 @@ int sysGetPid(){
 
 int sysKill(int pid){
     return syscall(KILL, pid, 0, 0, 0, 0, 0);
+}
+
+int64_t sysGetFd(){
+    return (int64_t) syscall(GET_FD, 0, 0, 0, 0, 0, 0);
 }
 
 int sysNice(int pid, int priority){
@@ -60,7 +64,7 @@ uint64_t *sysInfoReg(){
     return (uint64_t*)syscall(INFOREG, 0, 0, 0, 0, 0, 0);
 }
 
-void sysCreateProcess(void * entryPoint, char * name, int argc, char** argv){
+void sysCreateProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut , int argc, char** argv){
       // uint8_t background = argc > 0 && args[argc - 1][0] == '&';
 
       // for(int i = 0; i<argc; i++)
@@ -68,7 +72,7 @@ void sysCreateProcess(void * entryPoint, char * name, int argc, char** argv){
       
       /*syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, background, 
                   (uint64_t) args[0], (uint64_t) args[1], (uint64_t) args[2]);*/
-      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, argc, (uint64_t) argv, 0, 0);
+      syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, fdIn, fdOut, argc, (uint64_t) argv);
 }
 
 void sysYield(void){
@@ -77,7 +81,7 @@ void sysYield(void){
 
 //dibuja bitmap
 void sysDraw(char* bitmap, t_colour colour, int multiplier) {
-      syscall(DRAW, (uint64_t)bitmap, colour, multiplier, 0, 0, 0);
+      syscall(DRAW, (uint64_t) bitmap, colour, multiplier, 0, 0, 0);
 }
 
 void sysMoveCursor(int x, int y) {
@@ -89,5 +93,5 @@ void sysMoveCursorTo(int x, int y) {
 }
 
 void sysCursorPosition(int* array) {
-      syscall(CURSOR_POSITION, (uint64_t)array, 0, 0, 0, 0, 0);
+      syscall(CURSOR_POSITION, (uint64_t) array, 0, 0, 0, 0, 0);
 }

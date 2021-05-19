@@ -80,7 +80,7 @@ void cpuInfo(int argc, char** args) {
 }
 
 //muestra la informacion recoletada sobre los registros obtenidos al haber presionado ctrl + s
-void inforeg(int argc, char ** args) {
+void inforeg(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -192,13 +192,12 @@ void showArgs(int argc, char** args) {
 void memoryInfo(int argc, char** args) {
       int size = 0;
       char** info = sysGetMeminfo(&size);
-      for (int i = 0; i < size;i++) {
+      for (int i = 0; i < size; i++) {
             printStringLn(info[i]);
             free(info[i]);
       }
       free(info);
       sysExit();
-
 }
 
 void ps(int argc, char** args) {
@@ -226,10 +225,6 @@ void loop(int argc, char** args) {
       sysExit();
 }
 
-/*void loop(int argc, char** args) {
-      sysCreateProcess(&loopProcess, "loop", argc, args);
-}*/
-
 void cat(int argc, char** args) {
       sysBlock(0);
       char c;
@@ -251,9 +246,6 @@ void cat(int argc, char** args) {
       }
 }
 
-/*void cat(int argc, char** args) {
-      sysCreateProcess(&catProcess, "cat", argc, args);
-}*/
 
 void filter(int argc, char** args) {
       sysBlock(0);
@@ -306,7 +298,6 @@ void wc(int argc, char** args) {
 }
 
 void kill(int argc, char** args) {
-      printInt(argc);
       if (argc > 1) {
             printStringLn("Too many arguments");
             sysExit();
@@ -316,7 +307,8 @@ void kill(int argc, char** args) {
       int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
-      } else if (killed == 0) {
+      }
+      else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
@@ -344,14 +336,6 @@ void sem(int argc, char** args) {
       free((uint8_t*)info);
       sysExit();
 }
-
-/*void testSync(int argc, char** args) {
-      sysCreateProcess(&test_sync, "test-sync", argc, args);
-}
-
-void testSyncNoSem(int argc, char** args) {
-      sysCreateProcess(&test_no_sync, "test-sync-n", argc, args);
-}*/
 
 void nice(int argc, char** args) {
       int error = 0;

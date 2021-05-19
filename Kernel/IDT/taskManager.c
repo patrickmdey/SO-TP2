@@ -13,9 +13,9 @@
 
 #define SIZE_OF_STACK 4 * 1024
 
-static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char ** argv);
+static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv);
 static t_PCB* getNextProcess();
-static t_PCB* getForegroundProcess();
+// static t_PCB* getForegroundProcess();
 static int fillPs(char** toReturn, int size);
 
 //sacado de stackOverflow
@@ -47,7 +47,7 @@ typedef struct {
 
 
 static t_list* tasks;
-static t_PCB* current;
+static t_PCB* current = NULL;
 
 static int currentPID = 0;
 static int currentTicks = 0;
@@ -60,17 +60,18 @@ void* schedule(void* oldRSP, int forceStart) {
       current->rsp = oldRSP;
 
       if (current->state != READY || currentTicks >= current->priority) { // Change process
-            t_PCB * aux = current;
+            t_PCB* aux = current;
             uint8_t state = aux->state;
             currentTicks = 0;
             current = getNextProcess();
             if (state == YIELD)
                   aux->state = READY;
 
-      } else {
+      }
+      else {
             currentTicks++;
       }
-      
+
       return current->rsp;
 }
 
@@ -82,7 +83,7 @@ void initTaskManager(void* entryPoint) {
       tasks->first = NULL;
       tasks->size = 0;
 
-      createProcess(entryPoint, "shell", 0, 0);
+      createProcess(entryPoint, "shell", -1, -1, 0, 0);
       current = tasks->first;
       current->foreground = 1;
 }
@@ -91,24 +92,33 @@ uint64_t getCurrentPid() {
       return current->pid;
 }
 
-void createProcess(void * entryPoint, char * name, int argc, char ** argv) {
-      t_PCB * process = malloc(sizeof(t_PCB));
+void createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, int argc, char ** argv) {
+      t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return;
 
+      uint8_t background = (argc > 0 && argv[argc - 1][0] == '&');
       process->entryPoint = entryPoint;
       process->name = name;
-      process->foreground = 1 - (argc > 0 && argv[argc - 1][0] == '&');
+      process->foreground = 1 - background;
       process->argv = argv;
-      process->argc = argc - (1-process->foreground);
+      process->argc = argc - background;
+      if (current == NULL) {
+            process->in = STDIN;
+            process->out = STDOUT;
+      } else {
+            process->in = /*(background) ? -1 : */( (fdIn == -1) ? current->in : fdIn ); // si esta en background seteo a -1, 
+                  // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
+            process->out = (fdOut == -1) ? current->out : fdOut;
+      }
 
-      process->in = STDIN;
-      process->out = STDOUT;
+      printInt(process->in);
+      printInt(process->out);
 
       addProcess(process);
 }
 
-int addProcess(t_PCB * process) {
+int addProcess(t_PCB* process) {
       if (process->entryPoint == 0) {
             return 0;
       }
@@ -116,8 +126,8 @@ int addProcess(t_PCB * process) {
       if (process->rbp == NULL)
             return -1;
 
-      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1, 
-                                          process->argc, process->argv);
+      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
+            process->argc, process->argv);
       process->pid = currentPID++;
       process->state = READY;
 
@@ -165,27 +175,29 @@ void exit() {
 
 void resetCurrentProcess() {
       current->rsp = initializeStackFrame(current->entryPoint, (void*)(current->rbp + SIZE_OF_STACK - 1),
-                                          current->argc, current->argv);
+            current->argc, current->argv);
       sysForceStart();
 }
 
 void writeKeyOnBuffer(char key) { // INPUT DE TECLADO
       //t_PCB* foreground = getForegroundProcess();
-      t_fdNode * in = findFd(STDIN);
+      t_fdNode * in = findFd(current->in);
       //queueInsert(in->buffer, &key);
       pipeWrite(in, key);
 }
 
-char removeKeyFromBuffer() {
-      char key;
+char removeKeyFromBuffer() { // getchar
+      char key = 0;
       t_fdNode * in = findFd(STDIN);
-      queueRemoveData(in->buffer, &key);
+      if (in != NULL) {
+            queueRemoveData(in->buffer, &key);
+      }
       return key;
 }
 
 char** ps(int* index) {
       int size = tasks->size;
-      char** toReturn = malloc((size) * sizeof(char *));
+      char** toReturn = malloc((size) * sizeof(char*));
 
       *index = fillPs(toReturn, size);
 
@@ -201,7 +213,7 @@ void yield() {
 uint8_t block(int pid) {
       // if (pid == 0)
       //       return 0;
-      
+
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;
@@ -223,7 +235,7 @@ uint8_t changePriority(int pid, int priority) {
       return 1;
 }
 
-uint8_t changeForeground(int pid) {      
+uint8_t changeForeground(int pid) {
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;
@@ -244,7 +256,7 @@ uint64_t getCurrentOut() {
 
 
 //guarda el contexto de un proceso
-static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char ** argv) {
+static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv) {
       t_stackFrame* frame = (t_stackFrame*)(baseStack - sizeof(t_stackFrame));
 
       //todos los registros
@@ -256,7 +268,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, c
       frame->r10 = 0x006;
       frame->r9 = 0x007;
       frame->r8 = 0x008;
-      frame->rsi = (uint64_t) argv;
+      frame->rsi = (uint64_t)argv;
       frame->rdi = argc;
       frame->rbp = (uint64_t)baseStack; //0x00D
       frame->rdx = 0x00B;
@@ -279,7 +291,7 @@ static t_PCB* getNextProcess() {
       int i = 0, size = tasks->size;
       t_PCB* curr = current;
       do {
-            t_PCB * aux = curr->next;
+            t_PCB* aux = curr->next;
             if (curr->state == KILLED) {
                   removePCB(tasks, curr->pid);
             }
@@ -294,18 +306,18 @@ static t_PCB* getNextProcess() {
       return curr;
 }
 
-static t_PCB* getForegroundProcess() {
-      t_PCB* next = current;
-      while (next->foreground != 1) {
-            if (next->next != NULL) {
-                  next = next->next;
-            }
-            else {
-                  next = tasks->first;
-            }
-      }
-      return next;
-}
+// static t_PCB* getForegroundProcess() {
+//       t_PCB* next = current;
+//       while (next->foreground != 1) {
+//             if (next->next != NULL) {
+//                   next = next->next;
+//             }
+//             else {
+//                   next = tasks->first;
+//             }
+//       }
+//       return next;
+// }
 
 static int fillPs(char** toReturn, int size) {
       int i = 0, j = 0;
@@ -313,7 +325,7 @@ static int fillPs(char** toReturn, int size) {
       int offset;
 
       while (i < size) {
-            if(iterator->state != KILLED){
+            if (iterator->state != KILLED) {
                   toReturn[j] = malloc(150);
                   offset = 0;
                   offset += uintToBase(iterator->pid, toReturn[j] + offset, 10);

@@ -79,10 +79,14 @@ static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
     return pcb;
 }
 
-static void freePCB(t_PCB* pcb) {
+static void freePCB(t_PCB * pcb) {
     free(pcb->rbp);
-    // freeQueue(pcb->buffer);
     // destruir fd creado?
+    int i, count = (pcb->argc) + 1 - pcb->foreground;
+    for (i = 0; i < count; i++)
+        free(pcb->argv[i]);
+
+    free(pcb->argv);
     free(pcb);
 }
 
