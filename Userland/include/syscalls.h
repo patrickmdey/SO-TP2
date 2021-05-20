@@ -77,7 +77,7 @@ uint8_t sysChangeForeground(int pid);
 
 uint64_t *sysInfoReg();
 
-void sysCreateProcess(void * entryPoint, char* name, int64_t fdInt, int64_t fdOut, uint8_t argc, char** args);
+int64_t sysCreateProcess(void * entryPoint, char* name, int64_t fdInt, int64_t fdOut, uint8_t argc, char** args);
 
 void sysYield(void);
 

@@ -1,4 +1,5 @@
 #include <syscalls.h>
+#include <shell.h>
 
 int sysGetTicksElapsed() {
     return syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
@@ -6,6 +7,7 @@ int sysGetTicksElapsed() {
 
 void sysExit() {
     syscall(EXIT, 0, 0, 0, 0, 0, 0);
+
 }
 
 void sysClear(int fromWidth, int fromHeight, int toWidth, int toHeight) {
@@ -64,8 +66,8 @@ uint64_t *sysInfoReg(){
     return (uint64_t*)syscall(INFOREG, 0, 0, 0, 0, 0, 0);
 }
 
-void sysCreateProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv){
-    syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, fdIn, fdOut, argc, (uint64_t) argv);
+int64_t sysCreateProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv){
+    return syscall(CREATE_PROCESS, (uint64_t) entryPoint, (uint64_t) name, fdIn, fdOut, argc, (uint64_t) argv);
 }
 
 void sysYield(void){

@@ -13,12 +13,13 @@
 
 #include <memoryManager.h>
 #include <test_sync.h>
+#include <phylo.h>
 
 #define MAX_PIPE_PROCESS 2
 
 static void initShell(t_shellData* shellData);
 static void shellText(t_shellData* shellData);
-static void processCommand(t_shellData* shellData);
+static int processCommand(t_shellData* shellData);
 static void processChar(char c, t_shellData* shellData);
 
 void runShell() {
@@ -59,7 +60,8 @@ static void initShell(t_shellData* shellData) {
           {NULL, &sem, "sem", "prints a list with all opened semaphores with their most relevant information", 0},
           {NULL, &cat, "cat", "prints to stdout the content of the fd", 0},
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
-          {NULL, &wc, "wc", "counts the amount of lines in a given input", 0}
+          {NULL, &wc, "wc", "counts the amount of lines in a given input", 0},
+          {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0}
 
       };
 
@@ -78,6 +80,7 @@ static void initShell(t_shellData* shellData) {
 
 // procesa el caracter recibido actua segun el mismo
 static void processChar(char c, t_shellData* shellData) {
+      int printsPrompt;
       if (c != 0) {
             switch (c) {
             case CLEAR_SCREEN:
@@ -87,9 +90,10 @@ static void processChar(char c, t_shellData* shellData) {
                   break;
             case '\n':
                   putchar('\n');
-                  processCommand(shellData);
+                  printsPrompt =processCommand(shellData);
                   cleanBuffer(&shellData->buffer);
-                  shellText(shellData);
+                  if(printsPrompt)
+                        shellText(shellData);
                   break;
             case '\b':
                   if (shellData->buffer.index > 0) {
@@ -107,7 +111,7 @@ static void processChar(char c, t_shellData* shellData) {
 }
 
 //procesa el comando, tokenizando lo ingresado.
-static void processCommand(t_shellData * shellData) {
+static int processCommand(t_shellData * shellData) {
       uint8_t argc[MAX_PIPE_PROCESS] = {0};
       char ** argv[MAX_PIPE_PROCESS];
 
@@ -168,7 +172,7 @@ static void processCommand(t_shellData * shellData) {
                         }
                         k++;
                         if (k == idx) {
-                              return;
+                              return 0;
                         }
                   }
             }
@@ -183,6 +187,7 @@ static void processCommand(t_shellData * shellData) {
           free(argv[i]);
         }
       }
+      return 1;
 }
 
 

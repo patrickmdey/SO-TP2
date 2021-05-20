@@ -93,10 +93,10 @@ uint64_t getCurrentPid() {
       return current->pid;
 }
 
-void createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv) {
+int64_t createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv) {
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
-            return;
+            return -1;
 
       uint8_t background = (argc > 0 && argv[argc - 1][0] == '&');
       process->entryPoint = entryPoint;
@@ -117,6 +117,7 @@ void createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOut, 
       printInt(process->out);*/
 
       addProcess(process);
+      return process->pid;
 }
 
 int addProcess(t_PCB* process) {
@@ -212,16 +213,19 @@ void yield() {
 }
 
 uint8_t block(int pid) {
-      // if (pid == 0)
-      //       return 0;
 
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;
+      
+      if (pcb->state == KILLED)
+            return 0;
+      
       if (pcb->state == READY)
             pcb->state = BLOCKED;
       else if (pcb->state == BLOCKED)
             pcb->state = READY;
+
       return 1;
 }
 

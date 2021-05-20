@@ -9,6 +9,7 @@
 #include <chess.h>
 #include <memoryManager.h>
 #include <test_sync.h>
+#include <sem.h>
 
 #define VERY_BIG_NUMBER 9999999
 
@@ -27,6 +28,7 @@ static void memToString(char* buffer, uint8_t* mem, int bytes);
 // }
 
 //devuelve el tiempo acutal del sistema
+
 void time(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
@@ -379,6 +381,5 @@ static void memToString(char* buffer, uint8_t* mem, int bytes) {
                   uintToBase(mem[i], buffer + i, 16);
             }
       }
-
       sysExit();
 }

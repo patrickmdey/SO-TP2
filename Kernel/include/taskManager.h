@@ -38,7 +38,7 @@ void initTaskManager(void* entryPoint);
 
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
-void createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv);
+int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv);
 int addProcess(t_PCB* process);
 void killCurrentProcess();
 void resetCurrentProcess();
