@@ -44,7 +44,7 @@ void semWait(t_sem* s) {
 void semPost(t_sem* s) {
     if (s == NULL)
         return;
-        
+
     (s->value)++;
     wakeup(s);
 }

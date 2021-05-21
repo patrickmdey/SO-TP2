@@ -15,7 +15,6 @@
 
 static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv);
 static t_PCB* getNextProcess();
-// static t_PCB* getForegroundProcess();
 static int fillPs(char** toReturn, int size);
 
 //sacado de stackOverflow
@@ -310,19 +309,6 @@ static t_PCB* getNextProcess() {
 
       return curr;
 }
-
-// static t_PCB* getForegroundProcess() {
-//       t_PCB* next = current;
-//       while (next->foreground != 1) {
-//             if (next->next != NULL) {
-//                   next = next->next;
-//             }
-//             else {
-//                   next = tasks->first;
-//             }
-//       }
-//       return next;
-// }
 
 static int fillPs(char** toReturn, int size) {
       int i = 0, j = 0;

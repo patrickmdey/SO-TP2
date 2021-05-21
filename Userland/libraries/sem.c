@@ -20,3 +20,7 @@ void semPost(t_sem * sem) {
 void semClose(t_sem * sem) {
     syscall(SEM_CLOSE, (uint64_t) sem, 0, 0, 0, 0, 0);
 }
+
+void semDestroy(t_sem * sem) {
+    syscall(SEM_DESTROY, (uint64_t) sem, 0, 0, 0, 0, 0);
+}

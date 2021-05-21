@@ -9,15 +9,26 @@
 #define MAX_PHYLOSOPHERS 15
 #define VERY_BIG_NUMBER 999999
 
+static void addEater(int64_t* pids);
+static void removeEater(int64_t* pids);
+static void eat(int id);
+
 t_sem* forks[MAX_PHYLOSOPHERS] = { NULL };
 t_sem* printSem;
+t_sem* touchSemArray;
 
 int size = 5;
 
 char eating[MAX_PHYLOSOPHERS] = { 0 };
 
+int signal = 0;
+
 static void printProcess(int argc, char** argv) {
     while (1) {
+
+        if (signal)
+            semWait(touchSemArray);
+
         semWait(printSem);
         printStringLn(eating);
         semPost(printSem);
@@ -31,18 +42,17 @@ static void phyloProcess(int argc, char** args) {
         printStringLn("Too many arguments");
     int error = 0;
     int id = strToInt(args[0], &error);
-    //int size = strToInt(args[1], &error);
-    //size = 5;
     int leftFork, rightFork;
 
     //{0, 0, 0 ,0, 0, 0}
 
-    //{0, 1, 2, 3, 4}     size = 5
-    // {0, 1, 2, 3, 4}   size = 5
+    //{0, 1, 2, 3}     size = 5
+    // {0, 1, 2, 3}   size = 5
 
     while (1) {
-        /*printInt(id);
-        printStringLn(" waiting");*/
+        if (signal)
+            semWait(touchSemArray);
+
         rightFork = id;
         if (id == 0)
             leftFork = size - 1;
@@ -53,44 +63,17 @@ static void phyloProcess(int argc, char** args) {
             semWait(forks[rightFork]);
             semWait(forks[leftFork]);
 
-            /*printInt(id);
-            printStringLn(" eating");*/
-
-            semWait(printSem);
-            eating[id] = args[0][0];
-            semPost(printSem);
-
-
-            for (int i = 0; i < VERY_BIG_NUMBER; i++);
-
-            semWait(printSem);
-            eating[id] = '.';
-            semPost(printSem);
-
-            /*printInt(id);
-            printStringLn(" done");*/
+            eat(id);
 
             semPost(forks[leftFork]);
             semPost(forks[rightFork]);
 
-        } else {
+        }
+        else {
             semWait(forks[leftFork]);
             semWait(forks[rightFork]);
 
-            /*printInt(id);
-            printStringLn(" eating");*/
-            semWait(printSem);
-            eating[id] = args[0][0];
-            semPost(printSem);
-
-            for (int i = 0; i < VERY_BIG_NUMBER; i++);
-
-            semWait(printSem);
-            eating[id] = '.';
-            semPost(printSem);
-
-            /*printInt(id);
-            printStringLn(" done");*/
+            eat(id);
 
             semPost(forks[rightFork]);
             semPost(forks[leftFork]);
@@ -105,6 +88,7 @@ void phylo(int argc, char** args) {
     size = 5;
 
     printSem = semOpen("printSem", 1, 1);
+    touchSemArray = semOpen("touchSemArray", 1, 1);
 
     int i;
     char** names = (char**)malloc(10 * sizeof(char*));
@@ -135,47 +119,97 @@ void phylo(int argc, char** args) {
 
     char c;
     while (1) {
-        c = getchar();
-        if (c == 'a') {
-            char** param = (char**)malloc(2 * sizeof(char*));
-            param[0] = (char*)malloc(3 * sizeof(char));
-            uintToBase(size, param[0], 10);
-            param[1] = "&";
-            forks[size] = semOpen(param[0], 1, 1);
-            eating[size] = '.';
-            pids[size++] = sysCreateProcess(&phyloProcess, "eater", -1, -1, 2, param);
-        } else if (c == 'r') {
-            ;
-            // printStringLn("WAITING");
-            // if ((size - 1) % 2 != 0) {
-            //     semWait(forks[size - 1]); // espero liberar fork izq
-            //     semWait(forks[0]);
-            // } else {
-            //     semWait(forks[0]);
-            //     semWait(forks[size - 1]); // espero liberar fork izq
-            // }
-            // printStringLn("KILLING");
-            // sysKill(pids[size - 1]);
-            // size--;
-            // eating[size] = 0;
-            // semPost(forks[0]);
-            // semPost(forks[size]);
-            // semClose(forks[size]);
-            // forks[size] = NULL;
-            // printStringLn("DONE");
-        } else if (c == '\t') {
-            for (i = 0; i < size; i++) {
-                sysKill(pids[i]);
-                semClose(forks[i]);
-                free(names[i]);
+        if (!signal) {
+            c = getchar();
+            if (c == 'a')
+                addEater(pids);
+            else if (c == 'r')
+                removeEater(pids);
+            else if (c == '\t') {
+                for (i = 0; i < size; i++) {
+                    sysKill(pids[i]);
+                    semClose(forks[i]);
+                    free(names[i]);
+                }
+
+                semClose(printSem);
+                sysKill(printPid);
+                free(names);
+                sysBlock(0);
+                sysExit();
             }
-
-            semClose(printSem);
-
-            sysKill(printPid);
-            free(names);
-            sysBlock(0);
-            sysExit();
         }
     }
+}
+
+static void addEater(int64_t* pids) {
+    printStringWC("Agrego filosofo\n", BLACK, RED);
+    char** param = (char**)malloc(2 * sizeof(char*));
+    param[0] = (char*)malloc(3 * sizeof(char));
+    uintToBase(size, param[0], 10);
+    param[1] = "&";
+    forks[size] = semOpen(param[0], 1, 1);
+    eating[size] = '.';
+    pids[size++] = sysCreateProcess(&phyloProcess, "eater", -1, -1, 2, param);
+}
+
+static void removeEater(int64_t* pids) {
+    if (size - 1 > 2) {
+        size--;
+        int id = size;
+        int rightFork, leftFork;
+        rightFork = id;
+        leftFork = id - 1;
+
+        if (id % 2 == 0) {
+            semWait(forks[rightFork]);
+            semWait(forks[leftFork]);
+        }
+        else {
+            semWait(forks[leftFork]);
+            semWait(forks[rightFork]);
+        }
+
+        semPost(forks[leftFork]);
+        semPost(forks[rightFork]);
+
+        signal = 1;
+        printStringWC("Mato filosofo\n", BLACK, RED);
+        semClose(forks[rightFork]);
+        eating[size] = 0;
+        signal = 0;
+        semPost(touchSemArray);
+        sysKill(pids[size]);
+    }
+    else {
+        printStringWC("Too few phylosophers\n", BLACK, RED);
+    }
+
+    // printStringLn("WAITING");
+        // if ((size - 1) % 2 != 0) {
+        //     semWait(forks[size - 1]); // espero liberar fork izq
+        //     semWait(forks[0]);
+        // } else {
+        //     semWait(forks[0]);
+        //     semWait(forks[size - 1]); // espero liberar fork izq
+        // }
+        // printStringLn("KILLING");
+        // sysKill(pids[size - 1]);
+        // size--;
+        // eating[size] = 0;
+        // semPost(forks[0]);
+        // semPost(forks[size]);
+        // semClose(forks[size]);
+        // forks[size] = NULL;
+        // printStringLn("DONE");
+}
+
+static void eat(int id) {
+    semWait(printSem);
+    eating[id] = 'E';
+    semPost(printSem);
+
+    semWait(printSem);
+    eating[id] = '.';
+    semPost(printSem);
 }
