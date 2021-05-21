@@ -5,17 +5,13 @@
 #include <stddef.h>
 #include <lib.h>
 #include <memoryManager.h>
-
-typedef struct t_waitingPid {
-    uint64_t pid;
-    struct t_waitingPid * next;
-} t_waitingPid;
+#include <waitingPid.h>
 
 typedef struct t_sem {
     char * name;
     int value;
     int chan;
-    struct t_waitingPid * waiting;
+    t_waitingPid * waiting;
     uint64_t processAmount;
 } t_sem;
 
@@ -25,7 +21,7 @@ typedef struct t_semNode {
 } t_semNode;
 
 typedef struct t_semList {
-    struct t_semNode * first;
+    t_semNode * first;
     int size;
 } t_semList;
 

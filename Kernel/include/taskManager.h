@@ -11,19 +11,21 @@
 #include <stdint.h>
 #include <buffer.h>
 #include <staticQueue.h>
+#include <waitingPid.h>
 
 typedef struct t_PCB {
     void* entryPoint;
     void* rsp;
     void* rbp;
-    //t_queue* buffer;
 
     struct t_PCB* next;
     uint8_t state;
     uint8_t foreground;
     int priority;
-    int pid;
+    uint64_t pid;
     char* name;
+
+    t_waitingPid * waiting;
 
     int64_t in;
     int64_t out;
@@ -45,6 +47,8 @@ void resetCurrentProcess();
 int killProcess(int pid);
 
 void exit();
+
+void waitpid(uint64_t pid);
 
 int getPID();
 char** ps(int* index);

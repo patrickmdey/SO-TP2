@@ -31,6 +31,7 @@ void runShell() {
             c = getchar();
             processChar(c, &shellData);
       }
+
       sysExit();
 }
 
@@ -153,31 +154,36 @@ static int processCommand(t_shellData * shellData) {
             {-1, -1}, 
             {-1, -1}
       };
+
+      int64_t pids[MAX_PIPE_PROCESS] = {-1};
       if (idx == MAX_PIPE_PROCESS) {
             int aux = sysGetFd();
             fd[0][1] = aux;
             fd[1][0] = aux;
       }
+      int notFound = 1;
       int invalidCommand[MAX_PIPE_PROCESS] = {1, 1};
-      for (i = 0; i < COMMANDS; i++) {
+      for (i = 0; i < COMMANDS && notFound; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
                         invalidCommand[j] = 0;
                         if (shellData->commands[i].isBuiltIn) {
                               shellData->commands[i].builtIn(argc[j], argv[j], shellData);
                         } else {
-                              sysCreateProcess(shellData->commands[i].command, 
+                              pids[j] = sysCreateProcess(shellData->commands[i].command, 
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
                               //sysYield();
                         }
                         k++;
                         if (k == idx) {
-                              return 0;
+                              notFound = 0;
+                              break;
                         }
                   }
             }
       }
-      for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos 
+
+      for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos
         if (invalidCommand[i]) {
           printString("Invalid command: ");
           printStringLn(command[i]);
@@ -185,6 +191,8 @@ static int processCommand(t_shellData * shellData) {
             free(argv[i][j]);
           }
           free(argv[i]);
+        } else if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
+          sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
         }
       }
       return 1;

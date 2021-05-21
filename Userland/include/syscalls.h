@@ -8,7 +8,7 @@
 #include <cpuInfo.h>
 #include <stdint.h>
 
-typedef enum{
+typedef enum {
     GET_MEM = 0,
     RTC_TIME = 1,
     TEMP = 2,
@@ -41,7 +41,8 @@ typedef enum{
     SEM_CLOSE = 29,
     YIELD = 30,
     SEM_INFO = 31,
-    GET_FD = 32
+    GET_FD = 32,
+    WAIT_PID = 33
 } syscallID;
 
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);
@@ -66,6 +67,8 @@ char **sysPs(int *size);
 int sysGetPid();
 
 int sysKill(int pid);
+
+void sysWaitpid(uint64_t pid);
 
 char **sysSemInfo(int *size);
 

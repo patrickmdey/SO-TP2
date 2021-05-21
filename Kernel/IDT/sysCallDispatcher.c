@@ -44,8 +44,9 @@
 #define SYS_YIELD 30
 #define SYS_SEM_INFO 31
 #define SYS_GET_FD 32
+#define SYS_WAIT_PID 33
 
-#define SYSCALLS 32
+#define SYSCALLS 33
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -164,6 +165,9 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_GET_FD:
                   return (uint64_t) getFd();
+                  break;
+            case SYS_WAIT_PID:
+                  waitpid((uint64_t) r->rdi);
                   break;
             }
 

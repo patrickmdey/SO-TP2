@@ -228,21 +228,23 @@ void loop(int argc, char** args) {
 }
 
 void cat(int argc, char** args) {
-      sysBlock(0);
+      //sysBlock(0);
       char c;
       char toPrint[100];
       int i = 0;
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  sysBlock(0);
+                  //sysBlock(0);
+                  putchar('\t');
                   sysExit();
             }
-            putchar(c);
             if (c == '\n') {
                   toPrint[i] = 0;
                   printStringLn(toPrint);
                   i = 0;
+            } else {
+                  putchar(c);
             }
             toPrint[i++] = c;
       }
@@ -250,15 +252,13 @@ void cat(int argc, char** args) {
 
 
 void filter(int argc, char** args) {
-      sysBlock(0);
       char c;
       char toPrint[100];
       int i = 0;
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  //ps(0, 0);
-                  sysBlock(0);
+                  putchar('\t');
                   sysExit();
             }
             putchar(c);
@@ -267,27 +267,24 @@ void filter(int argc, char** args) {
                   printStringLn(toPrint);
                   i = 0;
             }
+            
             if (IS_VOCAL(c))
                   toPrint[i++] = c;
       }
 }
 
 void wc(int argc, char** args) {
-      sysBlock(0);
+      //sysBlock(0);
       char c;
       int i = 0;
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  sysBlock(0);
-                  sysExit();
-            }
-            else if (c == '#') {
                   printInt(i);
-                  i = 0;
+                  putchar('\t');
                   putchar('\n');
-            }
-            else {
+                  sysExit();
+            } else {
                   if (c == '\n')
                         i++;
                   putchar(c);
@@ -305,13 +302,11 @@ void kill(int argc, char** args) {
       int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
-      }
-      else if (killed == 0) {
+      } else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
-      }
-      else {
+      } else {
             printStringLn("Error occured: no processes running");
       }
       sysExit();
