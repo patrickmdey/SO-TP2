@@ -15,6 +15,8 @@ uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint8_t BSDToInt(uint8_t num);
 uint64_t strToInt(char* str, int* error);
 uint64_t pow(uint64_t x, uint64_t y);
+int log2(uint32_t x);
+int isPower(int x, long int y);
 char* strtok(char* string, char* result, const char delim);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);
 uint64_t strToHex(char* str, int* error);

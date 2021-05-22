@@ -170,7 +170,6 @@ void memoryInfo(int argc, char** args, t_shellData* shellData){
             free(info[i]);
       }
       free(info);
-
 }
 
 void ps(int argc, char** args, t_shellData* shellData) {
