@@ -8,6 +8,8 @@ GLOBAL getSnapshot
 
 GLOBAL getBSDTimeInfo
 
+GLOBAL _xchg
+
 GLOBAL sys_changeProcess
 GLOBAL sysForceStart
 
@@ -164,6 +166,16 @@ getBSDTimeInfo:
 
     leave
     ret
+
+_xchg:
+	push rbp
+    mov rbp,rsp
+
+	xchg rsi, rdi
+
+	mov rsp, rbp
+	pop rbp
+	ret
 
 sysForceStart:
 	

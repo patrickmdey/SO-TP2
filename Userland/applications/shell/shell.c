@@ -12,13 +12,12 @@
 #include <stddef.h> 
 
 #include <memoryManager.h>
-#include <test_sync.h>
+#include <tests.h>
 #include <phylo.h>
 
 #define MAX_PIPE_PROCESS 2
 
 static void initShell(t_shellData* shellData);
-static void shellText(t_shellData* shellData);
 static int processCommand(t_shellData* shellData);
 static void processChar(char c, t_shellData* shellData);
 
@@ -39,7 +38,6 @@ void runShell() {
 static void initShell(t_shellData* shellData) {
       t_command commandsData[] = {
           {&help, NULL, "help", "shows the list of commands and their use", 1},
-          {&changeUsername, NULL, "changeUsername", "changes the shell prompt username", 1},
           {&checkZeroException, NULL, "checkZeroException", "triggers a zero division exception", 1},
           {&checkInvalidOpcodeException, NULL, "checkInvalidOpcodeException", "triggers an invalid opcode exception", 1},
           {NULL, &inforeg, "inforeg", "prints the value of all the registers on screen, press ctrl + s to update values", 0},
@@ -57,6 +55,9 @@ static void initShell(t_shellData* shellData) {
           {NULL, &nice, "nice", "changes the process with the given pid priority to the new priority", 0},
           {NULL, &test_sync, "testSync", "tests syncronization using semaphores", 0},
           {NULL, &test_no_sync, "testSyncNoSem", "tests syncronization without using semaphores", 0},
+          {NULL, &test_prio, "testPrio", "tests changing processes using priority", 0},
+          {NULL, &test_processes, "testProcesses", "tests changing processes", 0},
+          {NULL, &test_mm, "testMM", "tests memory manager", 0},
           {NULL, &sem, "sem", "prints a list with all opened semaphores with their most relevant information", 0},
           {NULL, &cat, "cat", "prints to stdout the content of the fd", 0},
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
@@ -74,8 +75,7 @@ static void initShell(t_shellData* shellData) {
       }
 
       cleanBuffer(&shellData->buffer);
-      strcpy(shellData->username, "USER");
-      shellText(shellData);
+      printPrompt();
 }
 
 // procesa el caracter recibido actua segun el mismo
@@ -84,16 +84,16 @@ static void processChar(char c, t_shellData* shellData) {
       if (c != 0) {
             switch (c) {
             case CLEAR_SCREEN:
-                  sysClear(0,0,0,0);
+                  sysClear(0, 0, 0, 0);
                   cleanBuffer(&shellData->buffer);
-                  shellText(shellData);
+                  printPrompt();
                   break;
             case '\n':
                   putchar('\n');
-                  printsPrompt =processCommand(shellData);
+                  printsPrompt = processCommand(shellData);
                   cleanBuffer(&shellData->buffer);
-                  if(printsPrompt)
-                        shellText(shellData);
+                  if (printsPrompt)
+                        printPrompt();
                   break;
             case '\b':
                   if (shellData->buffer.index > 0) {
@@ -111,15 +111,15 @@ static void processChar(char c, t_shellData* shellData) {
 }
 
 //procesa el comando, tokenizando lo ingresado.
-static int processCommand(t_shellData * shellData) {
-      uint8_t argc[MAX_PIPE_PROCESS] = {0};
-      char ** argv[MAX_PIPE_PROCESS];
+static int processCommand(t_shellData* shellData) {
+      uint8_t argc[MAX_PIPE_PROCESS] = { 0 };
+      char** argv[MAX_PIPE_PROCESS];
 
       int i, j, k;
-      
-      char command[MAX_PIPE_PROCESS][BUFFER_SIZE] = {{0}};
 
-      char process[MAX_PIPE_PROCESS][BUFFER_SIZE] = {{0}};
+      char command[MAX_PIPE_PROCESS][BUFFER_SIZE] = { {0} };
+
+      char process[MAX_PIPE_PROCESS][BUFFER_SIZE] = { {0} };
       int idx = 0;
 
       strtok(0, 0, ' ');
@@ -129,17 +129,17 @@ static int processCommand(t_shellData * shellData) {
       }
 
       for (i = 0; i < idx; i++) {
-            argv[i] = (char **) malloc(MAX_ARGS * sizeof(char *));
+            argv[i] = (char**)malloc(MAX_ARGS * sizeof(char*));
             argc[i] = 0;
             strtok(0, 0, ' ');
             strtok(process[i], command[i], ' ');    // parse buffer
             strtok(NULL, command[i], ' ');          // parse buffer
 
 
-            argv[i][0] = (char *) malloc(BUFFER_SIZE * sizeof(char));
+            argv[i][0] = (char*)malloc(BUFFER_SIZE * sizeof(char));
             while (argc[i] < MAX_ARGS && strtok(NULL, argv[i][argc[i]], ' ')) {
                   argc[i]++;
-                  argv[i][argc[i]] = (char *) malloc(BUFFER_SIZE * sizeof(char));
+                  argv[i][argc[i]] = (char*)malloc(BUFFER_SIZE * sizeof(char));
             };
             if (argc[i] != MAX_ARGS)
                   free(argv[i][argc[i]]);
@@ -150,7 +150,7 @@ static int processCommand(t_shellData * shellData) {
 
       k = 0;
       int64_t fd[MAX_PIPE_PROCESS][2] = {
-            {-1, -1}, 
+            {-1, -1},
             {-1, -1}
       };
       if (idx == MAX_PIPE_PROCESS) {
@@ -158,15 +158,16 @@ static int processCommand(t_shellData * shellData) {
             fd[0][1] = aux;
             fd[1][0] = aux;
       }
-      int invalidCommand[MAX_PIPE_PROCESS] = {1, 1};
+      int invalidCommand[MAX_PIPE_PROCESS] = { 1, 1 };
       for (i = 0; i < COMMANDS; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
                         invalidCommand[j] = 0;
                         if (shellData->commands[i].isBuiltIn) {
                               shellData->commands[i].builtIn(argc[j], argv[j], shellData);
-                        } else {
-                              sysCreateProcess(shellData->commands[i].command, 
+                        }
+                        else {
+                              sysCreateProcess(shellData->commands[i].command,
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
                               //sysYield();
                         }
@@ -178,34 +179,16 @@ static int processCommand(t_shellData * shellData) {
             }
       }
       for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos 
-        if (invalidCommand[i]) {
-          printString("Invalid command: ");
-          printStringLn(command[i]);
-          for (j = 0; j < argc[i]; j++) {
-            free(argv[i][j]);
-          }
-          free(argv[i]);
-        }
+            if (invalidCommand[i]) {
+                  printString("Invalid command: ");
+                  printStringLn(command[i]);
+                  for (j = 0; j < argc[i]; j++) {
+                        free(argv[i][j]);
+                  }
+                  free(argv[i]);
+            }
       }
       return 1;
-}
-
-
-//muestra en pantalla el texto de la shell
-static void shellText(t_shellData* shellData) {
-      printStringWC(shellData->username, BLACK, WHITE);
-      printStringWC(" $ > ", BLACK, WHITE);
-}
-
-//cambia el nombre del usuario mostrado en la shell
-void changeUsername(int argc, char** argv, t_shellData* shellData) {
-      if (argc != 1) {
-            printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
-      }
-      cleanString(shellData->username);
-      strcpy(shellData->username, argv[0]);
 }
 
 //muestra la lista de comandos con sus descripciones

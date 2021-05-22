@@ -22,9 +22,6 @@ void cpuInfo(int argc, char** args);
 //shows processor temp
 void cpuTemp(int argc, char** args);
 
-//change username in shell
-void changeUsername(int argc, char** argv, t_shellData* shellData);
-
 //check zero exception
 void checkZeroException(int argc, char** args, t_shellData* shellData);
 

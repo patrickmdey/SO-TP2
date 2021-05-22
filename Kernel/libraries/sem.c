@@ -5,6 +5,8 @@
 #include <taskManager.h>
 #include <semList.h>
 
+#include <lib.h>
+
 #include <stringLib.h>
 
 
@@ -105,6 +107,7 @@ static void sleep(t_sem* sem) {
             curr = curr->next;
         }
         curr->next = toCreate;
+        //_xchg((uint64_t) curr->next, (uint64_t) toCreate);
     }
     block(pid);
     int_20();

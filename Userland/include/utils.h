@@ -12,6 +12,8 @@
 #define ABS(c) (c >= 0 ? c : c * -1)
 #define MAX(a, b) (a > b ? a : b)
 
+void printPrompt(void);
+
 uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);
 uint8_t BSDToInt(uint8_t num);
@@ -30,5 +32,7 @@ void reverse(char* str, int len);
 int intToStr(int x, char str[], int d);
 void getCurrentTime(char toReturn[9]);
 int abs(int n);
+
+void* memset(void* destiation, int32_t c, uint64_t length);
 
 #endif

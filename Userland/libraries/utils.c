@@ -3,6 +3,12 @@
 #include <utils.h>
 #include <syscalls.h>
 
+//muestra en pantalla el texto de la shell
+void printPrompt(void) {
+      printStringWC("USER", BLACK, LIGHT_BLUE);
+      printStringWC(" $ > ", BLACK, WHITE);
+}
+
 void getCurrentTime(char toReturn[9]) {
       char timeFormat[3][3];
       uint8_t hours = syscall(RTC_TIME, HOURS, 0, 0, 0, 0, 0);

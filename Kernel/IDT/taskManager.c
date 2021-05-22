@@ -63,8 +63,9 @@ void* schedule(void* oldRSP, int forceStart) {
             uint8_t state = aux->state;
             currentTicks = 0;
             current = getNextProcess();
-            /*printString("pid:");
-            printInt(current->pid);*/
+            //printString("pid:");
+            //printInt(current->pid);
+            //printString(" ");
             if (state == YIELD)
                   aux->state = READY;
 
@@ -162,7 +163,7 @@ int killProcess(int pid) {
 
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
-            return 0;
+            return -1;
 
       pcb->state = KILLED;
 

@@ -127,11 +127,10 @@ void phylo(int argc, char** args) {
                 removeEater(pids);
             else if (c == '\t') {
                 for (i = 0; i < size; i++) {
-                    sysKill(pids[i]);
                     semClose(forks[i]);
                     free(names[i]);
+                    sysKill(pids[i]);
                 }
-
                 semClose(printSem);
                 sysKill(printPid);
                 free(names);
@@ -179,12 +178,22 @@ static void removeEater(int64_t* pids) {
         eating[size] = 0;
         signal = 0;
         semPost(touchSemArray);
-        sysKill(pids[size]);
+        int pid = pids[size];
+        pids[size] = 0;
+        sysKill(pid);
+        //sysExit();
     }
     else {
         printStringWC("Too few phylosophers\n", BLACK, RED);
     }
 
+
+    // t_sem** aux = forks;
+    //     for (int m = 0; m < size; m++) {
+    //         printString("Sem ");
+    //         printInt(aux[m]->chan);
+    //         printStringLn((aux[m]->value == 0) ? "BLOCKED" : "READY");
+    //     }
     // printStringLn("WAITING");
         // if ((size - 1) % 2 != 0) {
         //     semWait(forks[size - 1]); // espero liberar fork izq

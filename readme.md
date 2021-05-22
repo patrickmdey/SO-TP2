@@ -27,7 +27,6 @@ Los comandos son los siguientes:
 - ***printmem:*** dump de 32 bytes de memoria a partir de la dirección hexadecimal pasada como parámetro. 
 - ***checkZeroException:*** causa una excepción de división por cero. 
 - ***checkInvalidOpCodeException:*** causa una excepción de código de operación inválido.
-- ***changeUsername:*** cambia el nombre del usuario de la shell al pasado como parámetro.
 - ***showArgs:*** imprime en pantalla los argumentos del comando.
 
 
