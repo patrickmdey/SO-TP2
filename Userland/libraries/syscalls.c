@@ -9,7 +9,6 @@ int sysGetTicksElapsed() {
 void sysExit() {
     printPrompt();
     syscall(EXIT, 0, 0, 0, 0, 0, 0);
-
 }
 
 void sysClear(int fromWidth, int fromHeight, int toWidth, int toHeight) {

@@ -21,13 +21,13 @@ int size = 5;
 
 char eating[MAX_PHYLOSOPHERS] = { 0 };
 
-int signal = 0;
+int signal[MAX_PHYLOSOPHERS] = {0};
 
 static void printProcess(int argc, char** argv) {
     while (1) {
 
-        if (signal)
-            semWait(touchSemArray);
+        /*if (signal)
+            semWait(touchSemArray);*/
 
         semWait(printSem);
         printStringLn(eating);
@@ -46,12 +46,16 @@ static void phyloProcess(int argc, char** args) {
 
     //{0, 0, 0 ,0, 0, 0}
 
-    //{0, 1, 2, 3}     size = 5
-    // {0, 1, 2, 3}   size = 5
+    //{0, 1, 2, 3, 4}     size = 5
+    // {0, 1, 2, 3, 4}   size = 5
+
+    //{0, 1, 2, 3, 4, 5}     size = 6
+    // {0, 1, 2, 3, 4, 5}   size = 6
 
     while (1) {
-        if (signal)
-            semWait(touchSemArray);
+        /*if (signal)
+            semWait(touchSemArray);*/
+        
 
         rightFork = id;
         if (id == 0)
@@ -63,15 +67,42 @@ static void phyloProcess(int argc, char** args) {
             semWait(forks[rightFork]);
             semWait(forks[leftFork]);
 
+            // 
+
+            if(signal[id]) {
+                signal[0] = 1;
+                semPost(forks[rightFork]);
+                semClose(forks[rightFork]);
+                eating[id] = 0;
+                sysExit();
+                // cierro el semaforo right
+                //semPost(mutex)
+
+            }
+
             eat(id);
+
+            if(id == 0 && signal[0]) {
+                leftFork--;
+                signal[0] = 0;
+            }  
 
             semPost(forks[leftFork]);
             semPost(forks[rightFork]);
 
-        }
-        else {
+        } else {
             semWait(forks[leftFork]);
             semWait(forks[rightFork]);
+
+            if(signal[id]) {
+                signal[0] = 1;
+                semPost(forks[rightFork]);
+                semClose(forks[rightFork]);
+                sysExit();
+                // cierro el semaforo right
+                //semPost(mutex)
+
+            }
 
             eat(id);
 
@@ -82,7 +113,6 @@ static void phyloProcess(int argc, char** args) {
 }
 
 void phylo(int argc, char** args) {
-    sysBlock(0);
     int64_t pids[MAX_PHYLOSOPHERS] = { 0 };
     int64_t printPid = 0;
     size = 5;
@@ -93,7 +123,7 @@ void phylo(int argc, char** args) {
     int i;
     char** names = (char**)malloc(10 * sizeof(char*));
     for (i = 0; i < size;i++) {
-        names[i] = (char*)malloc(3 * sizeof(char));
+        names[i] = (char*) malloc(3 * sizeof(char));
         uintToBase(i, names[i], 10);
         forks[i] = semOpen(names[i], 1, 1);
     }
@@ -119,7 +149,7 @@ void phylo(int argc, char** args) {
 
     char c;
     while (1) {
-        if (!signal) {
+        // if (!signal) {
             c = getchar();
             if (c == 'a')
                 addEater(pids);
@@ -134,10 +164,10 @@ void phylo(int argc, char** args) {
                 semClose(printSem);
                 sysKill(printPid);
                 free(names);
-                sysBlock(0);
+                //sysBlock(0);
                 sysExit();
             }
-        }
+        //}
     }
 }
 
@@ -156,32 +186,32 @@ static void removeEater(int64_t* pids) {
     if (size - 1 > 2) {
         size--;
         int id = size;
-        int rightFork, leftFork;
+        signal[id] = 1;
+        /*int rightFork, leftFork;
         rightFork = id;
         leftFork = id - 1;
 
         if (id % 2 == 0) {
             semWait(forks[rightFork]);
             semWait(forks[leftFork]);
-        }
-        else {
+        } else {
             semWait(forks[leftFork]);
             semWait(forks[rightFork]);
         }
 
+        signal = 1;
         semPost(forks[leftFork]);
         semPost(forks[rightFork]);
 
-        signal = 1;
         printStringWC("Mato filosofo\n", BLACK, RED);
         semClose(forks[rightFork]);
+
         eating[size] = 0;
         signal = 0;
         semPost(touchSemArray);
         int pid = pids[size];
         pids[size] = 0;
-        sysKill(pid);
-        //sysExit();
+        sysKill(pid);*/
     }
     else {
         printStringWC("Too few phylosophers\n", BLACK, RED);

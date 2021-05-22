@@ -11,7 +11,7 @@
 
 #include <utils.h>
 
-#define SIZE_OF_STACK 4 * 1024
+#define SIZE_OF_STACK 8 * 1024
 
 static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv);
 static t_PCB* getNextProcess();

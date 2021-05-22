@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <utils.h>
 
-#define TOTAL_MEM 1024 * 5000
+#define TOTAL_MEM 1024 * 1000
 #define BLOCK_SIZE 64
 #define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
 
@@ -50,6 +50,10 @@ void* malloc(uint32_t size) {
 }
 
 void free(void* dir) {
+    if ((uint64_t) dir % BLOCK_SIZE) {
+        printStringLn("DIR");
+        return;
+    }
     int idx = ((uint8_t*)dir - start) / BLOCK_SIZE;
     if (idx < 0 || idx >= TOTAL_BLOCKS) {
         return;
@@ -137,7 +141,7 @@ static int findBlocks(int amount) {
 #else
 // Otro sistema --> menor cantidad de bloques por memoria pedida
 static int findBlocks(int amount) {
-    printStringLn("BUDDY!");
+    //printStringLn("BUDDY!");
     int i, count = 0, firstIdx, best_fit = INT_MAX, best_fit_idx = -1;
     for (i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
