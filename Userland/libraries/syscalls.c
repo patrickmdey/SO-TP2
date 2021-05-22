@@ -1,13 +1,11 @@
 #include <syscalls.h>
 #include <shell.h>
-#include <utils.h>
 
 int sysGetTicksElapsed() {
     return syscall(GET_TICKS_ELAPSED, 0, 0, 0, 0, 0, 0);
 }
 
 void sysExit() {
-    printPrompt();
     syscall(EXIT, 0, 0, 0, 0, 0, 0);
 }
 

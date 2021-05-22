@@ -317,7 +317,7 @@ void sem(int argc, char** args) {
       char** info = sysSemInfo(&size);
       if (size == 0) {
             printStringLn("No active semaphores");
-            return;
+            sysExit();
       }
       printStringWC("PROCESS_WAITING   NAME   VALUE   STATE", BLACK, GREEN);
       printStringLn(" ");
