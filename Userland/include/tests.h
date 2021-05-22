@@ -2,6 +2,7 @@
 #define TESTS_H
 
 #include <stdint.h>
+#include <utils.h>
 
 void test_processes();
 void test_prio();

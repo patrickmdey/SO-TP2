@@ -14,6 +14,8 @@
 
 void printPrompt(void);
 
+void* memset(void* destiation, int32_t c, uint64_t length);
+
 uint32_t uintToBase(int64_t value, char* buffer, uint32_t base);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);
 uint8_t BSDToInt(uint8_t num);

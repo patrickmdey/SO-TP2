@@ -43,7 +43,8 @@ typedef enum {
     SEM_INFO = 31,
     GET_FD = 32,
     WAIT_PID = 33,
-    SEM_DESTROY = 34
+    SEM_DESTROY = 34,
+    CLOSE_FD = 35
 } syscallID;
 
 uint64_t syscall(uint64_t rax, uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9);
@@ -86,6 +87,8 @@ int64_t sysCreateProcess(void * entryPoint, char* name, int64_t fdInt, int64_t f
 void sysYield(void);
 
 int64_t sysGetFd();
+
+void sysCloseFd(int64_t fd);
 
 void sysDraw(char* bitmap, t_colour colour, int multiplier);
 

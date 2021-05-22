@@ -53,6 +53,10 @@ int64_t sysGetFd() {
     return (int64_t)syscall(GET_FD, 0, 0, 0, 0, 0, 0);
 }
 
+void sysCloseFd(int64_t fd) {
+    syscall(CLOSE_FD, fd, 0, 0, 0, 0, 0);
+}
+
 int sysNice(int pid, int priority) {
     return syscall(NICE, pid, priority, 0, 0, 0, 0);
 }

@@ -3,6 +3,7 @@
 #include <lib.h>
 #include <stringLib.h>
 #include <syscalls.h>
+#include <tests.h>
 
 // #define MAX_MEMORY 1024 * 5000 * 0.8 //Should be around 80% of memory managed by the MM
 // #define MAX_BLOCKS 64000

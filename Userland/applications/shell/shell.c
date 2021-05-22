@@ -156,10 +156,11 @@ static int processCommand(t_shellData* shellData) {
       };
 
       int64_t pids[MAX_PIPE_PROCESS] = {-1};
+      int openedFd = -1;
       if (idx == MAX_PIPE_PROCESS) {
-            int aux = sysGetFd();
-            fd[0][1] = aux;
-            fd[1][0] = aux;
+            openedFd = sysGetFd();
+            fd[0][1] = openedFd;
+            fd[1][0] = openedFd;
       }
       int notFound = 1;
       int invalidCommand[MAX_PIPE_PROCESS] = {1, 1};
@@ -194,6 +195,9 @@ static int processCommand(t_shellData* shellData) {
         } else if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
           sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
         }
+      }
+      if (openedFd != -1) {
+            sysCloseFd(openedFd);
       }
       return 1;
 }

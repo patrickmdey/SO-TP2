@@ -20,11 +20,12 @@ typedef struct  t_fdList {
 
 void initPipes();
 void insertFd(t_fdNode* fdNode);
-uint8_t removeFd(uint64_t fd);
+void closeFd(uint64_t fd);
 t_fdNode* findFd(uint64_t fd);
 uint64_t getFdSize();
 int64_t getFd();
 void pipeWrite(t_fdNode* node, char c);
 void pipeWriteStr(t_fdNode* node, char* str);
+
 
 #endif

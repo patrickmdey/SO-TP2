@@ -53,15 +53,14 @@ void pipeWriteStr(t_fdNode* node, char* str) {
     }
 }
 
-uint8_t removeFd(uint64_t fd) {
-    t_fdList* l = &fdList;
+void closeFd(uint64_t fd) {
+    t_fdList * l = &fdList;
     if (l == NULL)
-        return -1;
+        return;
     int flag = 0;
     l->first = deleteFdNode(l->first, fd, &flag);
     if (flag)
         l->size--;
-    return flag;
 }
 
 t_fdNode* findFd(uint64_t fd) {
@@ -82,6 +81,7 @@ uint64_t getFdSize() {
 int64_t getFd() {
     return createFd();
 }
+
 
 static uint64_t createFd() {
     t_fdNode* node = malloc(sizeof(t_fdNode));

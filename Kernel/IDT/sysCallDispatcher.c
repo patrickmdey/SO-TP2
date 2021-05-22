@@ -46,8 +46,9 @@
 #define SYS_GET_FD 32
 #define SYS_WAIT_PID 33
 #define SYS_SEM_DESTROY 34
+#define SYS_CLOSE_FD 35
 
-#define SYSCALLS 34
+#define SYSCALLS 35
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -172,6 +173,9 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_SEM_DESTROY:
                   semDestroy((void*)r->rdi);
+                  break;
+            case SYS_CLOSE_FD:
+                  closeFd((int64_t) r->rdi);
                   break;
             }
 
