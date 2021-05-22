@@ -13,21 +13,21 @@ static void addEater(int64_t* pids);
 static void removeEater(int64_t* pids);
 static void eat(int id);
 
-t_sem* forks[MAX_PHYLOSOPHERS] = { NULL };
-t_sem* printSem;
-t_sem* touchSemArray;
+t_sem * forks[MAX_PHYLOSOPHERS] = { NULL };
+t_sem * printSem;
+//t_sem* touchSemArray;
 
-int size = 5;
+int size;
 
 char eating[MAX_PHYLOSOPHERS] = { 0 };
 
-int signal = 0;
+int sig[MAX_PHYLOSOPHERS] = { 0 };
 
 static void printProcess(int argc, char** argv) {
     while (1) {
 
-        if (signal)
-            semWait(touchSemArray);
+        /*if (signal)
+            semWait(touchSemArray);*/
 
         semWait(printSem);
         printStringLn(eating);
@@ -50,8 +50,8 @@ static void phyloProcess(int argc, char** args) {
     // {0, 1, 2, 3}   size = 5
 
     while (1) {
-        if (signal)
-            semWait(touchSemArray);
+        /*if (signal)
+            semWait(touchSemArray);*/
 
         rightFork = id;
         if (id == 0)
@@ -63,15 +63,46 @@ static void phyloProcess(int argc, char** args) {
             semWait(forks[rightFork]);
             semWait(forks[leftFork]);
 
+            if (sig[id]) {
+                if (id == 0) {
+                    leftFork = size -1;
+                    sig[0] = 0;
+                } else {
+                    semWait(printSem);
+                    eating[id] = 0;
+                    printStringWC("Mato filosofo\n", BLACK, RED);
+                    semPost(printSem);
+                    size--;
+                    sig[0] = 1;
+                    sig[id] = 0;
+                    semPost(forks[rightFork]);
+                    semClose(forks[rightFork]);
+                    sysExit();
+                }
+            }
+
             eat(id);
 
             semPost(forks[leftFork]);
             semPost(forks[rightFork]);
 
-        }
-        else {
+        } else {
             semWait(forks[leftFork]);
             semWait(forks[rightFork]);
+
+            if (sig[id]) {
+                semWait(printSem);
+                eating[id] = 0;
+                printStringWC("Mato filosofo\n", BLACK, RED);
+                semPost(printSem);
+                size--;
+                sig[0] = 1;
+                sig[id] = 0;
+                semPost(forks[rightFork]);
+                semClose(forks[rightFork]);
+                sysExit();
+            }
+
 
             eat(id);
 
@@ -88,7 +119,7 @@ void phylo(int argc, char** args) {
     size = 5;
 
     printSem = semOpen("printSem", 1, 1);
-    touchSemArray = semOpen("touchSemArray", 1, 1);
+    //touchSemArray = semOpen("touchSemArray", 1, 1);
 
     int i;
     char** names = (char**)malloc(10 * sizeof(char*));
@@ -119,7 +150,7 @@ void phylo(int argc, char** args) {
 
     char c;
     while (1) {
-        if (!signal) {
+        //if (!signal) {
             c = getchar();
             if (c == 'a')
                 addEater(pids);
@@ -137,7 +168,7 @@ void phylo(int argc, char** args) {
                 sysBlock(0);
                 sysExit();
             }
-        }
+        //}
     }
 }
 
@@ -154,7 +185,7 @@ static void addEater(int64_t* pids) {
 
 static void removeEater(int64_t* pids) {
     if (size - 1 > 2) {
-        size--;
+        /*size--;
         int id = size;
         int rightFork, leftFork;
         rightFork = id;
@@ -180,10 +211,10 @@ static void removeEater(int64_t* pids) {
         semPost(touchSemArray);
         int pid = pids[size];
         pids[size] = 0;
-        sysKill(pid);
+        sysKill(pid);*/
+        sig[size-1] = 1;
         //sysExit();
-    }
-    else {
+    } else {
         printStringWC("Too few phylosophers\n", BLACK, RED);
     }
 
@@ -217,7 +248,7 @@ static void eat(int id) {
     semWait(printSem);
     eating[id] = 'E';
     semPost(printSem);
-
+    for (int i = 0; i < VERY_BIG_NUMBER; ++i);
     semWait(printSem);
     eating[id] = '.';
     semPost(printSem);
