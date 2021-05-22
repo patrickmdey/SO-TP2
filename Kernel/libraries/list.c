@@ -86,6 +86,14 @@ static void freePCB(t_PCB * pcb) {
     for (i = 0; i < count; i++)
         free(pcb->argv[i]);
 
+    t_waitingPid * current = pcb->waiting;
+    t_waitingPid * next;
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+
     free(pcb->argv);
     free(pcb);
 }

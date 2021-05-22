@@ -35,7 +35,7 @@
 #define SYS_KILL 21
 #define SYS_NICE 22
 #define SYS_BLOCK 23
-#define SYS_FOREGROUND 34
+#define SYS_FOREGROUND 24
 #define SYS_SEM_OPEN 25
 #define SYS_SEM_INIT 26
 #define SYS_SEM_WAIT 27
@@ -44,9 +44,10 @@
 #define SYS_YIELD 30
 #define SYS_SEM_INFO 31
 #define SYS_GET_FD 32
-#define SYS_SEM_DESTROY 33
+#define SYS_WAIT_PID 33
+#define SYS_SEM_DESTROY 34
 
-#define SYSCALLS 33
+#define SYSCALLS 34
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -116,16 +117,16 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)malloc((uint8_t)r->rdi);
                   break;
             case SYS_FREE_MEMORY:
-                  free((void *) r->rdi);
+                  free((void*)r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
                   return (uint64_t)getMemoryInfo((uint64_t*)r->rdi);
                   break;
             case SYS_PS:
-                  return (uint64_t) ps((int*)((uint64_t)(r->rdi)));
+                  return (uint64_t)ps((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_CREATE_PROCESS:
-                  return createProcess((void *) r->rdi, (char *) r->rsi, (int64_t) r->rdx, (int64_t) r->r10, r->r8, (char **) r->r9);
+                  return createProcess((void*)r->rdi, (char*)r->rsi, (int64_t)r->rdx, (int64_t)r->r10, r->r8, (char**)r->r9);
                   break;
             case SYS_GET_PID:
                   return getPID();
@@ -164,7 +165,10 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return (uint64_t)semInfo((int*)r->rdi);
                   break;
             case SYS_GET_FD:
-                  return (uint64_t) getFd();
+                  return (uint64_t)getFd();
+                  break;
+            case SYS_WAIT_PID:
+                  waitpid((uint64_t)r->rdi);
                   break;
             case SYS_SEM_DESTROY:
                   semDestroy((void*)r->rdi);

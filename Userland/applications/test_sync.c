@@ -13,6 +13,8 @@ int64_t global;
 void test_sync(int argc, char ** argv) {
     uint64_t i;
 
+    uint64_t pids[TOTAL_PAIR_PROCESSES * 2];
+
     global = 0;
 
     printStringLn("CREATING PROCESSES...(WITH SEM)");
@@ -20,9 +22,12 @@ void test_sync(int argc, char ** argv) {
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "1", "1", "100", "&" };
         char* array2[4] = { "1", "-1", "100", "&" };
-        sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
-        sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
+        pids[i] = sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
+        pids[i+1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
+
+    for (i = 0; i < TOTAL_PAIR_PROCESSES * 2; i++)
+        sysWaitpid(pids[i]);
 
     sysExit();
 }
@@ -41,7 +46,7 @@ void test_no_sync(int argc, char ** argv) {
         sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
     
-    while(1);
+    
     sysExit();
 }
 

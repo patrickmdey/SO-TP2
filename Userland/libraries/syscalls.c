@@ -48,6 +48,10 @@ int sysKill(int pid) {
     return syscall(KILL, pid, 0, 0, 0, 0, 0);
 }
 
+void sysWaitpid(uint64_t pid) {
+    syscall(WAIT_PID, pid, 0, 0, 0, 0, 0);
+}
+
 int64_t sysGetFd() {
     return (int64_t)syscall(GET_FD, 0, 0, 0, 0, 0, 0);
 }

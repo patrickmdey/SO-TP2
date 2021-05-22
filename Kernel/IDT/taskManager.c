@@ -48,7 +48,7 @@ typedef struct {
 static t_list* tasks;
 static t_PCB* current = NULL;
 
-static int currentPID = 0;
+static uint64_t currentPID = 0;
 static int currentTicks = 0;
 
 void* schedule(void* oldRSP, int forceStart) {
@@ -63,9 +63,6 @@ void* schedule(void* oldRSP, int forceStart) {
             uint8_t state = aux->state;
             currentTicks = 0;
             current = getNextProcess();
-            //printString("pid:");
-            //printInt(current->pid);
-            //printString(" ");
             if (state == YIELD)
                   aux->state = READY;
 
@@ -113,6 +110,8 @@ int64_t createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOu
                   // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
             process->out = (fdOut == -1) ? current->out : fdOut;
       }
+
+      process->waiting = NULL;
       /*printInt(process->in);
       printInt(process->out);*/
 
@@ -161,9 +160,15 @@ int killProcess(int pid) {
             currentTicks = 0;
       }
 
-      t_PCB* pcb = findPCB(tasks, pid);
+      t_PCB * pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return -1;
+
+      t_waitingPid * curr = pcb->waiting;
+      while (curr != NULL) {
+            block(curr->pid);
+            curr = curr->next;
+      }
 
       pcb->state = KILLED;
 
@@ -173,6 +178,28 @@ int killProcess(int pid) {
 void exit() {
       killProcess(current->pid);
       int_20();
+}
+
+void waitpid(uint64_t pid) {
+      t_PCB * pcb = findPCB(tasks, pid);
+      if (pcb == NULL)
+            return;
+
+      t_waitingPid * toAdd = malloc(sizeof(t_waitingPid));
+      toAdd->pid = current->pid;
+      toAdd->next = NULL;
+      t_waitingPid * curr = pcb->waiting;
+      if (curr == NULL)
+            pcb->waiting = toAdd;
+      else {
+            while (curr->next != NULL)
+                  curr = curr->next;
+
+            curr->next = toAdd;
+      }
+      block(current->pid);
+      int_20();
+
 }
 
 void resetCurrentProcess() {
@@ -213,7 +240,6 @@ void yield() {
 }
 
 uint8_t block(int pid) {
-
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;
