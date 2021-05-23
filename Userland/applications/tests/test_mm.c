@@ -8,20 +8,21 @@
 // #define MAX_MEMORY 1024 * 5000 * 0.8 //Should be around 80% of memory managed by the MM
 // #define MAX_BLOCKS 64000
 
-#define MAX_MEMORY 1024 * 1000 * 0.7 //Should be around 80% of memory managed by the MM
+#define MAX_MEMORY 1024 * 1024 * 0.5 //Should be around 80% of memory managed by the MM
 #define MAX_BLOCKS 64
 
 typedef struct MM_rq {
     void * address;
     uint32_t size;
-}mm_rq;
+} mm_rq;
 
 void test_mm() {
-    mm_rq mm_rqs[MAX_BLOCKS];;
+    mm_rq mm_rqs[MAX_BLOCKS];
     uint8_t rq;
     uint32_t total;
 
     while (1) {
+        printString("a");
         rq = 0;
         total = 0;
 
