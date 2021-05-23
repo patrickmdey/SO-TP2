@@ -22,7 +22,7 @@ void test_mm() {
     uint32_t total;
 
     while (1) {
-        printString("a");
+        //printString("a");
         rq = 0;
         total = 0;
 

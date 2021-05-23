@@ -3,19 +3,21 @@
 #include <stddef.h>
 #include <memoryManager.h>
 
-static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag);
-static void freeRec(t_PCB * pcb);
-static void freePCB(t_PCB * pcb);
+#include <stringLib.h>
+
+static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag);
+static void freeRec(t_PCB* pcb);
+static void freePCB(t_PCB* pcb);
 
 t_pcbQueue* createPcbQueue() {
     return malloc(sizeof(t_queue));
 }
 
-void freePcbQueue(t_pcbQueue * q) {
+void freePcbQueue(t_pcbQueue* q) {
     if (q == NULL)
         return;
     freeRec(q->first);
-    free((void *) q);
+    free((void*)q);
 }
 
 uint8_t removePCB(t_pcbQueue* q, int pid) {
@@ -29,21 +31,21 @@ uint8_t removePCB(t_pcbQueue* q, int pid) {
     return flag;
 }
 
-t_PCB * peekFirst(t_pcbQueue* q) {
+t_PCB* peekFirst(t_pcbQueue* q) {
     if (q == NULL)
         return NULL;
-    
+
     return q->first;
 }
 
-t_PCB * popFirst(t_pcbQueue* q) {
+t_PCB* popFirst(t_pcbQueue* q) {
     if (q == NULL)
         return NULL;
-    
+
     if (q->first == NULL)
         return NULL;
-    
-    t_PCB * toReturn = q->first;
+
+    t_PCB* toReturn = q->first;
     q->first = q->first->next;
     q->size--;
     return toReturn;
@@ -72,7 +74,7 @@ t_PCB* findPCB(t_pcbQueue* q, int pid) {
     if (q == NULL)
         return NULL;
 
-    t_PCB * pcb = q->first;
+    t_PCB* pcb = q->first;
     while (pcb != NULL && pcb->pid != pid) {
         pcb = pcb->next;
     }
@@ -85,7 +87,7 @@ int getSize(t_pcbQueue* q) {
     return q->size;
 }
 
-static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag) {
+static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag) {
     if (pcb == NULL) {
         return NULL;
     }
@@ -104,14 +106,19 @@ static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag) {
     return pcb;
 }
 
-static void freePCB(t_PCB * pcb) {
+static void freePCB(t_PCB* pcb) {
     free(pcb->rbp);
+
     int i, count = (pcb->argc) + 1 - pcb->foreground;
     for (i = 0; i <= count; i++)
         free(pcb->argv[i]);
+        
+    for (i = 0; i < pcb->dirArrayIndex; i++)
+        free(pcb->dirArray[i]);
+    free(pcb->dirArray);
 
-    t_waitingPid * current = pcb->waiting;
-    t_waitingPid * next;
+    t_waitingPid* current = pcb->waiting;
+    t_waitingPid* next;
     while (current != NULL) {
         next = current->next;
         free(current);
