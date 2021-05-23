@@ -15,6 +15,9 @@ static void sleep(t_sem* sem);
 static void wakeup(t_sem* sem);
 static int fillSemInfo(char** toReturn, int size);
 
+static void acquire(t_sem* sem);
+static void release(t_sem* sem);
+
 static int chan = 0;
 
 static t_semList semaphores = { NULL, 0 };
@@ -23,36 +26,12 @@ t_sem* semOpen(char* name, uint8_t create, uint64_t value) {
     t_semNode* sem = findSemByName(&semaphores, name);
     if (sem == NULL && create) {
         return semCreate(name, value);
-    } else if (sem != NULL) {
+    }
+    else if (sem != NULL) {
         (sem->sem->processAmount)++;
         return sem->sem;
     }
     return NULL;
-}
-
-void semWait(t_sem* s) {
-    if (s == NULL)
-        return;
-
-    if (s->value > 0) {
-        (s->value)--;
-    }
-    else {
-        sleep(s);
-        // (s->value)--; <- decremento en wakup en lugar de aca
-    }
-}
-
-void semPost(t_sem* s) {
-    if (s == NULL)
-        return;
-
-    (s->value)++;
-    wakeup(s);
-}
-
-void semInit(t_sem* sem, int value) {
-    sem->value = value;
 }
 
 void semClose(t_sem* sem) {
@@ -67,6 +46,38 @@ void semDestroy(t_sem* sem) {
         free(sem->waiting);
     }
     free(sem);
+}
+
+void semInit(t_sem* sem, int value) {
+    sem->value = value;
+}
+
+void semWait(t_sem* s) {
+    if (s == NULL)
+        return;
+
+    acquire(s);
+
+    if (s->value > 0) {
+        (s->value)--;
+    }
+    else {
+        release(s);
+        sleep(s);
+        // (s->value)--; <- decremento en wakup en lugar de aca
+    }
+    release(s);
+}
+
+void semPost(t_sem* s) {
+    if (s == NULL)
+        return;
+
+    acquire(s);
+
+    (s->value)++;
+    wakeup(s);
+    release(s);
 }
 
 char** semInfo(int* index) {
@@ -90,6 +101,7 @@ static t_sem* semCreate(char* name, uint64_t value) {
     sem->value = value;
     sem->waiting = NULL;
     sem->processAmount = 1;
+    sem->lock = 0;
     insertSem(&semaphores, sem);
     return sem;
 }
@@ -101,7 +113,8 @@ static void sleep(t_sem* sem) {
     toCreate->next = NULL;
     if (sem->waiting == NULL) {
         sem->waiting = toCreate;
-    } else {
+    }
+    else {
         t_waitingPid* curr = sem->waiting;
         while (curr->next != NULL) {
             curr = curr->next;
@@ -118,16 +131,30 @@ static void wakeup(t_sem* sem) {
         return;
 
     uint64_t pid = sem->waiting->pid;
-    t_waitingPid * aux = sem->waiting;
+    t_waitingPid* aux = sem->waiting;
     sem->waiting = sem->waiting->next;
     int ret = block(pid);
     free(aux);
-    if (ret)
+    if (ret) {
+        acquire(sem);
         (sem->value)--;
-    /*else {
-        wakeup(sem);
-    }*/
+        
+    }
 }
+
+//Hago un lock al semaforo para que no pueda ser incrementado ni decrementado
+//mientras lo esta haciendo
+//ES UNA MEDIDA DE PROTECCION AL KERNEL (que en este caso, como hay un único nucleo, no pasa)
+static void acquire(t_sem* sem) {
+    while (_xchg(sem->lock, 1) != 0)
+        int_20();
+}
+
+static void release(t_sem* sem) {
+    _xchg(sem->lock, 0);
+}
+
+
 
 static int fillSemInfo(char** toReturn, int size) {
     int i = 0, j = 0;

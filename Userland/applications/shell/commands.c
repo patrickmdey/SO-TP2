@@ -132,8 +132,8 @@ void printmem(int argc, char** args) {
                   memDir += 4;
             }
             if (i % 2 == 0) {
-                  putcharWC(byteStr[i], BLACK, BLUE);
-                  putcharWC(byteStr[i + 1], BLACK, BLUE);
+                  putcharWC(byteStr[i], BLACK, GREEN);
+                  putcharWC(byteStr[i + 1], BLACK, GREEN);
                   putchar(' ');
             }
             else {

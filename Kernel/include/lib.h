@@ -13,7 +13,7 @@ int cpuTemp();
 void sysGetMem(uint64_t memDir, uint8_t* memData);
 uint8_t getBSDTimeInfo(uint8_t info);
 
-void _xchg(uint64_t a, uint64_t b);
+uint64_t _xchg(uint64_t a, uint64_t b);
 
 void sys_changeProcess();
 void sysForceStart();
