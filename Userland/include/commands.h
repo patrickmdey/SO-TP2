@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <shell.h>
 
-//prints commands man
-void help(int argc, char** args, t_shellData* shellData);
 
 //print registers, done in assembly
 void inforeg(int argc, char** args);
@@ -21,12 +19,6 @@ void cpuInfo(int argc, char** args);
 
 //shows processor temp
 void cpuTemp(int argc, char** args);
-
-//check zero exception
-void checkZeroException(int argc, char** args, t_shellData* shellData);
-
-//check invalid op exception
-void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData);
 
 //shows arguments
 void showArgs(int argc, char** args);

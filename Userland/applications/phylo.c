@@ -46,7 +46,7 @@ static void printProcess(int argc, char **argv) {
 }
 
 static void phyloProcess(int argc, char **args) {
-    if (argc <= 0 || argc > 4)
+    if (argc <= 0 || argc > 1)
         printStringLn("Too many arguments");
 
     int error = 0;
@@ -134,7 +134,11 @@ void phylo(int argc, char **args) {
         addEater(pids);
     }
 
-    printPid = sysCreateProcess(&printProcess, "printer", -1, -1, 0, NULL);
+    char ** printParams = (char **) malloc(sizeof(char *));
+    printParams[0] = (char *) malloc(sizeof(char));
+    printParams[0][0] = '&';
+
+    printPid = sysCreateProcess(&printProcess, "printer", -1, -1, 1, printParams);
 
     for (i = 0; i < size + 1; i++) {
         semPost(creatingSem);
@@ -171,7 +175,7 @@ static void addEater(){
     char ** param = (char **) malloc(2 * sizeof(char *));
     param[0] = (char *) malloc(3 * sizeof(char));
     uintToBase(size, param[0], 10);
-    param[1] = (char *) malloc(2 * sizeof(char));
+    param[1] = (char *) malloc(1 * sizeof(char));
     param[1][0] = '&';
     sig[size] = 0;
     if (size != 0)

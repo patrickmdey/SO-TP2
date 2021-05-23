@@ -21,6 +21,11 @@ static void initShell(t_shellData* shellData);
 static int processCommand(t_shellData* shellData);
 static void processChar(char c, t_shellData* shellData);
 
+
+static void help(t_shellData* shellData);
+static void checkZeroException(t_shellData* shellData);
+static void checkInvalidOpcodeException(t_shellData* shellData);
+
 void runShell() {
       t_shellData shellData;
       initShell(&shellData);
@@ -169,7 +174,8 @@ static int processCommand(t_shellData* shellData) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
                         invalidCommand[j] = 0;
                         if (shellData->commands[i].isBuiltIn) {
-                              shellData->commands[i].builtIn(argc[j], argv[j], shellData);
+                              free(argv[j]);
+                              shellData->commands[i].builtIn(shellData);
                         } else {
                               pids[j] = sysCreateProcess(shellData->commands[i].command, 
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
@@ -203,13 +209,7 @@ static int processCommand(t_shellData* shellData) {
 }
 
 //muestra la lista de comandos con sus descripciones
-void help(int argc, char** args, t_shellData* shellData) {
-      if (argc != 0) {
-            printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
-      }
-
+static void help(t_shellData* shellData) {
       printStringLn("These shell commands are defined internally.  Type 'help' to see this list.");
       for (int i = 0; i < COMMANDS; i++) {
             printString(" >");
@@ -218,4 +218,14 @@ void help(int argc, char** args, t_shellData* shellData) {
             printStringLn(shellData->commands[i].description);
       }
       putchar('\n');
+}
+
+//causa una excepcion de dividir por cero
+static void checkZeroException(t_shellData* shellData) {
+      check0Exception();
+}
+
+//causa una excepcion de tipo invalid opcode
+static void checkInvalidOpcodeException(t_shellData* shellData) {
+      __asm__("ud2");  // https://hjlebbink.github.io/x86doc/html/UD2.html
 }

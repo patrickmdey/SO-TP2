@@ -42,8 +42,11 @@ void semClose(t_sem* sem) {
 
 void semDestroy(t_sem* sem) {
     removeSem(&semaphores, sem->chan);
-    if (sem->waiting != NULL) {
-        free(sem->waiting);
+    while (sem->waiting != NULL) {
+        t_waitingPid * toFree = sem->waiting;
+        sem->waiting = sem->waiting->next;
+        block(toFree->pid); 
+        free(toFree);
     }
     free(sem);
 }

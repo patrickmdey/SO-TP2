@@ -52,7 +52,7 @@ void* malloc(uint32_t size) {
 
 void free(void* dir) {
     if ((uint64_t) dir % BLOCK_SIZE) {
-        printStringLn("DIR");
+        printStringLn("DIR NO VALIDA");
         return;
     }
     int idx = ((uint8_t*)dir - start) / BLOCK_SIZE;

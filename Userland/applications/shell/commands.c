@@ -159,26 +159,6 @@ void cpuTemp(int argc, char** args) {
       sysExit();
 }
 
-//causa una excepcion de dividir por cero
-void checkZeroException(int argc, char** args, t_shellData* shellDat) {
-      if (argc != 0) {
-            printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
-      }
-      check0Exception();
-}
-
-//causa una excepcion de tipo invalid opcode
-void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellDat) {
-      if (argc != 0) {
-            printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
-      }
-      __asm__("ud2");  // https://hjlebbink.github.io/x86doc/html/UD2.html
-}
-
 //Muestra los argumentos pasados al comando
 void showArgs(int argc, char** args) {
       for (int i = 0; i < argc && i < MAX_ARGS; i++) {

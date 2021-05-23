@@ -81,9 +81,8 @@ static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag) {
 
 static void freePCB(t_PCB * pcb) {
     free(pcb->rbp);
-    // destruir fd creado?
     int i, count = (pcb->argc) + 1 - pcb->foreground;
-    for (i = 0; i < count; i++)
+    for (i = 0; i <= count; i++)
         free(pcb->argv[i]);
 
     t_waitingPid * current = pcb->waiting;
