@@ -200,6 +200,11 @@ void ps(int argc, char** args) {
 void loop(int argc, char** args) {
       int pid = sysGetPid();
       int i;
+      int *array = (int*) malloc(17 * sizeof(int));
+      malloc(17 * sizeof(int));
+
+      free(array);
+      malloc(17 * sizeof(int));
       while (1) {
             for (i = 0; i < VERY_BIG_NUMBER; i++);
             printInt(pid);

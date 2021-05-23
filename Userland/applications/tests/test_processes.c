@@ -14,13 +14,7 @@ typedef struct P_rq {
 }p_rq;
 
 void endless_loop() {
-    while (1){
-        // for (int i = 0; i < 999999; i++);
-        // printString("While 1. PID: ");
-        // printInt(sysGetPid());
-        // printStringLn("");
-        ;
-    }
+    while (1);
 }
 
 void test_processes() {

@@ -4,6 +4,8 @@
 #include <interrupts.h>
 #include <taskManager.h>
 
+#include <stringLib.h>
+
 //static void insertFdNode(t_fdNode* node);
 static t_fdNode* deleteFdNode(t_fdNode* fdNode, uint64_t fd, int* flag);
 //static void freeRec(t_fdNode* fdNode);
@@ -78,6 +80,7 @@ char pipeRead(uint64_t fd) {
     toAdd->pid = pid;
     toAdd->next = NULL;
     t_waitingPid * curr = node->waiting;
+
 
     if (curr == NULL) {
         node->waiting = toAdd;

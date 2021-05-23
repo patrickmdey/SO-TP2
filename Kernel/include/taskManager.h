@@ -25,6 +25,9 @@ typedef struct t_PCB {
     uint64_t pid;
     char* name;
 
+    uint8_t **dirArray;
+    int dirArrayIndex;
+
     t_waitingPid * waiting;
 
     int64_t in;
@@ -37,6 +40,8 @@ typedef struct t_PCB {
 extern t_queue taskManager;
 
 void initTaskManager(void* entryPoint);
+
+t_PCB *getCurrentProcess();
 
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
