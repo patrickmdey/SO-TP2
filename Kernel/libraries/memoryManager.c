@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <utils.h>
 #define TOTAL_MEM 1024 * 1000
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 32
 #define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
 uint8_t * start = (uint8_t *) 0x600000;
 
@@ -30,7 +30,7 @@ void initMemory() {
     }
 }
 
-void* malloc(uint32_t size) {
+void * malloc(uint32_t size) {
     if (size == 0)
         return NULL;
 
@@ -55,7 +55,7 @@ void free(void* dir) {
         //printStringLn("DIR NO VALIDA");
         return;
     }
-    int idx = ((uint8_t*)dir - start) / BLOCK_SIZE;
+    int idx = ((uint8_t *)dir - start) / BLOCK_SIZE;
     if (idx < 0 || idx >= TOTAL_BLOCKS) {
         return;
     }
@@ -109,13 +109,13 @@ static void asignMemory(int firstIdx, int count, int size) {
     for (int i = firstIdx; i < count + firstIdx; i++) {
         blockArray[i].size = BLOCK_SIZE;
         blockArray[i].usesNext = 1;
+        blockArray[i].free = 0;
         if (i == count + firstIdx - 1) {
             if (size % BLOCK_SIZE != 0)
                 blockArray[i].size = size % BLOCK_SIZE;
 
             blockArray[i].usesNext = 0;
         }
-        blockArray[i].free = 0;
     }
 }
 static int findBlocks(int amount) {

@@ -116,7 +116,7 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return ticksElapsed();
                   break;
             case SYS_ASIGN_MEMORY:
-                  return (uint64_t)malloc((uint8_t)r->rdi);
+                  return (uint64_t) malloc((uint32_t)r->rdi);
                   break;
             case SYS_FREE_MEMORY:
                   free((void*)r->rdi);
