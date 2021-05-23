@@ -3,24 +3,33 @@
 #include <cpuInfo.h>
 #include <lib.h>
 #include <stringLib.h>
-#include <systemCalls.h>
+#include <syscalls.h>
 #include <utils.h>
+#include <registers.h>
 #include <chess.h>
 #include <memoryManager.h>
 #include <test_sync.h>
+#include <sem.h>
 
 #define VERY_BIG_NUMBER 9999999
 
+
+static char* regNames[] = { "R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
+                           "R8: ", "RSI: ", "RDI: ", "RBP: ", "RDX: ", "RCX: ", "RBX: ",
+                           "RAX: ", "RIP: ", "RSP: " };
+
+
 static void memToString(char* buffer, uint8_t* mem, int bytes);
 
-void changeToChess(int argc, char** args, t_shellData* shellData) {
-      syscall(CLEAR, 0, 0, 0, 0, 0, 0);
-      cleanBuffer(&shellData->buffer);
-      sys_changeApp();
-}
+// void changeToChess(int argc, char** args, t_shellData shellData) {
+//       sysClear(0, 0, 0, 0);
+//       cleanBuffer(&shellData->buffer);
+//       sys_changeApp();
+// }
 
 //devuelve el tiempo acutal del sistema
-void time(int argc, char** args, t_shellData* shellData) {
+
+void time(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -29,9 +38,9 @@ void time(int argc, char** args, t_shellData* shellData) {
 
       char dateFormat[3][3];
 
-      uint8_t day = syscall(RTC_TIME, DAY, 0, 0, 0, 0, 0);
-      uint8_t month = syscall(RTC_TIME, MONTH, 0, 0, 0, 0, 0);
-      uint8_t year = syscall(RTC_TIME, YEAR, 0, 0, 0, 0, 0);
+      uint8_t day = sysRTCTime(DAY);
+      uint8_t month = sysRTCTime(MONTH);
+      uint8_t year = sysRTCTime(YEAR);
       char aux[9] = { 0 };
       getCurrentTime(aux);
       printString(" >Current time: ");
@@ -49,10 +58,11 @@ void time(int argc, char** args, t_shellData* shellData) {
             }
       }
       putchar('\n');
+      sysExit();
 }
 
 //devuelve el modelo y vendedor del cpu
-void cpuInfo(int argc, char** args, t_shellData* shellData) {
+void cpuInfo(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -68,28 +78,46 @@ void cpuInfo(int argc, char** args, t_shellData* shellData) {
       printInt(cpuInfo.model);
       putchar('\n');
       putchar('\n');
+      sysExit();
 }
 
-//Hace un dump de 32 bytes de memria a partir de la direccion pedida
-void printmem(int argc, char** args, t_shellData* shellData) {
-      if (argc != 1) {
+//muestra la informacion recoletada sobre los registros obtenidos al haber presionado ctrl + s
+void inforeg(int argc, char** args) {
+      if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
             return;
+      }
+      uint64_t* regData = sysInfoReg();
+      for (int i = 0; i < REGISTERS; i++) {
+            printString(" > ");
+            printString(regNames[i]);
+            printHexWL(regData[i], 8);
+            putchar('\n');
+      }
+      putchar('\n');
+      sysExit();
+}
+
+
+//Hace un dump de 32 bytes de memria a partir de la direccion pedida
+void printmem(int argc, char** args) {
+      if (argc != 1) {
+            printStringLn("Invalid ammount of arguments.");
+            sysExit();
       }
 
       int error = 0;
       uint64_t memDir = strToHex(args[0], &error);
       if (error) {
             printStringLn("Invalid argument for function printmem (must be a hex value).");
-            putchar('\n');
-            return;
+            sysExit();
       }
 
       int bytes = 32;
 
       uint8_t memData[bytes];
-      syscall(GET_MEM, memDir, (uint64_t)memData, 0, 0, 0, 0);
+      sysGetMem(memDir, memData);
 
       char byteStr[bytes * 2];
       memToString(byteStr, memData, bytes);
@@ -119,20 +147,20 @@ void printmem(int argc, char** args, t_shellData* shellData) {
 }
 
 //Imprime la temperatura actual del cpu
-void cpuTemp(int argc, char** args, t_shellData* shellData) {
+void cpuTemp(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
-            putchar('\n');
-            return;
+            sysExit();
       }
       printString("CPU temp: ");
-      printInt(syscall(TEMP, 0, 0, 0, 0, 0, 0));
+      printInt(sysTemp());
       printStringLn(" C");
       putchar('\n');
+      sysExit();
 }
 
 //causa una excepcion de dividir por cero
-void checkZeroException(int argc, char** args, t_shellData* shellData) {
+void checkZeroException(int argc, char** args, t_shellData* shellDat) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -142,7 +170,7 @@ void checkZeroException(int argc, char** args, t_shellData* shellData) {
 }
 
 //causa una excepcion de tipo invalid opcode
-void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData) {
+void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellDat) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
@@ -152,7 +180,7 @@ void checkInvalidOpcodeException(int argc, char** args, t_shellData* shellData) 
 }
 
 //Muestra los argumentos pasados al comando
-void showArgs(int argc, char** args, t_shellData* shellData) {
+void showArgs(int argc, char** args) {
       for (int i = 0; i < argc && i < MAX_ARGS; i++) {
             printString("arg[");
             printInt(i);
@@ -160,21 +188,24 @@ void showArgs(int argc, char** args, t_shellData* shellData) {
             printStringLn(args[i]);
       }
       putchar('\n');
+      sysExit();
 }
 
-void memoryInfo(int argc, char** args, t_shellData* shellData){
+void memoryInfo(int argc, char** args) {
       int size = 0;
-      char** info = (char**) syscall(GET_MEMORY_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
-      for(int i = 0; i< size;i++) {
+      char** info = sysGetMeminfo(&size);
+      for (int i = 0; i < size; i++) {
             printStringLn(info[i]);
             free(info[i]);
       }
       free(info);
+      sysExit();
+
 }
 
-void ps(int argc, char** args, t_shellData* shellData) {
+void ps(int argc, char** args) {
       int size = 0;
-      char** info = (char**)syscall(PS, (uint64_t)&size, 0, 0, 0, 0, 0);
+      char** info = sysPs(&size);
       printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP        NAME", BLACK, GREEN);
       printStringLn(" ");
       for (int i = 0; i < size; i++) {
@@ -183,49 +214,111 @@ void ps(int argc, char** args, t_shellData* shellData) {
       }
 
       free((uint8_t*)info);
+      sysExit();
 }
 
-static void loopProcess() {
-      int pid = syscall(GET_PID, 0, 0, 0, 0, 0, 0);
+void loop(int argc, char** args) {
+      int pid = sysGetPid();
       int i;
       while (1) {
             for (i = 0; i < VERY_BIG_NUMBER; i++);
             printInt(pid);
             printString(" ");
       }
+      sysExit();
 }
 
-void loop(int argc, char** args, t_shellData* shellData) {
-      createProcess(&loopProcess, "loop", argc, args);
+void cat(int argc, char** args) {
+      //sysBlock(0);
+      char c;
+      char toPrint[100];
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  //sysBlock(0);
+                  putchar('\t');
+                  sysExit();
+            }
+            if (c == '\n') {
+                  toPrint[i] = 0;
+                  printStringLn(toPrint);
+                  i = 0;
+            } else {
+                  putchar(c);
+            }
+            toPrint[i++] = c;
+      }
 }
 
-void kill(int argc, char** args, t_shellData* shellData) {
-      if (argc > 2) {
-            printStringLn("To many arguments");
-            return;
+
+void filter(int argc, char** args) {
+      char c;
+      char toPrint[100];
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  putchar('\t');
+                  sysExit();
+            }
+            putchar(c);
+            if (c == '\n') {
+                  toPrint[i] = 0;
+                  printStringLn(toPrint);
+                  i = 0;
+            }
+            
+            if (IS_VOCAL(c))
+                  toPrint[i++] = c;
+      }
+}
+
+void wc(int argc, char** args) {
+      //sysBlock(0);
+      char c;
+      int i = 0;
+      while (1) {
+            c = getchar();
+            if (c == '\t') {
+                  printInt(i);
+                  putchar('\t');
+                  putchar('\n');
+                  sysExit();
+            } else {
+                  if (c == '\n')
+                        i++;
+                  putchar(c);
+            }
+      }
+}
+
+void kill(int argc, char** args) {
+      if (argc > 1) {
+            printStringLn("Too many arguments");
+            sysExit();
       }
       int error = 0;
       int pid = strToInt(args[0], &error);
-      int killed = syscall(KILL, pid, 0, 0, 0, 0, 0);
+      int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
-      }
-      else if (killed == 0) {
+      } else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
-      }
-      else {
+      } else {
             printStringLn("Error occured: no processes running");
       }
+      sysExit();
 }
 
-void sem(int argc, char** args, t_shellData* shellData){
+void sem(int argc, char** args) {
       int size = 0;
-      char** info = (char**)syscall(SEM_INFO, (uint64_t)&size, 0, 0, 0, 0, 0);
-      if(size == 0){
+      char** info = sysSemInfo(&size);
+      if (size == 0) {
             printStringLn("No active semaphores");
-            return;
+            sysExit();
       }
       printStringWC("PROCESS_WAITING   NAME   VALUE   STATE", BLACK, GREEN);
       printStringLn(" ");
@@ -235,17 +328,10 @@ void sem(int argc, char** args, t_shellData* shellData){
       }
 
       free((uint8_t*)info);
+      sysExit();
 }
 
-void testSync(int argc, char** args, t_shellData* shellData) {
-      createProcess(&test_sync, "test-sync", argc, args);
-}
-
-void testSyncNoSem(int argc, char** args, t_shellData* shellData) {
-      createProcess(&test_no_sync, "test-sync-n", argc, args);
-}
-
-void nice(int argc, char** args, t_shellData* shellData) {
+void nice(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
@@ -255,19 +341,21 @@ void nice(int argc, char** args, t_shellData* shellData) {
       if (error) {
             return;
       }
-      error = syscall(NICE, pid, priority, 0, 0, 0, 0);
+      error = sysNice(pid, priority);
       if (error == 0) {
             printStringLn("Not found");
       }
+
+      sysExit();
 }
 
-void block(int argc, char** args, t_shellData* shellData) {
+void block(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
             return;
       }
-      int blocked = syscall(BLOCK, pid, 0, 0, 0, 0, 0);
+      int blocked = sysBlock(pid);
       if (blocked) {
             printString("Changed process ");
             printInt(pid);
@@ -275,6 +363,8 @@ void block(int argc, char** args, t_shellData* shellData) {
       }
       else
             printStringLn("Couldn´t change process state");
+
+      sysExit();
 }
 
 static void memToString(char* buffer, uint8_t* mem, int bytes) {
@@ -287,4 +377,5 @@ static void memToString(char* buffer, uint8_t* mem, int bytes) {
                   uintToBase(mem[i], buffer + i, 16);
             }
       }
+      sysExit();
 }

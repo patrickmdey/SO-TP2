@@ -5,6 +5,8 @@
 #include <taskManager.h>
 #include <semList.h>
 
+#include <lib.h>
+
 #include <stringLib.h>
 
 
@@ -19,7 +21,6 @@ static t_semList semaphores = { NULL, 0 };
 
 t_sem* semOpen(char* name, uint8_t create, uint64_t value) {
     t_semNode* sem = findSemByName(&semaphores, name);
-    printStringLn("SEM OPEN");
     if (sem == NULL && create) {
         return semCreate(name, value);
     } else if (sem != NULL) {
@@ -30,6 +31,9 @@ t_sem* semOpen(char* name, uint8_t create, uint64_t value) {
 }
 
 void semWait(t_sem* s) {
+    if (s == NULL)
+        return;
+
     if (s->value > 0) {
         (s->value)--;
     }
@@ -40,6 +44,9 @@ void semWait(t_sem* s) {
 }
 
 void semPost(t_sem* s) {
+    if (s == NULL)
+        return;
+
     (s->value)++;
     wakeup(s);
 }
@@ -100,6 +107,7 @@ static void sleep(t_sem* sem) {
             curr = curr->next;
         }
         curr->next = toCreate;
+        //_xchg((uint64_t) curr->next, (uint64_t) toCreate);
     }
     block(pid);
     int_20();
@@ -110,11 +118,15 @@ static void wakeup(t_sem* sem) {
         return;
 
     uint64_t pid = sem->waiting->pid;
-    t_waitingPid* aux = sem->waiting;
+    t_waitingPid * aux = sem->waiting;
     sem->waiting = sem->waiting->next;
-    block(pid);
+    int ret = block(pid);
     free(aux);
-    (sem->value)--;
+    if (ret)
+        (sem->value)--;
+    /*else {
+        wakeup(sem);
+    }*/
 }
 
 static int fillSemInfo(char** toReturn, int size) {

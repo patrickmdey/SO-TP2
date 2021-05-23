@@ -51,6 +51,10 @@ void* malloc(uint32_t size) {
 }
 
 void free(void* dir) {
+    if ((uint64_t) dir % BLOCK_SIZE) {
+        printStringLn("DIR");
+        return;
+    }
     int idx = ((uint8_t*)dir - start) / BLOCK_SIZE;
     if (idx < 0 || idx >= TOTAL_BLOCKS) {
         return;
@@ -72,14 +76,13 @@ char ** getMemoryInfo(uint64_t * size) {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
             freeMemory++;
-        }
-        else {
+        } else {
             blocksUsed++;
             usedMemory += blockArray[i].size;
         }
     }
     *size = 3;
-    char ** info = malloc(*size * sizeof(char *));
+    char ** info = malloc((*size) * sizeof(char *));
     int i;
     for(i = 0; i < *size; i++) {
         info[i] = malloc(100);
@@ -92,7 +95,7 @@ char ** getMemoryInfo(uint64_t * size) {
     info[0][offset] = 0;
     offset = 0;
     offset += strcpy(info[1], "Memoria en uso: ");
-    offset += uintToBase(usedMemory * BLOCK_SIZE, info[1] + offset, 10);
+    offset += uintToBase(usedMemory, info[1] + offset, 10);
     offset += strcpy(info[1] + offset, " bytes");
     info[1][offset] = 0;
     offset = 0;
@@ -126,6 +129,8 @@ static int findBlocks(int amount) {
             if (count == amount) {
                 return firstIdx;
             }
+        } else {
+            count = 0;
         }
     }
     return -1;
@@ -133,7 +138,7 @@ static int findBlocks(int amount) {
 /*
 // Otro sistema --> menor cantidad de bloques por memoria pedida
 static int findBlocks(int amount) {
-    printStringLn("BUDDY!");
+    //printStringLn("BUDDY!");
     int i, count = 0, firstIdx, best_fit = INT_MAX, best_fit_idx = -1;
     for (i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {

@@ -1,5 +1,20 @@
 #include <staticQueue.h>
 #include <lib.h>
+#include <memoryManager.h>
+
+t_queue * queueInit(uint64_t dataSize){
+      t_queue* queue = malloc(sizeof(t_queue));
+      if (queue == NULL)
+            return NULL;
+
+      queue->queue = malloc(MAX_SIZE);
+      queue->front = 0;
+      queue->rear = -1;
+      queue->size = 0;
+      queue->dim = MAX_SIZE;
+      queue->dataSize = dataSize;
+      return queue;
+}
 
 //https://www.tutorialspoint.com/data_structures_algorithms/queue_program_in_c.htm
 void queuePeek(t_queue* queue, void* data) {
@@ -27,6 +42,7 @@ int queueSize(t_queue* queue) {
 }
 
 void queueInsert(t_queue* queue, void* data) {
+      //printStringLn(queue->queue);
       if (!queueIsFull(queue)) {
             if (queue->rear == queue->dim - 1) {
                   queue->rear = -1;
@@ -37,6 +53,7 @@ void queueInsert(t_queue* queue, void* data) {
 }
 
 void queueRemoveData(t_queue* queue, void* data) {
+      //printStringLn(queue->queue);
       if (queue->size != 0) {
             memcpy(data, (void*)((uint64_t)queue->queue + ((queue->front++) * queue->dataSize)), queue->dataSize);
 
@@ -48,4 +65,9 @@ void queueRemoveData(t_queue* queue, void* data) {
       else {
             memset(data, 0, queue->dataSize);
       }
+}
+
+void freeQueue(t_queue * queue) {
+      free(queue->queue);
+      free(queue);
 }
