@@ -54,11 +54,12 @@ int getPID();
 char** ps(int* index);
 uint8_t block(int pid);
 void yield();
+void idleProcess();
 
 uint64_t getCurrentOut();
 
 void writeKeyOnBuffer(char key);
-char removeKeyFromBuffer();
+char getChar(int64_t fd);
 
 uint8_t changePriority(int pid, int priority);
 uint8_t changeForeground(int pid);

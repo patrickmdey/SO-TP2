@@ -42,7 +42,6 @@ int queueSize(t_queue* queue) {
 }
 
 void queueInsert(t_queue* queue, void* data) {
-      //printStringLn(queue->queue);
       if (!queueIsFull(queue)) {
             if (queue->rear == queue->dim - 1) {
                   queue->rear = -1;
@@ -52,17 +51,16 @@ void queueInsert(t_queue* queue, void* data) {
       }
 }
 
-void queueRemoveData(t_queue* queue, void* data) {
-      //printStringLn(queue->queue);
+void queueRemoveData(t_queue * queue, void * data) {
       if (queue->size != 0) {
             memcpy(data, (void*)((uint64_t)queue->queue + ((queue->front++) * queue->dataSize)), queue->dataSize);
 
             if (queue->front == queue->dim) {
                   queue->front = 0;
             }
+
             queue->size--;
-      }
-      else {
+      } else {
             memset(data, 0, queue->dataSize);
       }
 }

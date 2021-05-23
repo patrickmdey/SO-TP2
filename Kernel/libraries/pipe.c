@@ -1,6 +1,8 @@
 #include <pipe.h>
 #include <memoryManager.h>
 #include <staticQueue.h>
+#include <interrupts.h>
+#include <taskManager.h>
 
 //static void insertFdNode(t_fdNode* node);
 static t_fdNode* deleteFdNode(t_fdNode* fdNode, uint64_t fd, int* flag);
@@ -28,7 +30,7 @@ void insertFd(t_fdNode* fdNode) {
         return;
     }
 
-    t_fdNode* current = l->first;
+    t_fdNode * current = l->first;
     while (current->next != NULL) {
         current = current->next;
     }
@@ -40,6 +42,13 @@ void insertFd(t_fdNode* fdNode) {
 void pipeWrite(t_fdNode* node, char c) {
     if (node == NULL)
         return;
+
+    if (node->waiting != NULL) {
+        t_waitingPid * toFree = node->waiting;
+        block(toFree->pid);
+        node->waiting = toFree->next;
+        free(toFree);
+    }
         
     queueInsert(node->buffer, &c);
 }
@@ -51,6 +60,38 @@ void pipeWriteStr(t_fdNode* node, char* str) {
     for (int i = 0; str[i]; i++) {
         pipeWrite(node, str[i]);
     }
+}
+
+char pipeRead(uint64_t fd) {
+    t_fdNode * node = findFd(fd);
+    if (node == NULL)
+        return 0;
+
+    char key;
+    queueRemoveData(node->buffer, &key);
+    if (key != 0)
+        return key;
+
+    int pid = getCurrentPid();
+    block(pid);
+    t_waitingPid * toAdd = malloc(sizeof(t_waitingPid));
+    toAdd->pid = pid;
+    toAdd->next = NULL;
+    t_waitingPid * curr = node->waiting;
+
+    if (curr == NULL) {
+        node->waiting = toAdd;
+    } else {
+        while (curr->next != NULL) {
+            curr = curr->next;
+        }
+        curr->next = toAdd;
+    }
+
+    int_20();
+    queueRemoveData(node->buffer, &key);
+    return key;
+
 }
 
 void closeFd(uint64_t fd) {

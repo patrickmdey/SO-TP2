@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 void keyboardHandler(uint64_t rsp);
-char getchar();
-char getcharOnce();
+//char getchar(int64_t fd);
+//char getcharOnce();
 void changeBuffer(t_bufferID bufferID);
 uint64_t* getSnapshot();
 

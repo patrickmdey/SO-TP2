@@ -4,15 +4,27 @@
 #include <pipe.h>
 #include <staticQueue.h>
 #include <taskManager.h>
+#include <stddef.h>
 
-void sysWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour) {
+void sysWrite(int64_t fd, char * string, uint8_t lenght, t_colour bgColour, t_colour fontColour) {
       if (lenght <= 0 || string == 0 || bgColour < 0 || fontColour < 0) {
             return;
       }
 
-      uint64_t fd = getCurrentOut();
-      if (fd != STDOUT) {
-            t_fdNode* node = findFd(fd);
+
+      uint64_t toWriteFd;
+
+      if (fd == -1)
+            toWriteFd = getCurrentOut();
+      else
+            toWriteFd = fd;
+      
+      if (toWriteFd != STDOUT) {
+
+            t_fdNode * node = findFd(toWriteFd);
+            if (node == NULL)
+                  return;
+
             pipeWriteStr(node, string);
       } else {
             for (int i = 0; string[i] != 0 && i < lenght; i++) {
@@ -38,11 +50,11 @@ void sysStaticWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fo
 }
 
 void printString(char* str) {
-      sysWrite(str, strlen(str), BLACK, WHITE);
+      sysWrite(-1, str, strlen(str), BLACK, WHITE);
 }
 
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour) {
-      sysWrite(str, strlen(str), bgColour, fontColour);
+      sysWrite(-1, str, strlen(str), bgColour, fontColour);
 }
 
 void printStringLn(char* str) {
@@ -51,7 +63,7 @@ void printStringLn(char* str) {
 }
 
 void putchar(char c) {
-      sysWrite(&c, 1, BLACK, WHITE);
+      sysWrite(-1, &c, 1, BLACK, WHITE);
 }
 
 void printHex(uint64_t num) {

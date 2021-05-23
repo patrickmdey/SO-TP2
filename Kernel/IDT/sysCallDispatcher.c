@@ -68,13 +68,14 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
 
             case SYS_WRITE:
-                  sysWrite((char*)(r->rdi), (uint8_t)(r->rsi), (t_colour)(r->rdx), (t_colour)(r->r10));
+                  sysWrite((int64_t) r->rdi, (char*) (r->rsi), (uint8_t) (r->rdx), (t_colour)(r->r10), (t_colour) (r->r8));
                   break;
 
             case SYS_GETCHAR:
-                  if ((int)(r->rdi) == 1)
-                        return getcharOnce();
-                  return getchar();
+                  /*if ((int)(r->rdi) == 1)
+                        return getcharOnce();*/
+
+                  return getChar((int64_t) r->rdi);
                   break;
 
             case SYS_CLEAR:

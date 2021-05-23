@@ -3,11 +3,11 @@
 #include <utils.h>
 
 void printString(char* str) {
-      syscall(WRITE, (uint64_t)str, strlen(str), BLACK, WHITE, 0, 0);
+      syscall(WRITE, -1, (uint64_t) str, strlen(str), BLACK, WHITE, 0);
 }
 
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour) {
-      syscall(WRITE, (uint64_t)str, strlen(str), bgColour, fontColour, 0, 0);
+      syscall(WRITE, -1, (uint64_t) str, strlen(str), bgColour, fontColour, 0);
 }
 
 void printStringLn(char* str) {
@@ -15,20 +15,24 @@ void printStringLn(char* str) {
       putchar('\n');
 }
 
+char readchar(int64_t fd) {
+      return syscall(GETCHAR, fd, 0, 0, 0, 0, 0);
+}
+
 char getchar() {
-      return syscall(GETCHAR, 0, 0, 0, 0, 0, 0);
+      return readchar(-1);
 }
 
 char getcharOnce() {
-      return syscall(GETCHAR, 1, 0, 0, 0, 0, 0);
+      return readchar(-1);
 }
 
 void putchar(char c) {
-      syscall(WRITE, (uint64_t)&c, 1, BLACK, WHITE, 0, 0);
+      syscall(WRITE, -1, (uint64_t) &c, 1, BLACK, WHITE, 0);
 }
 
 void putcharWC(char c, t_colour bgColour, t_colour fontColour) {
-      syscall(WRITE, (uint64_t)&c, 1, bgColour, fontColour, 0, 0);
+      syscall(WRITE, -1, (uint64_t) &c, 1, bgColour, fontColour, 0);
 }
 
 void printHex(uint64_t num) {

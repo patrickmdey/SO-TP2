@@ -37,15 +37,19 @@ void test_no_sync(int argc, char ** argv) {
 
     global = 0;
 
+    uint64_t pids[TOTAL_PAIR_PROCESSES * 2];
+
     printStringLn("CREATING PROCESSES...(WITHOUT SEM)");
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
         char* array1[4] = { "0", "1", "100", "&" };
         char* array2[4] = { "0", "-1", "100", "&" };
-        sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
-        sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
+        pids[i] = sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
+        pids[i+1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
     
+    for (i = 0; i < TOTAL_PAIR_PROCESSES * 2; i++)
+        sysWaitpid(pids[i]);
     
     sysExit();
 }
@@ -95,10 +99,7 @@ void inc(int argc, char ** argv) {
     }
 
     if (sem) {
-        printStringLn("Opening sem");
         semClose(semp);
-        printStringLn("Closing Sem");
-        printStringLn("CLOSED SEM");
     }
 
     printString("Final value: ");

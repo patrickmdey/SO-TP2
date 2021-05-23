@@ -50,6 +50,8 @@ static t_PCB* current = NULL;
 
 static uint64_t currentPID = 0;
 static int currentTicks = 0;
+static int idleId;
+static uint8_t isIdle = 0;
 
 void* schedule(void* oldRSP, int forceStart) {
       if (forceStart) {
@@ -82,6 +84,8 @@ void initTaskManager(void * entryPoint) {
       tasks->size = 0;
 
       createProcess(entryPoint, "shell", -1, -1, 0, 0);
+      idleId = createProcess(&idleProcess, "idle", -1, -1, 0, NULL);
+      block(idleId);
       current = tasks->first;
       current->foreground = 1;
 }
@@ -209,19 +213,26 @@ void resetCurrentProcess() {
 }
 
 void writeKeyOnBuffer(char key) { // INPUT DE TECLADO
-      //t_PCB* foreground = getForegroundProcess();
       t_fdNode * in = findFd(STDIN);
-      //queueInsert(in->buffer, &key);
       pipeWrite(in, key);
 }
 
-char removeKeyFromBuffer() { // getchar
-      char key = 0;
-      t_fdNode * in = findFd(current->in);
+char getChar(int64_t fd) { // getchar
+      //char key = 0;
+      uint64_t readFd;
+      if (fd == -1)
+            readFd = current->in;
+      else 
+            readFd = fd;
+
+      /*t_fdNode * in = findFd(readFd);
       if (in != NULL) {
             queueRemoveData(in->buffer, &key);
+            if (key == 0)
+
       }
-      return key;
+      return key;*/
+      return pipeRead(readFd);
 }
 
 char** ps(int* index) {
@@ -285,6 +296,9 @@ uint64_t getCurrentOut() {
       return current->out;
 }
 
+void idleProcess() {
+      while (1);
+}
 
 //guarda el contexto de un proceso
 static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv) {
@@ -318,7 +332,7 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, c
       return (void*)(frame);
 }
 
-static t_PCB* getNextProcess() {
+static t_PCB * getNextProcess() {
       int i = 0, size = tasks->size;
       t_PCB* curr = current;
       do {
@@ -333,6 +347,15 @@ static t_PCB* getNextProcess() {
             }
             i++;
       } while (i < size && curr->state != READY);
+
+      if (!isIdle && curr->state != READY) {
+            isIdle = 1; // desbloqueo idle process
+            block(idleId);
+            return findPCB(tasks, idleId); // run idle process;
+      } else if (isIdle && curr->state == READY) {
+            isIdle = 0;
+            block(idleId); // block idle process
+      }
 
       return curr;
 }

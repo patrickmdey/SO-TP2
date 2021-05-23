@@ -37,21 +37,21 @@ void keyboardHandler(uint64_t rsp) {
       }
 }
 
-char getchar() {
+/*char getchar(int64_t fd) {
       char c = 0;
       while (c == 0) {
             if (ticksElapsed() % 12 == 0) {
                   blinkCursor();
             }
             _hlt();
-            c = removeKeyFromBuffer();
+            c = readChar(fd);
       
       }
       stopBlink();
-      return c;
-}
+      return readChar(fd);
+}*/
 
-char getcharOnce(){
+/*char getcharOnce(){
       char c = 0;
       if (ticksElapsed() % 12 == 0) {
              blinkCursor();
@@ -60,7 +60,7 @@ char getcharOnce(){
       c = removeKeyFromBuffer();
       stopBlink();
       return c;
-}
+}*/
 
 uint64_t* getSnapshot() {
       return registers;

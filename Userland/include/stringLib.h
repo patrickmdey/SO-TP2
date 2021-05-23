@@ -14,6 +14,7 @@ void printHexWL(uint64_t num, int length);
 void putchar(char c);
 void putcharWC(char c, t_colour bgColour, t_colour fontColour);
 void staticputchar(char c);
+char readchar(int64_t fd);
 char getchar();
 char getcharOnce();
 void deletechar();
