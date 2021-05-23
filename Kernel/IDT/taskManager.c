@@ -7,6 +7,7 @@
 #include <pipe.h>
 
 #include <list.h>
+#include <pcbQueue.h>
 #include <memoryManager.h>
 
 #include <utils.h>
@@ -45,7 +46,7 @@ typedef struct {
 
 
 
-static t_list* tasks;
+static t_pcbQueue * tasks;
 static t_PCB* current = NULL;
 
 static uint64_t currentPID = 0;
@@ -76,7 +77,7 @@ void* schedule(void* oldRSP, int forceStart) {
 }
 
 void initTaskManager(void * entryPoint) {
-      tasks = malloc(sizeof(t_list));
+      tasks = createPcbQueue();
       if (tasks == NULL)
             return;
 
@@ -116,10 +117,15 @@ int64_t createProcess(void * entryPoint, char * name, int64_t fdIn, int64_t fdOu
       }
 
       process->waiting = NULL;
+      process->priority = 0;
       /*printInt(process->in);
       printInt(process->out);*/
 
-      addProcess(process);
+      int ret = addProcess(process);
+      if (ret != 1) {
+            free(process);
+            return -1;
+      }
       return process->pid;
 }
 
@@ -144,20 +150,8 @@ int addProcess(t_PCB* process) {
 }
 
 
-void killCurrentProcess() {
-      if (tasks->size == 1) {
-            return;
-      }
-      currentTicks = 0;
-      free((void*)current->rbp);
-      /*free((void*)current->buffer->queue);
-      free((void*)current->buffer);*/
-
-      removePCB(tasks, current->pid);
-}
-
 int killProcess(int pid) {
-      if (pid == 0)
+      if (pid == 0 || pid == idleId)
             return -1;
 
       if (pid == current->pid) {
@@ -166,7 +160,7 @@ int killProcess(int pid) {
 
       t_PCB * pcb = findPCB(tasks, pid);
       if (pcb == NULL)
-            return -1;
+            return 0;
 
       t_waitingPid * curr = pcb->waiting;
       while (curr != NULL) {
@@ -333,10 +327,17 @@ static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, c
 }
 
 static t_PCB * getNextProcess() {
-      int i = 0, size = tasks->size;
-      t_PCB* curr = current;
+      int i = 0;
+      t_PCB* curr;
       do {
-            t_PCB* aux = curr->next;
+            curr = peekFirst(tasks);
+            if (curr->state == KILLED) {
+                  removePCB(tasks, curr->pid);
+            } else {
+                  curr = popFirst(tasks);
+                  insertPCB(tasks, curr);
+            }
+            /*t_PCB* aux = curr->next;
             if (curr->state == KILLED) {
                   removePCB(tasks, curr->pid);
             }
@@ -345,8 +346,9 @@ static t_PCB * getNextProcess() {
             else {
                   curr = tasks->first;
             }
+            i++;*/
             i++;
-      } while (i < size && curr->state != READY);
+      } while (i < getSize(tasks) && curr->state != READY);
 
       if (!isIdle && curr->state != READY) {
             isIdle = 1; // desbloqueo idle process

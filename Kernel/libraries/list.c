@@ -1,7 +1,7 @@
 #include <list.h>
 #include <staticQueue.h>
 
-static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag);
+/*static t_PCB* deletePCB(t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
 static void freePCB(t_PCB* pcb);
 
@@ -104,4 +104,4 @@ static void freeRec(t_PCB* pcb) {
     t_PCB* next = pcb->next;
     free(pcb);
     freeRec(next);
-}
+}*/

@@ -6,7 +6,7 @@ MODULE=0000-sampleCodeModule.bin
 SOURCES= $(wildcard *.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 SOURCES_LIBRARIES=$(wildcard libraries/*.c)
-SOURCES_APPLICATIONS=$(wildcard applications/*.c applications/shell/*.c applications/chess/*.c)
+SOURCES_APPLICATIONS=$(wildcard applications/*.c applications/shell/*.c applications/chess/*.c applications/tests/*.c)
 
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)

@@ -4,7 +4,7 @@
 #include <test_util.h>
 #include <commands.h>
 
-#define MAX_PROCESSES 3 //Should be around 80% of the the processes handled by the kernel
+#define MAX_PROCESSES 10 //Should be around 80% of the the processes handled by the kernel
 
 enum State { ERROR, RUNNING, BLOCKED, KILLED };
 
@@ -43,8 +43,7 @@ void test_processes() {
             if (p_rqs[rq].pid == -1) {                           // TODO: Port this as required
                 printString("Error creating process\n");               // TODO: Port this as required
                 sysExit();
-            }
-            else {
+            } else {
                 p_rqs[rq].state = RUNNING;
                 alive++;
             }
@@ -62,7 +61,7 @@ void test_processes() {
                 switch (action) {
                 case 0:
                     if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {
-                        if (sysKill(p_rqs[rq].pid) == -1) {          // TODO: Port this as required
+                        if (sysKill(p_rqs[rq].pid) != 1) {          // TODO: Port this as required
                             printString("Error killing process\n");        // TODO: Port this as required
                             sysExit();
                         }
@@ -82,6 +81,8 @@ void test_processes() {
                     break;
                 }
             }
+
+            sysYield();
 
             // Randomly unblocks processes
             for (rq = 0; rq < MAX_PROCESSES; rq++)

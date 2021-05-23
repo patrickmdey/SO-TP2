@@ -33,7 +33,7 @@ void time(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
-            return;
+            sysExit();
       }
 
       char dateFormat[3][3];
@@ -66,7 +66,7 @@ void cpuInfo(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
-            return;
+            sysExit();
       }
       char vendor[13] = { 0 };
       t_cpuInfo cpuInfo = { vendor, 0 };
@@ -86,7 +86,7 @@ void inforeg(int argc, char** args) {
       if (argc != 0) {
             printStringLn("Invalid ammount of arguments.");
             putchar('\n');
-            return;
+            sysExit();
       }
       uint64_t* regData = sysInfoReg();
       for (int i = 0; i < REGISTERS; i++) {
@@ -288,7 +288,9 @@ void kill(int argc, char** args) {
             printInt(pid);
             printStringLn("");
       } else {
-            printStringLn("Error occured: no processes running");
+            printString("Can not kill process with pid ");
+            printInt(pid);
+            printStringLn("");
       }
       sysExit();
 }
@@ -315,11 +317,11 @@ void nice(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
-            return;
+            sysExit();
       }
       int priority = strToInt(args[1], &error);
       if (error) {
-            return;
+            sysExit();
       }
       error = sysNice(pid, priority);
       if (error == 0) {
@@ -333,16 +335,25 @@ void block(int argc, char** args) {
       int error = 0;
       int pid = strToInt(args[0], &error);
       if (error) {
-            return;
+            sysExit();
       }
+      if(pid == 0 || pid == 1){
+            printString("Can not change state of process with pid ");
+            printInt(pid);
+            printStringLn("");
+            sysExit();
+      }
+
       int blocked = sysBlock(pid);
       if (blocked) {
             printString("Changed process ");
             printInt(pid);
             printStringLn(" state");
+      } else {
+            printString("No process running with pid ");
+            printInt(pid);
+            printStringLn("");
       }
-      else
-            printStringLn("Couldn´t change process state");
 
       sysExit();
 }
