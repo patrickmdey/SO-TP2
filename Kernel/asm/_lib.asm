@@ -171,7 +171,10 @@ _xchg:
 	push rbp
     mov rbp,rsp
 
-	xchg rsi, rdi
+	mov rax, rsi
+
+	;xchg [rdi], eax ;(el primer parametro es un puntero)
+	xchg rdi, rax
 
 	mov rsp, rbp
 	pop rbp

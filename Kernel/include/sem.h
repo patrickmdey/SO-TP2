@@ -11,6 +11,7 @@ typedef struct t_sem {
     char * name;
     int value;
     int chan;
+    int lock;
     t_waitingPid * waiting;
     uint64_t processAmount;
 } t_sem;

@@ -213,7 +213,7 @@ void help(int argc, char** args, t_shellData* shellData) {
       printStringLn("These shell commands are defined internally.  Type 'help' to see this list.");
       for (int i = 0; i < COMMANDS; i++) {
             printString(" >");
-            printStringWC(shellData->commands[i].name, BLACK, BLUE);
+            printStringWC(shellData->commands[i].name, BLACK, GREEN);
             printString(": ");
             printStringLn(shellData->commands[i].description);
       }
