@@ -1,4 +1,3 @@
-#include <taskManager.h>
 #include <interrupts.h>
 #include <keyboardDriver.h>
 #include <videoDriver.h>
@@ -126,13 +125,20 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
       process->waiting = NULL;
       process->priority = 0;
 
-      process->dirArray = malloc(32 * sizeof(uint8_t*));
-      process->dirArrayIndex = 0;
+      process->addresses = malloc(sizeof(t_addressList));
+      if (process->addresses == NULL) {
+            free(process);
+            return -1;
+      }
+      process->addresses->first = NULL;
+      process->addresses->size = 0;
       /*printInt(process->in);
       printInt(process->out);*/
 
       int ret = addProcess(process);
+      
       if (ret != 1) {
+            freeAddressList(process->addresses);
             free(process);
             return -1;
       }
@@ -149,6 +155,7 @@ int addProcess(t_PCB* process) {
 
       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
             process->argc, process->argv);
+
       process->pid = currentPID++;
       process->state = READY;
 
@@ -238,6 +245,24 @@ char getChar(int64_t fd) { // getchar
       return key;*/
 
       return pipeRead(readFd);
+}
+
+void * allocateMem(uint32_t size) {
+      void * dir = malloc(size);
+      if (dir == NULL) 
+            return NULL;
+
+      int ret = addAddress(current->addresses, dir);
+      if (ret == 0) {
+            free(dir);
+            return NULL;
+      }
+      return dir;
+}
+
+void freeMem(void * dir) {
+      removeAddress(current->addresses, dir);
+      free(dir);
 }
 
 char** ps(int* index) {

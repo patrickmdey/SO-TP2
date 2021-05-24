@@ -197,6 +197,24 @@ void ps(int argc, char** args) {
       sysExit();
 }
 
+void pipeInfo(int argc, char** args){
+      int size = 0;
+      char** info = sysPipeInfo(&size);
+      if (size == 0) {
+            printStringLn("No opened pipes");
+            sysExit();
+      }
+      printStringWC("PROCESS_WAITING   FD", BLACK, GREEN);
+      printStringLn(" ");
+      for (int i = 0; i < size; i++) {
+            printStringLn(info[i]);
+            free((void *)info[i]);
+      }
+
+      free((void *) info);
+      sysExit();
+}
+
 void loop(int argc, char** args) {
       int pid = sysGetPid();
       int i;

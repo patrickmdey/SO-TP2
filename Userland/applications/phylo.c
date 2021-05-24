@@ -18,6 +18,7 @@ t_sem * forks[MAX_PHYLOSOPHERS] = {NULL};
 int64_t pids[MAX_PHYLOSOPHERS] = {0};
 t_sem * printSem;
 t_sem * creatingSem;
+t_sem * changeMutex;
 
 int size;
 
@@ -89,6 +90,7 @@ static void phyloProcess(int argc, char **args) {
 
                     leftFork = size - 1;
                     sig[0] = 0;
+                    semPost(changeMutex);
                 } else if (sig[id] == -1) {
                     removeEater();
                 } else {
@@ -128,6 +130,7 @@ void phylo(int argc, char **args) {
 
     creatingSem = semOpen("creatingSem", 1, 0);
     printSem = semOpen("printSem", 1, 1);
+    changeMutex = semOpen("changeMutex", 1, 1);
 
     int i;
     for (i = 0; i < INTIAL_PHYLOSOHERS; i++) {
@@ -150,18 +153,22 @@ void phylo(int argc, char **args) {
         if (c == 'a')
             if (size > 14)
                 printStringWC("Too many phylosophers\n", BLACK, RED);
-            else
+            else {
+                semWait(changeMutex);
                 sig[size - 1] = 1;
+            }
         else if (c == 'r') {
-            if (size - 1 > 2)
+            if (size - 1 > 2) {
+                semWait(changeMutex);
                 sig[size - 1] = -1;
-            else
+            } else
                 printStringWC("Too few phylosophers\n", BLACK, RED);
         } else if (c == '\t'){
             for (i = 0; i < size; i++) {
                 semClose(forks[i]);
                 sysKill(pids[i]);
             }
+            semClose(changeMutex);
             semClose(creatingSem);
             semClose(printSem);
             sysKill(printPid);

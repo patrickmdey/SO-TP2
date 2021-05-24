@@ -12,6 +12,8 @@
 #include <buffer.h>
 #include <staticQueue.h>
 #include <waitingPid.h>
+#include <taskManager.h>
+#include <addressList.h>
 
 typedef struct t_PCB {
     void* entryPoint;
@@ -25,8 +27,7 @@ typedef struct t_PCB {
     uint64_t pid;
     char* name;
 
-    uint8_t **dirArray;
-    int dirArrayIndex;
+    t_addressList * addresses;
 
     t_waitingPid * waiting;
 
@@ -34,18 +35,18 @@ typedef struct t_PCB {
     int64_t out;
 
     int argc;
-    char ** argv;
+    char** argv;
 } t_PCB;     //Process Control Block
 
 extern t_queue taskManager;
 
 void initTaskManager(void* entryPoint);
 
-t_PCB *getCurrentProcess();
+t_PCB* getCurrentProcess();
 
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
-int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char ** argv);
+int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char** argv);
 int addProcess(t_PCB* process);
 void resetCurrentProcess();
 int killProcess(int pid);
@@ -64,6 +65,10 @@ uint64_t getCurrentOut();
 
 void writeKeyOnBuffer(char key);
 char getChar(int64_t fd);
+
+void * allocateMem(uint32_t size);
+
+void freeMem(void * dir);
 
 uint8_t changePriority(int pid, int priority);
 uint8_t changeForeground(int pid);

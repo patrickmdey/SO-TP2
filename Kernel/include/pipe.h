@@ -30,5 +30,7 @@ void pipeWrite(t_fdNode* node, char c);
 char pipeRead(uint64_t fd);
 void pipeWriteStr(t_fdNode* node, char* str);
 
+char ** pipeInfo(int * size);
+
 
 #endif

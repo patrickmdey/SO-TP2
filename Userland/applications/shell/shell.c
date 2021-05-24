@@ -39,7 +39,6 @@ void runShell() {
       sysExit();
 }
 
-
 //inicia la shell y todas sus estructuras 
 static void initShell(t_shellData* shellData) {
       t_command commandsData[] = {
@@ -68,7 +67,8 @@ static void initShell(t_shellData* shellData) {
           {NULL, &cat, "cat", "prints to stdout the content of the fd", 0},
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
           {NULL, &wc, "wc", "counts the amount of lines in a given input", 0},
-          {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0}
+          {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0},
+          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0}
 
       };
 

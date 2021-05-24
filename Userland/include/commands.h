@@ -52,4 +52,7 @@ void filter(int argc, char** args);
 void wc(int argc, char** args);
 
 void phylo(int argc, char** args);
+
+void pipeInfo(int argc, char** args);
+
 #endif

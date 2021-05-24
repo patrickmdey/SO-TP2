@@ -4,13 +4,14 @@
 #include <interrupts.h>
 #include <taskManager.h>
 
-#include <stringLib.h>
+#include <utils.h>
 
 //static void insertFdNode(t_fdNode* node);
 static t_fdNode* deleteFdNode(t_fdNode* fdNode, uint64_t fd, int* flag);
 //static void freeRec(t_fdNode* fdNode);
 static uint64_t createFd();
 static void freeFd(t_fdNode* node);
+static int fillPipeInfo(char ** toReturn, int size);
 
 static t_fdList fdList = { NULL, 0 };
 static uint64_t nextFd = 0;
@@ -126,12 +127,30 @@ int64_t getFd() {
     return createFd();
 }
 
+char ** pipeInfo(int * index) {
+    int size = fdList.size;
+    t_fdNode * current = fdList.first;
+    while (current != NULL) {
+        t_waitingPid * pid = current->waiting;
+        while (pid != NULL) {
+            size++;
+            pid = pid->next;
+        }
+        current = current->next;
+    }
+    char** toReturn = malloc((size) * sizeof(char*));
+
+    *index = fillPipeInfo(toReturn, size);
+    return toReturn;
+
+}
 
 static uint64_t createFd() {
     t_fdNode* node = malloc(sizeof(t_fdNode));
     node->fd = nextFd++;
     node->buffer = queueInit(sizeof(char));
     node->next = NULL;
+    node->waiting = NULL;
     insertFd(node);
     return node->fd;
 }
@@ -158,4 +177,39 @@ static void freeFd(t_fdNode* node) {
 
     freeQueue(node->buffer);
     free(node);
+}
+
+static int fillPipeInfo(char ** toReturn, int size) {
+    int i = 0, j = 0;
+    t_fdNode * nodeIterator = fdList.first;
+    t_waitingPid * waitingIterator;
+    int offset;
+
+    while (nodeIterator != NULL) {
+        toReturn[j] = malloc(150);
+        offset = 0;
+        waitingIterator = nodeIterator->waiting;
+        if (waitingIterator != NULL) {
+            offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
+            offset += strcpy(toReturn[j] + offset, "                 ");
+            waitingIterator = waitingIterator->next;
+        } else {
+            offset += uintToBase(0, toReturn[j] + offset, 10);
+            offset += strcpy(toReturn[j] + offset, "                 ");
+        }
+        offset += uintToBase(nodeIterator->fd, toReturn[j] + offset, 10);
+        toReturn[j++][offset] = 0;
+
+        while (waitingIterator != NULL) {
+            toReturn[j] = malloc(150);
+            offset = 0;
+            offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
+            toReturn[j][offset] = 0;
+            j++;
+            waitingIterator = waitingIterator->next;
+        }
+        i++;
+        nodeIterator = nodeIterator->next;
+    }
+    return j;
 }

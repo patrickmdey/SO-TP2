@@ -47,8 +47,9 @@
 #define SYS_WAIT_PID 33
 #define SYS_SEM_DESTROY 34
 #define SYS_CLOSE_FD 35
+#define SYS_PIPE_INFO 36
 
-#define SYSCALLS 35
+#define SYSCALLS 36
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -116,10 +117,10 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   return ticksElapsed();
                   break;
             case SYS_ASIGN_MEMORY:
-                  return (uint64_t) malloc((uint32_t)r->rdi);
+                  return (uint64_t) allocateMem((uint32_t) r->rdi);
                   break;
             case SYS_FREE_MEMORY:
-                  free((void*)r->rdi);
+                  freeMem((void *) r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
                   return (uint64_t)getMemoryInfo((uint64_t*)r->rdi);
@@ -177,6 +178,9 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_CLOSE_FD:
                   closeFd((int64_t) r->rdi);
+                  break;
+            case SYS_PIPE_INFO:
+                  return (uint64_t) pipeInfo((int*) ((uint64_t)(r->rdi)));
                   break;
             }
 

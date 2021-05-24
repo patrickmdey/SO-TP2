@@ -37,6 +37,10 @@ char** sysSemInfo(int* size) {
     return (char**)syscall(SEM_INFO, (uint64_t)size, 0, 0, 0, 0, 0);
 }
 
+char** sysPipeInfo(int* size) {
+    return (char**)syscall(PIPE_INFO, (uint64_t)size, 0, 0, 0, 0, 0);
+}
+
 int sysGetPid() {
     return syscall(GET_PID, 0, 0, 0, 0, 0, 0);
 }

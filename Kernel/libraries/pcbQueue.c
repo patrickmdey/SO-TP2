@@ -5,6 +5,8 @@
 
 #include <stringLib.h>
 
+#include <addressList.h>
+
 static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
 static void freePCB(t_PCB* pcb);
@@ -112,13 +114,11 @@ static void freePCB(t_PCB* pcb) {
     int i, count = (pcb->argc) + 1 - pcb->foreground;
     for (i = 0; i <= count; i++)
         free(pcb->argv[i]);
-        
-    for (i = 0; i < pcb->dirArrayIndex; i++)
-        free(pcb->dirArray[i]);
-    free(pcb->dirArray);
 
-    t_waitingPid* current = pcb->waiting;
-    t_waitingPid* next;
+    freeAddressList(pcb->addresses);
+
+    t_waitingPid * current = pcb->waiting;
+    t_waitingPid * next;
     while (current != NULL) {
         next = current->next;
         free(current);

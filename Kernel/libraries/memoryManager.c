@@ -20,14 +20,14 @@ static void asignMemory(int firstIdx, int count, int size);
 
 int nextindex = 0;
 
-typedef struct block_t {
+typedef struct t_block {
     uint16_t size;  // = a lo que pidio size = 64 
     uint8_t free;
     int pos;    //pos q tengo en el array
     uint8_t usesNext;
-} block_t;
+} t_block;
 
-block_t blockArray[TOTAL_BLOCKS];
+t_block blockArray[TOTAL_BLOCKS];
 
 void initMemory() {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
@@ -52,10 +52,6 @@ void* malloc(uint32_t size) {
     }
 
     asignMemory(firstIdx, amount, size);
-    t_PCB* currentProcess = getCurrentProcess();
-
-    currentProcess->dirArray[currentProcess->dirArrayIndex] = (uint8_t*)&start[firstIdx * BLOCK_SIZE];
-    currentProcess->dirArrayIndex += 1;
 
     // printString("MALLOC -> ");
     // printInt(currentProcess->dirArrayIndex);
@@ -64,7 +60,7 @@ void* malloc(uint32_t size) {
     return &start[firstIdx * BLOCK_SIZE];
 }
 
-void free(void* dir) {
+void free(void * dir) {
     if ((uint64_t)dir % BLOCK_SIZE) {
         //printStringLn("DIR NO VALIDA");
         return;
@@ -94,8 +90,7 @@ char** getMemoryInfo(uint64_t* size) {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
             freeMemory++;
-        }
-        else {
+        } else {
             blocksUsed++;
             usedMemory += blockArray[i].size;
         }
