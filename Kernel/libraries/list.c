@@ -12,6 +12,7 @@ t_list* createList() {
 void freeList(t_list* l) {
     if (l == NULL)
         return;
+        
     freeRec(l->first);
     free((void*)l);
 }

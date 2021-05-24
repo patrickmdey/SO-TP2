@@ -10,18 +10,20 @@ int addAddress(t_addressList * l, void * address) {
         return 0;
 
     t_addressNode * addNode = malloc(sizeof(t_addressNode));
-    if (addNode == NULL)
+    if (addNode == NULL) {
         return 0;
+    }
 
     addNode->address = address;
     addNode->next = NULL;
 
     if (l->first == NULL) {
         l->first = addNode;
+        l->size++;
         return 1;
     }
 
-    t_addressNode* current = l->first;
+    t_addressNode * current = l->first;
     while (current->next != NULL) {
         current = current->next;
     }
@@ -63,7 +65,7 @@ static t_addressNode* deleteAddress(t_addressNode * node, void * address, int* f
     }
 
     if (node->address == address) {
-        t_addressNode* next = node->next;
+        t_addressNode * next = node->next;
         free(node);
         *flag = 1;
         return next;

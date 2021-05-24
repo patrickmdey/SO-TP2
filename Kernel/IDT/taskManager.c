@@ -68,8 +68,7 @@ void* schedule(void* oldRSP, int forceStart) {
             if (state == YIELD)
                   aux->state = READY;
 
-      }
-      else {
+      } else {
             currentTicks++;
       }
 
@@ -111,19 +110,35 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
       process->argv = argv;
       process->argc = argc - background;
 
+      process->parent = current;
+      process->pid = currentPID++;
+
 
       if (current == NULL) {
             process->in = STDIN;
             process->out = STDOUT;
-      }
-      else {
+      } else {
             process->in = (background) ? -1 : ((fdIn == -1) ? current->in : fdIn); // si esta en background seteo a -1, 
                   // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
             process->out = (fdOut == -1) ? current->out : fdOut;
+            t_waitingPid * child = malloc(sizeof(t_waitingPid));
+            child->pid = process->pid;
+            child->next = NULL;
+            if (current->children == NULL) {
+                  current->children = child;
+            } else {
+                  t_waitingPid * curr = current->children;
+                  while (curr->next != NULL) {
+                        curr = curr->next;
+                  }
+                  curr->next = child;
+            }
       }
 
       process->waiting = NULL;
       process->priority = 0;
+
+      process->children = NULL;
 
       process->addresses = malloc(sizeof(t_addressList));
       if (process->addresses == NULL) {
@@ -156,7 +171,6 @@ int addProcess(t_PCB* process) {
       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
             process->argc, process->argv);
 
-      process->pid = currentPID++;
       process->state = READY;
 
       //process->buffer = queueInit(sizeof(char));

@@ -135,7 +135,7 @@ static int processCommand(t_shellData* shellData) {
       }
 
       for (i = 0; i < idx; i++) {
-            argv[i] = (char**)malloc(MAX_ARGS * sizeof(char*));
+            argv[i] = (char**) malloc(MAX_ARGS * sizeof(char*));
             argc[i] = 0;
             strtok(0, 0, ' ');
             strtok(process[i], command[i], ' ');    // parse buffer

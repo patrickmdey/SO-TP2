@@ -9,7 +9,7 @@
 
 static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
-static void freePCB(t_PCB* pcb);
+static void freePCB(t_pcbQueue * q, t_PCB * pcb);
 
 t_pcbQueue* createPcbQueue() {
     return malloc(sizeof(t_queue));
@@ -89,14 +89,14 @@ int getSize(t_pcbQueue* q) {
     return q->size;
 }
 
-static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag) {
+static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag) {
     if (pcb == NULL) {
         return NULL;
     }
 
     if (pcb->pid == pid) {
         t_PCB* next = pcb->next;
-        freePCB(pcb);
+        freePCB(q, pcb);
         *flag = 1;
         return next;
     }
@@ -108,21 +108,72 @@ static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag) {
     return pcb;
 }
 
-static void freePCB(t_PCB* pcb) {
+static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
     free(pcb->rbp);
 
     int i, count = (pcb->argc) + 1 - pcb->foreground;
-    for (i = 0; i <= count; i++)
+    for (i = 0; i <= count; i++) {
+        if (pcb->parent != NULL) {
+            removeAddress(pcb->parent->addresses, pcb->argv[i]);
+        }
         free(pcb->argv[i]);
+    }
 
     freeAddressList(pcb->addresses);
 
     t_waitingPid * current = pcb->waiting;
     t_waitingPid * next;
+
     while (current != NULL) {
         next = current->next;
         free(current);
         current = next;
+    }
+
+    current = pcb->children;
+    t_PCB * child;
+
+    while (current != NULL) {
+        child = findPCB(q, current->pid);
+        if (child != NULL) {
+            child->parent = NULL;
+        }
+        next = current->next;
+        free(current);
+        current = next;
+    }
+
+    if (pcb->parent != NULL) {
+        removeAddress(pcb->parent->addresses, pcb->argv);
+        current = pcb->parent->children;
+        if (current != NULL) {
+            if (current->pid == pcb->pid) {
+                next = current->next;
+                free(current);
+                pcb->parent->children = next;
+            } else {
+                t_waitingPid * prev = current;
+                current = prev->next;
+                if (current != NULL) {
+                    next = current->next;
+                } else {
+                    next = NULL;
+                }
+                while (current != NULL && current->pid != pcb->pid) {
+                    prev = current;
+                    current = current->next;
+                    if (current != NULL) {
+                        next = current->next;
+                    } else {
+                        next = NULL;
+                    }
+                }
+                if (current != NULL) {
+                    prev->next = next;
+                    free(current);
+                }
+            }
+        }
     }
 
     free(pcb->argv);
