@@ -660,7 +660,54 @@ void free(void* ptr) {
 }
 
 char** getMemoryInfo(uint64_t* size) {
-    return NULL;
+    *size = 0;
+    char ** toReturn = malloc(3 * sizeof(char *));
+    if (toReturn == NULL) {
+        return NULL;
+    }
+    int i = 0, usedMemory = 0, bucket_size, freeBlocks = 0, j;
+    list_t * l;
+    list_t * iter;
+
+    for(i = 0; i < 3; i++) {
+        toReturn[i] = malloc(40 * sizeof(char));
+        if (toReturn[i] == NULL) {
+            for (j = 0; i < i; ++i)
+                free(toReturn[j]);
+
+            free(toReturn);
+            return NULL;
+        }
+    }
+
+    for (i = BUCKET_COUNT - 1; i >= bucket_limit; --i) {
+        bucket_size = 1 << (MAX_ALLOC_LOG2 - i);
+        l = (list_t *) &(buckets[i]);
+        iter = l->prev;
+        while (iter != l) {
+            freeBlocks++;
+            usedMemory += bucket_size;
+            iter = iter->prev;
+        }
+    }
+    int offset = 0;
+    offset += strcpy(toReturn[0], "Memoria total: ");
+    offset += uintToBase(MAX_ALLOC, toReturn[0] + offset, 10);
+    offset += strcpy(toReturn[0] + offset, " bytes");
+    toReturn[0][offset] = 0;
+    offset = 0;
+    offset += strcpy(toReturn[1], "Memoria en uso: ");
+    offset += uintToBase(usedMemory, toReturn[1] + offset, 10);
+    offset += strcpy(toReturn[1] + offset, " bytes");
+    toReturn[1][offset] = 0;
+    offset = 0;
+    offset += strcpy(toReturn[2], "Bloques libres: ");
+    offset += uintToBase(freeBlocks, toReturn[2] + offset, 10);
+    toReturn[2][offset] = 0;
+
+    *size = 3;
+
+    return toReturn;
 }
 
 #endif
