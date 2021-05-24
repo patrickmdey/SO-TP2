@@ -11,9 +11,6 @@
 #include <test_sync.h>
 #include <sem.h>
 
-#define VERY_BIG_NUMBER 9999999
-
-
 static char* regNames[] = { "R15: ", "R14: ", "R13: ", "R12: ", "R11: ", "R10: ", "R9: ",
                            "R8: ", "RSI: ", "RDI: ", "RBP: ", "RDX: ", "RCX: ", "RBX: ",
                            "RAX: ", "RIP: ", "RSP: " };
@@ -227,15 +224,14 @@ void loop(int argc, char** args) {
 }
 
 void cat(int argc, char** args) {
-      //sysBlock(0);
       char c;
       char toPrint[100];
       int i = 0;
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  //sysBlock(0);
                   putchar('\t');
+                  putchar('\n');
                   sysExit();
             }
             if (c == '\n') {
@@ -258,6 +254,7 @@ void filter(int argc, char** args) {
             c = getchar();
             if (c == '\t') {
                   putchar('\t');
+                  putchar('\n');
                   sysExit();
             }
             putchar(c);

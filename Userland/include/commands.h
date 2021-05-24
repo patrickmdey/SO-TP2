@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <shell.h>
 
+#define VERY_BIG_NUMBER 9999999
 
 //print registers, done in assembly
 void inforeg(int argc, char** args);

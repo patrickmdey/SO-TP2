@@ -68,7 +68,9 @@ static void initShell(t_shellData* shellData) {
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
           {NULL, &wc, "wc", "counts the amount of lines in a given input", 0},
           {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0},
-          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0}
+          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0},
+          {NULL, &testContextSwitching, "testCS", "enhanced context switching test", 0},
+          {NULL, &testPhylo, "testPhylo", "automatic phylo test", 0}
 
       };
 
@@ -160,7 +162,7 @@ static int processCommand(t_shellData* shellData) {
             {-1, -1}
       };
 
-      int64_t pids[MAX_PIPE_PROCESS] = {-1};
+      int64_t pids[MAX_PIPE_PROCESS] = { -1 };
       int openedFd = -1;
       if (idx == MAX_PIPE_PROCESS) {
             openedFd = sysGetFd();
@@ -168,7 +170,7 @@ static int processCommand(t_shellData* shellData) {
             fd[1][0] = openedFd;
       }
       int notFound = 1;
-      int invalidCommand[MAX_PIPE_PROCESS] = {1, 1};
+      int invalidCommand[MAX_PIPE_PROCESS] = { 1, 1 };
       for (i = 0; i < COMMANDS && notFound; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
@@ -176,8 +178,9 @@ static int processCommand(t_shellData* shellData) {
                         if (shellData->commands[i].isBuiltIn) {
                               free(argv[j]);
                               shellData->commands[i].builtIn(shellData);
-                        } else {
-                              pids[j] = sysCreateProcess(shellData->commands[i].command, 
+                        }
+                        else {
+                              pids[j] = sysCreateProcess(shellData->commands[i].command,
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
                               //sysYield();
                         }
@@ -191,16 +194,17 @@ static int processCommand(t_shellData* shellData) {
       }
 
       for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos
-        if (invalidCommand[i]) {
-          printString("Invalid command: ");
-          printStringLn(command[i]);
-          for (j = 0; j < argc[i]; j++) {
-            free(argv[i][j]);
-          }
-          free(argv[i]);
-        } else if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
-          sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
-        }
+            if (invalidCommand[i]) {
+                  printString("Invalid command: ");
+                  printStringLn(command[i]);
+                  for (j = 0; j < argc[i]; j++) {
+                        free(argv[i][j]);
+                  }
+                  free(argv[i]);
+            }
+            else if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
+                  sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
+            }
       }
       if (openedFd != -1) {
             sysCloseFd(openedFd);
