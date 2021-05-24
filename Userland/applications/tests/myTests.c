@@ -7,7 +7,6 @@ static void fakeSleep();
 static int createLoop();
 static void printPs();
 static void printMemoryInfo();
-static int createPhylo();
 char* params[] = { "&" };
 
 void testContextSwitching() {
@@ -72,74 +71,10 @@ void testContextSwitching() {
     sysExit();
 }
 
-void testPhylo() {
 
-    printStringWC("You can add or remove philosophers while this test is running\n", BLACK, GREEN);
-    printMemoryInfo();
-    fakeSleep();
-
-    createPhylo();
-    fakeSleep();
-
-    printStringWC("Trying to add a phylosopher\n", BLACK, GREEN);
-    putchar('a');
-    fakeSleep();
-
-    printStringWC("Trying to add a phylosopher\n", BLACK, GREEN);
-    putchar('a');
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Trying to add a phylosopher\n", BLACK, GREEN);
-    putchar('a');
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Exiting phylo... please wait for the phylo to reboot\n", BLACK, GREEN);
-    putchar('\t');
-    fakeSleep();
-
-    printMemoryInfo();
-    fakeSleep();
-
-    putchar('\n');
-
-    createPhylo();
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Trying to remove a phylosopher\n", BLACK, GREEN);
-    putchar('r');
-    fakeSleep();
-
-    printStringWC("Ending phyloTest\n", BLACK, GREEN);
-    putchar('\t');
-    fakeSleep();
-}
-
-static int createPhylo() {
-    return sysCreateProcess(&phylo, "phylo", -1, -1, 0, 0);
-}
 
 static int createLoop() {
-    printStringWC("\nCreating loop in backGround\n", BLACK, GREEN);
+    printStringWC("\nCreating loop in background\n", BLACK, GREEN);
     return sysCreateProcess(&loop, "loop", -1, -1, 1, params);
 }
 

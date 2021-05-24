@@ -15,6 +15,5 @@ void slowInc(int64_t* p, int64_t inc);
 void test_mm();
 
 void testContextSwitching();
-void testPhylo();
 
 #endif
