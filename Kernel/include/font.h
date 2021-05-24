@@ -261,6 +261,6 @@
 #define XXXXXXX_ 0xFE
 #define XXXXXXXX 0xFF
 
-char * getCharMap(int c);
+char* getCharMap(int c);
 
 #endif

@@ -5,19 +5,19 @@
 
 typedef struct t_pcbQueue {
     int size;
-    t_PCB * first;
-    t_PCB * last;
+    t_PCB* first;
+    t_PCB* last;
 } t_pcbQueue;
 
 t_pcbQueue* createPcbQueue();
 
-void freePcbQueue(t_pcbQueue * q);
+void freePcbQueue(t_pcbQueue* q);
 
 uint8_t removePCB(t_pcbQueue* q, int pid);
 
-t_PCB * peekFirst(t_pcbQueue* q);
+t_PCB* peekFirst(t_pcbQueue* q);
 
-t_PCB * popFirst(t_pcbQueue* q);
+t_PCB* popFirst(t_pcbQueue* q);
 
 void insertPCB(t_pcbQueue* q, t_PCB* pcb);
 

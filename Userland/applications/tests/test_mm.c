@@ -10,7 +10,7 @@
 #define MAX_BLOCKS 64
 
 typedef struct MM_rq {
-    void * address;
+    void* address;
     uint32_t size;
 } mm_rq;
 

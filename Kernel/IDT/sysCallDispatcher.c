@@ -67,14 +67,14 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
 
             case SYS_WRITE:
-                  sysWrite((int64_t) r->rdi, (char*) (r->rsi), (uint8_t) (r->rdx), (t_colour)(r->r10), (t_colour) (r->r8));
+                  sysWrite((int64_t)r->rdi, (char*)(r->rsi), (uint8_t)(r->rdx), (t_colour)(r->r10), (t_colour)(r->r8));
                   break;
 
             case SYS_GETCHAR:
                   /*if ((int)(r->rdi) == 1)
                         return getcharOnce();*/
 
-                  return getChar((int64_t) r->rdi);
+                  return getChar((int64_t)r->rdi);
                   break;
 
             case SYS_CLEAR:
@@ -112,10 +112,10 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   cursorPosition((int*)((uint64_t)(r->rdi)));
                   break;
             case SYS_ASIGN_MEMORY:
-                  return (uint64_t) allocateMem((uint32_t) r->rdi);
+                  return (uint64_t)allocateMem((uint32_t)r->rdi);
                   break;
             case SYS_FREE_MEMORY:
-                  freeMem((void *) r->rdi);
+                  freeMem((void*)r->rdi);
                   break;
             case SYS_GET_MEM_INFO:
                   return (uint64_t)getMemoryInfo((uint64_t*)r->rdi);
@@ -172,10 +172,10 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   semDestroy((void*)r->rdi);
                   break;
             case SYS_CLOSE_FD:
-                  closeFd((int64_t) r->rdi);
+                  closeFd((int64_t)r->rdi);
                   break;
             case SYS_PIPE_INFO:
-                  return (uint64_t) pipeInfo((int*) ((uint64_t)(r->rdi)));
+                  return (uint64_t)pipeInfo((int*)((uint64_t)(r->rdi)));
                   break;
             }
 

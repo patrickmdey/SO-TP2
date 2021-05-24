@@ -37,7 +37,8 @@ void test_processes() {
             if (p_rqs[rq].pid == -1) {                           // TODO: Port this as required
                 printString("Error creating process\n");               // TODO: Port this as required
                 sysExit();
-            } else {
+            }
+            else {
                 p_rqs[rq].state = RUNNING;
                 alive++;
             }

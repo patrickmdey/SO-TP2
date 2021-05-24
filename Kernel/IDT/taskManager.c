@@ -67,7 +67,8 @@ void* schedule(void* oldRSP, int forceStart) {
             if (state == YIELD)
                   aux->state = READY;
 
-      } else {
+      }
+      else {
             currentTicks++;
       }
 
@@ -114,7 +115,8 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
       if (current == NULL) {
             process->in = STDIN;
             process->out = STDOUT;
-      } else {
+      }
+      else {
             process->in = (background) ? -1 : ((fdIn == -1) ? current->in : fdIn); // si esta en background seteo a -1, 
                   // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
             process->out = (fdOut == -1) ? current->out : fdOut;
@@ -150,16 +152,16 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
       process->rbp = malloc(SIZE_OF_STACK);
       if (process->rbp == NULL)
             return -1;
-            
+
       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
             process->argc, process->argv);
-      
-      
+
+
       /*printInt(process->in);
       printInt(process->out);*/
 
       int ret = addProcess(process);
-      
+
       if (ret != 1) {
             //freeAddressList(process->addresses);
             free(process);
@@ -191,7 +193,7 @@ int killProcess(int pid) {
       if (pcb == NULL)
             return 0;
 
-      t_waitingPid * curr = pcb->waiting;
+      t_waitingPid* curr = pcb->waiting;
       while (curr != NULL) {
             block(curr->pid);
             curr = curr->next;
@@ -260,9 +262,9 @@ char getChar(int64_t fd) { // getchar
       return pipeRead(readFd);
 }
 
-void * allocateMem(uint32_t size) {
-      void * dir = malloc(size);
-      /*if (dir == NULL) 
+void* allocateMem(uint32_t size) {
+      void* dir = malloc(size);
+      /*if (dir == NULL)
             return NULL;
 
       int ret = addAddress(current->addresses, dir);
@@ -273,7 +275,7 @@ void * allocateMem(uint32_t size) {
       return dir;
 }
 
-void freeMem(void * dir) {
+void freeMem(void* dir) {
       //removeAddress(current->addresses, dir);
       free(dir);
 }
@@ -382,7 +384,8 @@ static t_PCB* getNextProcess() {
             curr = peekFirst(tasks);
             if (curr->state == KILLED) {
                   removePCB(tasks, curr->pid);
-            } else {
+            }
+            else {
                   curr = popFirst(tasks);
                   insertPCB(tasks, curr);
             }

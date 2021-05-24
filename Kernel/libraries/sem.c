@@ -43,9 +43,9 @@ void semClose(t_sem* sem) {
 void semDestroy(t_sem* sem) {
     removeSem(&semaphores, sem->chan);
     while (sem->waiting != NULL) {
-        t_waitingPid * toFree = sem->waiting;
+        t_waitingPid* toFree = sem->waiting;
         sem->waiting = sem->waiting->next;
-        block(toFree->pid); 
+        block(toFree->pid);
         free(toFree);
     }
     free(sem);
@@ -141,7 +141,7 @@ static void wakeup(t_sem* sem) {
     if (ret) {
         acquire(sem);
         (sem->value)--;
-        
+
     }
 }
 

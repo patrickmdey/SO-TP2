@@ -11,7 +11,7 @@ static t_fdNode* deleteFdNode(t_fdNode* fdNode, uint64_t fd, int* flag);
 //static void freeRec(t_fdNode* fdNode);
 static uint64_t createFd();
 static void freeFd(t_fdNode* node);
-static int fillPipeInfo(char ** toReturn, int size);
+static int fillPipeInfo(char** toReturn, int size);
 
 static t_fdList fdList = { NULL, 0 };
 static uint64_t nextFd = 0;
@@ -33,7 +33,7 @@ void insertFd(t_fdNode* fdNode) {
         return;
     }
 
-    t_fdNode * current = l->first;
+    t_fdNode* current = l->first;
     while (current->next != NULL) {
         current = current->next;
     }
@@ -47,12 +47,12 @@ void pipeWrite(t_fdNode* node, char c) {
         return;
 
     if (node->waiting != NULL) {
-        t_waitingPid * toFree = node->waiting;
+        t_waitingPid* toFree = node->waiting;
         block(toFree->pid);
         node->waiting = toFree->next;
         free(toFree);
     }
-        
+
     queueInsert(node->buffer, &c);
 }
 
@@ -66,7 +66,7 @@ void pipeWriteStr(t_fdNode* node, char* str) {
 }
 
 char pipeRead(uint64_t fd) {
-    t_fdNode * node = findFd(fd);
+    t_fdNode* node = findFd(fd);
     if (node == NULL)
         return 0;
 
@@ -76,15 +76,16 @@ char pipeRead(uint64_t fd) {
         return key;
 
     int pid = getCurrentPid();
-    t_waitingPid * toAdd = malloc(sizeof(t_waitingPid));
+    t_waitingPid* toAdd = malloc(sizeof(t_waitingPid));
     toAdd->pid = pid;
     toAdd->next = NULL;
-    t_waitingPid * curr = node->waiting;
+    t_waitingPid* curr = node->waiting;
 
 
     if (curr == NULL) {
         node->waiting = toAdd;
-    } else {
+    }
+    else {
         while (curr->next != NULL) {
             curr = curr->next;
         }
@@ -99,7 +100,7 @@ char pipeRead(uint64_t fd) {
 }
 
 void closeFd(uint64_t fd) {
-    t_fdList * l = &fdList;
+    t_fdList* l = &fdList;
     if (l == NULL)
         return;
     int flag = 0;
@@ -127,11 +128,11 @@ int64_t getFd() {
     return createFd();
 }
 
-char ** pipeInfo(int * index) {
+char** pipeInfo(int* index) {
     int size = fdList.size;
-    t_fdNode * current = fdList.first;
+    t_fdNode* current = fdList.first;
     while (current != NULL) {
-        t_waitingPid * pid = current->waiting;
+        t_waitingPid* pid = current->waiting;
         while (pid != NULL) {
             size++;
             pid = pid->next;
@@ -179,10 +180,10 @@ static void freeFd(t_fdNode* node) {
     free(node);
 }
 
-static int fillPipeInfo(char ** toReturn, int size) {
+static int fillPipeInfo(char** toReturn, int size) {
     int i = 0, j = 0;
-    t_fdNode * nodeIterator = fdList.first;
-    t_waitingPid * waitingIterator;
+    t_fdNode* nodeIterator = fdList.first;
+    t_waitingPid* waitingIterator;
     int offset;
 
     while (nodeIterator != NULL) {
@@ -193,7 +194,8 @@ static int fillPipeInfo(char ** toReturn, int size) {
             offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
             offset += strcpy(toReturn[j] + offset, "                 ");
             waitingIterator = waitingIterator->next;
-        } else {
+        }
+        else {
             offset += uintToBase(0, toReturn[j] + offset, 10);
             offset += strcpy(toReturn[j] + offset, "                 ");
         }

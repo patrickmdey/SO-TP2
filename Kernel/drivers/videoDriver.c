@@ -44,13 +44,13 @@ struct vbe_mode_info_structure {
 
 static int getPixelDataByPosition(uint32_t x, uint32_t y);
 
-static struct vbe_mode_info_structure *screen_info = (void *)0x5C00;
+static struct vbe_mode_info_structure* screen_info = (void*)0x5C00;
 static uint32_t SCREEN_WIDTH = 1024;  //VESA default values
 static uint32_t SCREEN_HEIGHT = 768;
 
-t_screen aux = {0};
+t_screen aux = { 0 };
 
-static t_screen *currentScreen = &aux;
+static t_screen* currentScreen = &aux;
 
 void initVideoDriver(t_colour BGColour, t_colour FontColour) {
 
@@ -65,88 +65,87 @@ void initVideoDriver(t_colour BGColour, t_colour FontColour) {
 
 }
 
-void draw(char *bitmap, t_colour colour, int multiplier){
-      if(bitmap[0] == 0 || multiplier <=0)
+void draw(char* bitmap, t_colour colour, int multiplier) {
+      if (bitmap[0] == 0 || multiplier <= 0)
             return;
       int originalX = currentScreen->currentX;
       int originalY = currentScreen->currentY;
       char c = 0;
       int auxY = 0;
-      char * aux = bitmap;
+      char* aux = bitmap;
       do {
             c = *aux;
-            switch(c) {         
-                  case '_':
-                        if((currentScreen->currentX)+multiplier <= currentScreen->width)
-                              currentScreen->currentX+=multiplier;
-                        else
-                              c = 0;
-                        break;
-                  case 'X':
-                        for(int i = 0; i<multiplier && c!=0;i++){
-                              if(currentScreen->currentX <= currentScreen->width && currentScreen->currentY <= currentScreen->height){
+            switch (c) {
+            case '_':
+                  if ((currentScreen->currentX) + multiplier <= currentScreen->width)
+                        currentScreen->currentX += multiplier;
+                  else
+                        c = 0;
+                  break;
+            case 'X':
+                  for (int i = 0; i < multiplier && c != 0;i++) {
+                        if (currentScreen->currentX <= currentScreen->width && currentScreen->currentY <= currentScreen->height) {
 
-                                    writePixel(currentScreen->currentX, currentScreen->currentY, colour);
-                                    auxY = currentScreen->currentY;
-                                    for(int j = 0; j<=multiplier && c!=0;j++){
-                                          if(currentScreen->currentY <= currentScreen->height){
-                                                writePixel(currentScreen->currentX, currentScreen->currentY, colour);
-                                                currentScreen->currentY++;
-                                          }
-                                          else
-                                                c=0;
-                                    
+                              writePixel(currentScreen->currentX, currentScreen->currentY, colour);
+                              auxY = currentScreen->currentY;
+                              for (int j = 0; j <= multiplier && c != 0;j++) {
+                                    if (currentScreen->currentY <= currentScreen->height) {
+                                          writePixel(currentScreen->currentX, currentScreen->currentY, colour);
+                                          currentScreen->currentY++;
                                     }
-                                    currentScreen->currentY = auxY;
-                                    currentScreen->currentX++;
+                                    else
+                                          c = 0;
+
                               }
-                              else 
-                                    c=0;
-                        }
-                        break;
-                  case '\n':
-                        if(currentScreen->currentY <= currentScreen->height){
-                              currentScreen->currentX = originalX;
-                              currentScreen->currentY+=multiplier;
+                              currentScreen->currentY = auxY;
+                              currentScreen->currentX++;
                         }
                         else
                               c = 0;
-                        break;
-                  default:
-                        c=0;
-                        break;
+                  }
+                  break;
+            case '\n':
+                  if (currentScreen->currentY <= currentScreen->height) {
+                        currentScreen->currentX = originalX;
+                        currentScreen->currentY += multiplier;
+                  }
+                  else
+                        c = 0;
+                  break;
+            default:
+                  c = 0;
+                  break;
             }
             aux++;
-      }
-      while(c!=0 && currentScreen->currentX < currentScreen->width && currentScreen->currentY < currentScreen->height);
+      }       while (c != 0 && currentScreen->currentX < currentScreen->width && currentScreen->currentY < currentScreen->height);
 
       currentScreen->currentX = originalX;
       currentScreen->currentY = originalY;
 }
 
-void moveCursor(int x, int y){
-      if(currentScreen->currentX + x < 0 || currentScreen->currentX + x > currentScreen->width
-      || currentScreen->currentY + y < 0 || currentScreen->currentY + y > currentScreen->height)
+void moveCursor(int x, int y) {
+      if (currentScreen->currentX + x < 0 || currentScreen->currentX + x > currentScreen->width
+            || currentScreen->currentY + y < 0 || currentScreen->currentY + y > currentScreen->height)
             return;
-      currentScreen->currentX+=x;
-      currentScreen->currentY+=y;
+      currentScreen->currentX += x;
+      currentScreen->currentY += y;
 }
 
-void moveCursorTo(int x, int y){
-      if(x < 0 || x > currentScreen->width || y < 0 || y > currentScreen->height)
+void moveCursorTo(int x, int y) {
+      if (x < 0 || x > currentScreen->width || y < 0 || y > currentScreen->height)
             return;
-      currentScreen->currentX=x;
-      currentScreen->currentY=y;
+      currentScreen->currentX = x;
+      currentScreen->currentY = y;
 }
 
-void cursorPosition(int *array){
+void cursorPosition(int* array) {
       array[0] = currentScreen->currentX;
       array[1] = currentScreen->currentY;
 }
 
 void writePixel(uint32_t x, uint32_t y, t_colour colour)  //BGR
 {
-      char *currentFrame = (char *)((uint64_t)screen_info->framebuffer);  //casteo a uint64 para evitar warning
+      char* currentFrame = (char*)((uint64_t)screen_info->framebuffer);  //casteo a uint64 para evitar warning
       int offset = getPixelDataByPosition(x, y);
       currentFrame[offset] = (char)((colour >> 16) & 0xFF);     //BLUE
       currentFrame[offset + 1] = (char)((colour >> 8) & 0xFF);  //GREEN
@@ -163,7 +162,7 @@ void printCharOnScreen(char c, t_colour bgColour, t_colour fontColour, int advan
             }
       }
 
-      char *charMap = getCharMap(c);
+      char* charMap = getCharMap(c);
 
       uint32_t x = currentScreen->currentX + currentScreen->offset, y = currentScreen->currentY;
 
@@ -172,7 +171,8 @@ void printCharOnScreen(char c, t_colour bgColour, t_colour fontColour, int advan
                   int8_t isFont = (charMap[i] >> (CHAR_WIDTH - j - 1)) & 0x01;  //-1 para no romper el decalaje, primera vez tengo q decalar 7
                   if (isFont) {
                         writePixel(x, y, fontColour);
-                  } else {
+                  }
+                  else {
                         writePixel(x, y, bgColour);
                   }
                   x++;
@@ -189,9 +189,9 @@ void printCharOnScreen(char c, t_colour bgColour, t_colour fontColour, int advan
 void scrollDownScreen() {
       for (int i = 0; i < CHAR_HEIGHT; i++) {
             for (int y = 0; y < SCREEN_HEIGHT; y++) {
-                  memcpy((void *)((uint64_t)screen_info->framebuffer + y * SCREEN_WIDTH * PIXEL_SIZE),
-                        (void *)((uint64_t)screen_info->framebuffer + (y + 1) * SCREEN_WIDTH * PIXEL_SIZE),
-                          SCREEN_WIDTH * PIXEL_SIZE);
+                  memcpy((void*)((uint64_t)screen_info->framebuffer + y * SCREEN_WIDTH * PIXEL_SIZE),
+                        (void*)((uint64_t)screen_info->framebuffer + (y + 1) * SCREEN_WIDTH * PIXEL_SIZE),
+                        SCREEN_WIDTH * PIXEL_SIZE);
             }
       }
 
@@ -239,8 +239,8 @@ void clearScreen() {
       currentScreen->currentY = 0;
 }
 
-void clearScreenFromTo(int fromWidth, int fromHeight, int toWidth, int toHeight){
-      if(fromWidth < 0 || toWidth < fromWidth || fromHeight < 0 || toHeight < fromHeight || toWidth > SCREEN_WIDTH || toHeight>SCREEN_HEIGHT)
+void clearScreenFromTo(int fromWidth, int fromHeight, int toWidth, int toHeight) {
+      if (fromWidth < 0 || toWidth < fromWidth || fromHeight < 0 || toHeight < fromHeight || toWidth > SCREEN_WIDTH || toHeight>SCREEN_HEIGHT)
             return;
       for (int y = fromHeight; y < toHeight; y++) {
             for (int x = fromWidth; x < toWidth; x++) {
@@ -255,7 +255,8 @@ void blinkCursor() {
       if (currentScreen->blink) {
             staticputchar('|');
             currentScreen->blink = 0;
-      } else {
+      }
+      else {
             staticputchar(' ');
             currentScreen->blink = 1;
       }

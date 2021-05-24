@@ -213,7 +213,8 @@ static int processCommand(t_shellData* shellData) {
             if (shellData->commands[execute].isBuiltIn) {
                   free(argv[i]);
                   shellData->commands[execute].builtIn(shellData);
-            } else {
+            }
+            else {
                   pids[i] = sysCreateProcess(shellData->commands[execute].command,
                         shellData->commands[execute].name, fd[i][0], fd[i][1], argc[i], argv[i]);
             }

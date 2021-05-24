@@ -19,7 +19,7 @@ static int findBlocks(int amount);
 static void asignMemory(int firstIdx, int count, int size);
 
 typedef struct t_block {
-    uint16_t size; 
+    uint16_t size;
     uint8_t free;
     int pos;
     uint8_t usesNext;
@@ -54,7 +54,7 @@ void* malloc(uint32_t size) {
     return &start[firstIdx * BLOCK_SIZE];
 }
 
-void free(void * dir) {
+void free(void* dir) {
     if ((uint64_t)dir % BLOCK_SIZE) {
         //printStringLn("DIR NO VALIDA");
         return;
@@ -84,7 +84,8 @@ char** getMemoryInfo(uint64_t* size) {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
             freeMemory++;
-        } else {
+        }
+        else {
             blocksUsed++;
             usedMemory += blockArray[i].size;
         }
@@ -313,8 +314,8 @@ static void list_remove(list_t* entry) {
 /*
  * Remove and return the first entry in the list or NULL if the list is empty.
  */
-static list_t * list_pop(list_t* list) {
-    list_t * back = list->prev;
+static list_t* list_pop(list_t* list) {
+    list_t* back = list->prev;
     if (back == list) return NULL;
     list_remove(back);
     return back;
@@ -387,7 +388,7 @@ static int lower_bucket_limit(int32_t bucket) {
          * block with the newly-expanded address space to the new root free list.
          */
         if (!parent_is_split(root)) {
-            list_remove((list_t*) base_ptr);
+            list_remove((list_t*)base_ptr);
             list_init(&buckets[--bucket_limit]);
             list_push(&buckets[bucket_limit], (list_t*)base_ptr);
             continue;
@@ -421,14 +422,14 @@ static int lower_bucket_limit(int32_t bucket) {
     return 1;
 }
 
-static int invalidDir(void * address, int bucket) {
+static int invalidDir(void* address, int bucket) {
     int32_t bucketSize = (1 << (MAX_ALLOC_LOG2 - bucket));
-    if (((uint64_t) address - (uint64_t) base_ptr) % bucketSize)
+    if (((uint64_t)address - (uint64_t)base_ptr) % bucketSize)
         return 1;
 
     if (bucket > BUCKET_COUNT)
         return 1;
-    
+
     return 0;
 }
 
@@ -464,7 +465,7 @@ void* malloc(uint32_t request) {
         bucket_limit = BUCKET_COUNT - 1;
         update_max_ptr(base_ptr + sizeof(list_t));
         list_init(&buckets[BUCKET_COUNT - 1]);
-        list_push(&buckets[BUCKET_COUNT - 1], (list_t *)base_ptr);
+        list_push(&buckets[BUCKET_COUNT - 1], (list_t*)base_ptr);
     }
 
     /*
@@ -591,16 +592,16 @@ void free(void* ptr) {
      * look up the index of the node corresponding to this address.
      */
     ptr = (uint8_t*)ptr - HEADER_SIZE;
-    if ((uint8_t*)ptr < base_ptr || (uint8_t*) ptr >= max_ptr - sizeof(list_t))
+    if ((uint8_t*)ptr < base_ptr || (uint8_t*)ptr >= max_ptr - sizeof(list_t))
         return;
 
 
     bucket = bucket_for_request(*(int32_t*)ptr + HEADER_SIZE);
     if (invalidDir(ptr, bucket))
         return;
-    
-    i = node_for_ptr((uint8_t *)ptr, bucket);
-    if (((i-1) / 16) >= NODE_LIMIT)
+
+    i = node_for_ptr((uint8_t*)ptr, bucket);
+    if (((i - 1) / 16) >= NODE_LIMIT)
         return;
 
     /*if (isFree(i))
@@ -643,8 +644,8 @@ void free(void* ptr) {
          * add the merged parent to its free list yet. That will be done once after
          * this loop is finished.
          */
-        //node_is_free[((i - 1) ^ 1) + 1] = 0;
-        list_remove((list_t*) ptr_for_node(((i - 1) ^ 1) + 1, bucket));
+         //node_is_free[((i - 1) ^ 1) + 1] = 0;
+        list_remove((list_t*)ptr_for_node(((i - 1) ^ 1) + 1, bucket));
         i = (i - 1) / 2;
         bucket--;
     }
@@ -655,20 +656,20 @@ void free(void* ptr) {
      * followed by a "malloc" of the same size to ideally use the same address
      * for better memory locality.
      */
-    list_push(&buckets[bucket], (list_t*) ptr_for_node(i, bucket));
+    list_push(&buckets[bucket], (list_t*)ptr_for_node(i, bucket));
 }
 
 char** getMemoryInfo(uint64_t* size) {
     *size = 0;
-    char ** toReturn = malloc(3 * sizeof(char *));
+    char** toReturn = malloc(3 * sizeof(char*));
     if (toReturn == NULL) {
         return NULL;
     }
     int i = 0, usedMemory = 0, bucket_size, freeBlocks = 0, j;
-    list_t * l;
-    list_t * iter;
+    list_t* l;
+    list_t* iter;
 
-    for(i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         toReturn[i] = malloc(40 * sizeof(char));
         if (toReturn[i] == NULL) {
             for (j = 0; j < i; ++i)
@@ -681,7 +682,7 @@ char** getMemoryInfo(uint64_t* size) {
 
     for (i = BUCKET_COUNT - 1; i >= bucket_limit; --i) {
         bucket_size = 1 << (MAX_ALLOC_LOG2 - i);
-        l = (list_t *) &(buckets[i]);
+        l = (list_t*)&(buckets[i]);
         iter = l->prev;
         while (iter != l) {
             freeBlocks++;

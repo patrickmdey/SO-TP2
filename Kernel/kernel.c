@@ -30,14 +30,14 @@ void clearBSS(void* bssAddress, uint64_t bssSize) {
 
 void* getStackBase() {
       return (void*)((uint64_t)&endOfKernel + PageSize * 8  //The size of the stack itself, 32KiB
-                     - sizeof(uint64_t)                     //Begin at the top of the stack
-      );
+            - sizeof(uint64_t)                     //Begin at the top of the stack
+            );
 }
 
 void* initializeKernelBinary() {
       void* moduleAddresses[] = {
           sampleCodeModuleAddress,
-          sampleDataModuleAddress};
+          sampleDataModuleAddress };
       loadModules(&endOfKernelBinary, moduleAddresses);
       clearBSS(&bss, &endOfKernel - &bss);
       return getStackBase();
@@ -46,7 +46,7 @@ void* initializeKernelBinary() {
 int main() {
       _cli();
       initMemory();
-      initTaskManager((void *) 0x400000);
+      initTaskManager((void*)0x400000);
       initVideoDriver(BLACK, WHITE);
       initPipes();
       loadIDT();

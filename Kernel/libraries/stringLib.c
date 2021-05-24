@@ -6,7 +6,7 @@
 #include <taskManager.h>
 #include <stddef.h>
 
-void sysWrite(int64_t fd, char * string, uint8_t lenght, t_colour bgColour, t_colour fontColour) {
+void sysWrite(int64_t fd, char* string, uint8_t lenght, t_colour bgColour, t_colour fontColour) {
       if (lenght <= 0 || string == 0 || bgColour < 0 || fontColour < 0) {
             return;
       }
@@ -18,20 +18,23 @@ void sysWrite(int64_t fd, char * string, uint8_t lenght, t_colour bgColour, t_co
             toWriteFd = getCurrentOut();
       else
             toWriteFd = fd;
-      
+
       if (toWriteFd != STDOUT) {
-            t_fdNode * node = findFd(toWriteFd);
+            t_fdNode* node = findFd(toWriteFd);
             if (node == NULL)
                   return;
 
             pipeWriteStr(node, string);
-      } else {
-            for (int i = 0; i < lenght && string[i] != 0 ; i++) {
+      }
+      else {
+            for (int i = 0; i < lenght && string[i] != 0; i++) {
                   if (string[i] == '\n') {
                         changeLineOnScreen();
-                  } else if (string[i] == '\b') {
+                  }
+                  else if (string[i] == '\b') {
                         removeCharFromScreen();
-                  } else {
+                  }
+                  else {
                         printCharOnScreen(string[i], bgColour, fontColour, 1);
                   }
             }
@@ -43,7 +46,7 @@ void sysStaticWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fo
             return;
       }
 
-      for (int i = 0; i < lenght && string[i] != 0 ; i++) {
+      for (int i = 0; i < lenght && string[i] != 0; i++) {
             printCharOnScreen(string[i], bgColour, fontColour, 0);
       }
 }

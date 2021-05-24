@@ -38,7 +38,7 @@ void testContextSwitching() {
     sysBlock(pid1);
     fakeSleep();
     printPs();
-    
+
     int pid4 = createLoop();
     fakeSleep();
 

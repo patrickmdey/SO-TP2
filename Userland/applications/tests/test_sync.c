@@ -10,7 +10,7 @@
 
 int64_t global;
 
-void test_sync(int argc, char ** argv) {
+void test_sync(int argc, char** argv) {
     uint64_t i;
 
     uint64_t pids[TOTAL_PAIR_PROCESSES * 2];
@@ -23,7 +23,7 @@ void test_sync(int argc, char ** argv) {
         char* array1[4] = { "1", "1", "100", "&" };
         char* array2[4] = { "1", "-1", "100", "&" };
         pids[i] = sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
-        pids[i+1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
+        pids[i + 1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
 
     for (i = 0; i < TOTAL_PAIR_PROCESSES * 2; i++)
@@ -32,7 +32,7 @@ void test_sync(int argc, char ** argv) {
     sysExit();
 }
 
-void test_no_sync(int argc, char ** argv) {
+void test_no_sync(int argc, char** argv) {
     uint64_t i;
 
     global = 0;
@@ -45,16 +45,16 @@ void test_no_sync(int argc, char ** argv) {
         char* array1[4] = { "0", "1", "100", "&" };
         char* array2[4] = { "0", "-1", "100", "&" };
         pids[i] = sysCreateProcess(&inc, "inc", -1, -1, 4, array1);
-        pids[i+1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
+        pids[i + 1] = sysCreateProcess(&inc, "dec", -1, -1, 4, array2);
     }
-    
+
     for (i = 0; i < TOTAL_PAIR_PROCESSES * 2; i++)
         sysWaitpid(pids[i]);
-    
+
     sysExit();
 }
 
-void inc(int argc, char ** argv) {
+void inc(int argc, char** argv) {
     if (argc < 3) {
         printStringLn("Not enough arguments");
         sysExit();
@@ -77,7 +77,7 @@ void inc(int argc, char ** argv) {
     }
 
     int64_t i;
-    t_sem * semp;
+    t_sem* semp;
     if (sem) {
         semp = semOpen(SEM_ID, 1, 1);
         if (!semp) {

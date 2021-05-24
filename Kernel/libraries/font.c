@@ -1714,8 +1714,8 @@ static char __font_bitmap__[] = {
     ________,
     ________,
     ________,
-    ________};
+    ________ };
 
 char* getCharMap(int c) {
-      return (__font_bitmap__ + (c - ' ') * CHAR_HEIGHT);
+    return (__font_bitmap__ + (c - ' ') * CHAR_HEIGHT);
 }

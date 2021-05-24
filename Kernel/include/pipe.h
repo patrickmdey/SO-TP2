@@ -11,7 +11,7 @@
 typedef struct t_fdNode {
     uint64_t fd;
     t_queue* buffer;
-    t_waitingPid * waiting;
+    t_waitingPid* waiting;
     struct t_fdNode* next;
 } t_fdNode;
 
@@ -30,7 +30,7 @@ void pipeWrite(t_fdNode* node, char c);
 char pipeRead(uint64_t fd);
 void pipeWriteStr(t_fdNode* node, char* str);
 
-char ** pipeInfo(int * size);
+char** pipeInfo(int* size);
 
 
 #endif

@@ -27,7 +27,7 @@ void ncNewline()
 	do
 	{
 		ncPrintChar(' ');
-	} 	while ((uint64_t)(currentVideo - video) % (width * 2) != 0);
+	} while ((uint64_t)(currentVideo - video) % (width * 2) != 0);
 }
 
 void ncPrintDec(uint64_t value)
@@ -72,7 +72,7 @@ static uint32_t uintToBase(uint64_t value, char* buffer, uint32_t base)
 		uint32_t remainder = value % base;
 		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
 		digits++;
-	} 	while (value /= base);
+	} while (value /= base);
 
 	// Terminate string in buffer.
 	*p = 0;

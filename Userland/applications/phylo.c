@@ -14,19 +14,19 @@ static void addEater();
 static void removeEater();
 static void eat(int id);
 
-t_sem * forks[MAX_PHYLOSOPHERS] = {NULL};
-int64_t pids[MAX_PHYLOSOPHERS] = {0};
-t_sem * printSem;
-t_sem * creatingSem;
-t_sem * changeMutex;
+t_sem* forks[MAX_PHYLOSOPHERS] = { NULL };
+int64_t pids[MAX_PHYLOSOPHERS] = { 0 };
+t_sem* printSem;
+t_sem* creatingSem;
+t_sem* changeMutex;
 
 int size;
 
-char eating[MAX_PHYLOSOPHERS] = {0};
+char eating[MAX_PHYLOSOPHERS] = { 0 };
 
-int sig[MAX_PHYLOSOPHERS] = {0};
+int sig[MAX_PHYLOSOPHERS] = { 0 };
 
-static void printProcess(int argc, char **argv) {
+static void printProcess(int argc, char** argv) {
     semWait(creatingSem);
     int counter;
     while (1) {
@@ -46,7 +46,7 @@ static void printProcess(int argc, char **argv) {
     }
 }
 
-static void phyloProcess(int argc, char **args) {
+static void phyloProcess(int argc, char** args) {
     if (argc <= 0 || argc > 1)
         printStringLn("Too many arguments");
 
@@ -91,9 +91,11 @@ static void phyloProcess(int argc, char **args) {
                     leftFork = size - 1;
                     sig[0] = 0;
                     semPost(changeMutex);
-                } else if (sig[id] == -1) {
+                }
+                else if (sig[id] == -1) {
                     removeEater();
-                } else {
+                }
+                else {
                     addEater();
                     semPost(creatingSem);
                 }
@@ -103,13 +105,15 @@ static void phyloProcess(int argc, char **args) {
 
             semPost(forks[leftFork]);
             semPost(forks[rightFork]);
-        } else {
+        }
+        else {
             semWait(forks[leftFork]);
             semWait(forks[rightFork]);
 
             if (sig[id] == -1) {
                 removeEater();
-            } else if (sig[id] == 1) {
+            }
+            else if (sig[id] == 1) {
                 //sig[id] = 0;
                 addEater();
                 semPost(creatingSem);
@@ -123,7 +127,7 @@ static void phyloProcess(int argc, char **args) {
     }
 }
 
-void phylo(int argc, char **args) {
+void phylo(int argc, char** args) {
     int64_t printPid;
 
     size = 0;
@@ -137,8 +141,8 @@ void phylo(int argc, char **args) {
         addEater(pids);
     }
 
-    char ** printParams = (char **) malloc(sizeof(char *));
-    printParams[0] = (char *) malloc(sizeof(char));
+    char** printParams = (char**)malloc(sizeof(char*));
+    printParams[0] = (char*)malloc(sizeof(char));
     printParams[0][0] = '&';
 
     printPid = sysCreateProcess(&printProcess, "printer", -1, -1, 1, printParams);
@@ -161,9 +165,11 @@ void phylo(int argc, char **args) {
             if (size - 1 > 2) {
                 semWait(changeMutex);
                 sig[size - 1] = -1;
-            } else
+            }
+            else
                 printStringWC("Too few phylosophers\n", BLACK, RED);
-        } else if (c == '\t'){
+        }
+        else if (c == '\t') {
             for (i = 0; i < size; i++) {
                 semClose(forks[i]);
                 sysKill(pids[i]);
@@ -177,12 +183,12 @@ void phylo(int argc, char **args) {
     }
 }
 
-static void addEater(){
+static void addEater() {
     printStringWC("Agrego filosofo\n", BLACK, RED);
-    char ** param = (char **) malloc(2 * sizeof(char *));
-    param[0] = (char *) malloc(3 * sizeof(char));
+    char** param = (char**)malloc(2 * sizeof(char*));
+    param[0] = (char*)malloc(3 * sizeof(char));
     uintToBase(size, param[0], 10);
-    param[1] = (char *) malloc(1 * sizeof(char));
+    param[1] = (char*)malloc(1 * sizeof(char));
     param[1][0] = '&';
     sig[size] = 0;
     if (size != 0)

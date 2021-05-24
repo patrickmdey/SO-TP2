@@ -10,7 +10,7 @@ void* malloc(uint32_t size);
 
 void free(void* dir);
 
-char ** getMemoryInfo(uint64_t *size);
+char** getMemoryInfo(uint64_t* size);
 
 
 #endif

@@ -113,17 +113,17 @@ uint64_t pow(uint64_t x, uint64_t y) {
 
 int isPower(int x, long int y)
 {
-    // The only power of 1 is 1 itself
-    if (x == 1)
-        return (y == 1);
+      // The only power of 1 is 1 itself
+      if (x == 1)
+            return (y == 1);
 
-    // Repeatedly comput power of x
-    long int pow = 1;
-    while (pow < y)
-        pow *= x;
+      // Repeatedly comput power of x
+      long int pow = 1;
+      while (pow < y)
+            pow *= x;
 
-    // Check if power of x becomes y
-    return (pow == y);
+      // Check if power of x becomes y
+      return (pow == y);
 }
 
 int log2(uint32_t x) {
@@ -131,7 +131,7 @@ int log2(uint32_t x) {
             return -1;
       }
       int log = -1;
-      while (x) {  
+      while (x) {
             log++;
             x >>= 1;
       }

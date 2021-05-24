@@ -194,7 +194,7 @@ void ps(int argc, char** args) {
       sysExit();
 }
 
-void pipeInfo(int argc, char** args){
+void pipeInfo(int argc, char** args) {
       int size = 0;
       char** info = sysPipeInfo(&size);
       if (size == 0) {
@@ -205,10 +205,10 @@ void pipeInfo(int argc, char** args){
       printStringLn(" ");
       for (int i = 0; i < size; i++) {
             printStringLn(info[i]);
-            free((void *)info[i]);
+            free((void*)info[i]);
       }
 
-      free((void *) info);
+      free((void*)info);
       sysExit();
 }
 
@@ -238,7 +238,8 @@ void cat(int argc, char** args) {
                   toPrint[i] = 0;
                   printStringLn(toPrint);
                   i = 0;
-            } else {
+            }
+            else {
                   putchar(c);
             }
             toPrint[i++] = c;
@@ -263,7 +264,7 @@ void filter(int argc, char** args) {
                   printStringLn(toPrint);
                   i = 0;
             }
-            
+
             if (IS_VOCAL(c))
                   toPrint[i++] = c;
       }
@@ -280,7 +281,8 @@ void wc(int argc, char** args) {
                   putchar('\t');
                   putchar('\n');
                   sysExit();
-            } else {
+            }
+            else {
                   if (c == '\n')
                         i++;
                   putchar(c);
@@ -298,11 +300,13 @@ void kill(int argc, char** args) {
       int killed = sysKill(pid);
       if (killed == 1) {
             printStringLn("Killed process");
-      } else if (killed == 0) {
+      }
+      else if (killed == 0) {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");
-      } else {
+      }
+      else {
             printString("Can not kill process with pid ");
             printInt(pid);
             printStringLn("");
@@ -352,7 +356,7 @@ void block(int argc, char** args) {
       if (error) {
             sysExit();
       }
-      if(pid == 0 || pid == 1){
+      if (pid == 0 || pid == 1) {
             printString("Can not change state of process with pid ");
             printInt(pid);
             printStringLn("");
@@ -364,7 +368,8 @@ void block(int argc, char** args) {
             printString("Changed process ");
             printInt(pid);
             printStringLn(" state");
-      } else {
+      }
+      else {
             printString("No process running with pid ");
             printInt(pid);
             printStringLn("");

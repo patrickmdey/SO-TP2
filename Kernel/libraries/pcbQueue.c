@@ -9,7 +9,7 @@
 
 static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag);
 static void freeRec(t_PCB* pcb);
-static void freePCB(t_pcbQueue * q, t_PCB * pcb);
+static void freePCB(t_pcbQueue* q, t_PCB* pcb);
 
 t_pcbQueue* createPcbQueue() {
     return malloc(sizeof(t_queue));
@@ -89,7 +89,7 @@ int getSize(t_pcbQueue* q) {
     return q->size;
 }
 
-static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag) {
+static t_PCB* deletePCB(t_pcbQueue* q, t_PCB* pcb, int pid, int* flag) {
     if (pcb == NULL) {
         return NULL;
     }
@@ -108,7 +108,7 @@ static t_PCB* deletePCB(t_pcbQueue * q, t_PCB* pcb, int pid, int* flag) {
     return pcb;
 }
 
-static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
+static void freePCB(t_pcbQueue* q, t_PCB* pcb) {
     free(pcb->rbp);
 
     int i, count = (pcb->argc) + 1 - pcb->foreground;
@@ -121,8 +121,8 @@ static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
 
     //freeAddressList(pcb->addresses);
 
-    t_waitingPid * current = pcb->waiting;
-    t_waitingPid * next;
+    t_waitingPid* current = pcb->waiting;
+    t_waitingPid* next;
 
     while (current != NULL) {
         next = current->next;

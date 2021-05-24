@@ -3,13 +3,13 @@
 #include <memoryManager.h>
 
 static void freeRec(t_addressNode* addressNode);
-static t_addressNode * deleteAddress(t_addressNode* node, void* address, int* flag);
+static t_addressNode* deleteAddress(t_addressNode* node, void* address, int* flag);
 
-int addAddress(t_addressList * l, void * address) {
+int addAddress(t_addressList* l, void* address) {
     if (l == NULL)
         return 0;
 
-    t_addressNode * addNode = malloc(sizeof(t_addressNode));
+    t_addressNode* addNode = malloc(sizeof(t_addressNode));
     if (addNode == NULL) {
         return 0;
     }
@@ -23,7 +23,7 @@ int addAddress(t_addressList * l, void * address) {
         return 1;
     }
 
-    t_addressNode * current = l->first;
+    t_addressNode* current = l->first;
     while (current->next != NULL) {
         current = current->next;
     }
@@ -33,7 +33,7 @@ int addAddress(t_addressList * l, void * address) {
     return 1;
 }
 
-int removeAddress(t_addressList * l, void * address) {
+int removeAddress(t_addressList* l, void* address) {
     if (l == NULL)
         return 0;
 
@@ -57,16 +57,16 @@ void freeAddressList(t_addressList* l) {
 
 
     freeRec(l->first);
-    free((void *) l);
+    free((void*)l);
 }
 
-static t_addressNode* deleteAddress(t_addressNode * node, void * address, int* flag) {
+static t_addressNode* deleteAddress(t_addressNode* node, void* address, int* flag) {
     if (node == NULL) {
         return NULL;
     }
 
     if (node->address == address) {
-        t_addressNode * next = node->next;
+        t_addressNode* next = node->next;
         free(node);
         *flag = 1;
         return next;
@@ -76,11 +76,11 @@ static t_addressNode* deleteAddress(t_addressNode * node, void * address, int* f
     return node;
 }
 
-static void freeRec(t_addressNode * addressNode) {
+static void freeRec(t_addressNode* addressNode) {
     if (addressNode == NULL)
         return;
 
-    t_addressNode * next = addressNode->next;
+    t_addressNode* next = addressNode->next;
 
     free(addressNode->address);
     free(addressNode);
