@@ -76,7 +76,6 @@ char pipeRead(uint64_t fd) {
         return key;
 
     int pid = getCurrentPid();
-    block(pid);
     t_waitingPid * toAdd = malloc(sizeof(t_waitingPid));
     toAdd->pid = pid;
     toAdd->next = NULL;
@@ -91,6 +90,7 @@ char pipeRead(uint64_t fd) {
         }
         curr->next = toAdd;
     }
+    block(pid);
 
     int_20();
     queueRemoveData(node->buffer, &key);

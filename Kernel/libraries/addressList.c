@@ -55,6 +55,7 @@ void freeAddressList(t_addressList* l) {
     if (l == NULL)
         return;
 
+
     freeRec(l->first);
     free((void *) l);
 }

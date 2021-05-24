@@ -99,6 +99,8 @@ t_PCB* getCurrentProcess() {
 }
 
 int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char** argv) {
+      if (entryPoint == 0)
+            return -1;
       t_PCB* process = malloc(sizeof(t_PCB));
       if (process == NULL)
             return -1;
@@ -110,7 +112,7 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
       process->argv = argv;
       process->argc = argc - background;
 
-      process->parent = current;
+      //process->parent = current;
       process->pid = currentPID++;
 
 
@@ -121,7 +123,7 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
             process->in = (background) ? -1 : ((fdIn == -1) ? current->in : fdIn); // si esta en background seteo a -1, 
                   // sino chequeo si me pasaron un fd y seteo a el, sino seteo al del padre
             process->out = (fdOut == -1) ? current->out : fdOut;
-            t_waitingPid * child = malloc(sizeof(t_waitingPid));
+            /*t_waitingPid * child = malloc(sizeof(t_waitingPid));
             child->pid = process->pid;
             child->next = NULL;
             if (current->children == NULL) {
@@ -132,28 +134,39 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
                         curr = curr->next;
                   }
                   curr->next = child;
-            }
+            }*/
       }
 
       process->waiting = NULL;
       process->priority = 0;
 
-      process->children = NULL;
+      //process->children = NULL;
 
-      process->addresses = malloc(sizeof(t_addressList));
+      /*process->addresses = malloc(sizeof(t_addressList));
       if (process->addresses == NULL) {
             free(process);
             return -1;
       }
       process->addresses->first = NULL;
-      process->addresses->size = 0;
+      process->addresses->size = 0;*/
+
+
+      process->state = READY;
+      process->rbp = malloc(SIZE_OF_STACK);
+      if (process->rbp == NULL)
+            return -1;
+            
+      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
+            process->argc, process->argv);
+      
+      
       /*printInt(process->in);
       printInt(process->out);*/
 
       int ret = addProcess(process);
       
       if (ret != 1) {
-            freeAddressList(process->addresses);
+            //freeAddressList(process->addresses);
             free(process);
             return -1;
       }
@@ -161,17 +174,6 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
 }
 
 int addProcess(t_PCB* process) {
-      if (process->entryPoint == 0) {
-            return 0;
-      }
-      process->rbp = malloc(SIZE_OF_STACK);
-      if (process->rbp == NULL)
-            return -1;
-
-      process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
-            process->argc, process->argv);
-
-      process->state = READY;
 
       //process->buffer = queueInit(sizeof(char));
 
@@ -189,11 +191,12 @@ int killProcess(int pid) {
             currentTicks = 0;
       }
 
+
       t_PCB* pcb = findPCB(tasks, pid);
       if (pcb == NULL)
             return 0;
 
-      t_waitingPid* curr = pcb->waiting;
+      t_waitingPid * curr = pcb->waiting;
       while (curr != NULL) {
             block(curr->pid);
             curr = curr->next;
@@ -211,8 +214,9 @@ void exit() {
 
 void waitpid(uint64_t pid) {
       t_PCB* pcb = findPCB(tasks, pid);
-      if (pcb == NULL)
+      if (pcb == NULL || pcb->state == KILLED)
             return;
+
 
       t_waitingPid* toAdd = malloc(sizeof(t_waitingPid));
       toAdd->pid = current->pid;
@@ -263,19 +267,19 @@ char getChar(int64_t fd) { // getchar
 
 void * allocateMem(uint32_t size) {
       void * dir = malloc(size);
-      if (dir == NULL) 
+      /*if (dir == NULL) 
             return NULL;
 
       int ret = addAddress(current->addresses, dir);
       if (ret == 0) {
             free(dir);
             return NULL;
-      }
+      }*/
       return dir;
 }
 
 void freeMem(void * dir) {
-      removeAddress(current->addresses, dir);
+      //removeAddress(current->addresses, dir);
       free(dir);
 }
 
@@ -383,8 +387,7 @@ static t_PCB* getNextProcess() {
             curr = peekFirst(tasks);
             if (curr->state == KILLED) {
                   removePCB(tasks, curr->pid);
-            }
-            else {
+            } else {
                   curr = popFirst(tasks);
                   insertPCB(tasks, curr);
             }

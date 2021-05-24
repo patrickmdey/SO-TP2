@@ -113,13 +113,13 @@ static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
 
     int i, count = (pcb->argc) + 1 - pcb->foreground;
     for (i = 0; i <= count; i++) {
-        if (pcb->parent != NULL) {
+        /*if (pcb->parent != NULL) {
             removeAddress(pcb->parent->addresses, pcb->argv[i]);
-        }
+        }*/
         free(pcb->argv[i]);
     }
 
-    freeAddressList(pcb->addresses);
+    //freeAddressList(pcb->addresses);
 
     t_waitingPid * current = pcb->waiting;
     t_waitingPid * next;
@@ -130,7 +130,7 @@ static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
         current = next;
     }
 
-    current = pcb->children;
+    /*current = pcb->children;
     t_PCB * child;
 
     while (current != NULL) {
@@ -141,9 +141,9 @@ static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
         next = current->next;
         free(current);
         current = next;
-    }
+    }*/
 
-    if (pcb->parent != NULL) {
+    /*if (pcb->parent != NULL) {
         removeAddress(pcb->parent->addresses, pcb->argv);
         current = pcb->parent->children;
         if (current != NULL) {
@@ -174,8 +174,7 @@ static void freePCB(t_pcbQueue * q, t_PCB * pcb) {
                 }
             }
         }
-    }
-
+    }*/
     free(pcb->argv);
     free(pcb);
 }

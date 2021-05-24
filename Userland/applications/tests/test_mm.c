@@ -5,10 +5,8 @@
 #include <syscalls.h>
 #include <tests.h>
 
-// #define MAX_MEMORY 1024 * 5000 * 0.8 //Should be around 80% of memory managed by the MM
-// #define MAX_BLOCKS 64000
 
-#define MAX_MEMORY 1024 * 1024 * 0.5 //Should be around 80% of memory managed by the MM
+#define MAX_MEMORY 1024 * 1024 * 0.4 //Should be around 80% of memory managed by the MM
 #define MAX_BLOCKS 64
 
 typedef struct MM_rq {
@@ -22,7 +20,6 @@ void test_mm() {
     uint32_t total;
 
     while (1) {
-        //printString("a");
         rq = 0;
         total = 0;
 
@@ -31,7 +28,7 @@ void test_mm() {
             mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
             mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
             if (mm_rqs[rq].address == NULL)
-                printStringLn("NULL");
+                printString("NULL");
 
             total += mm_rqs[rq].size;
 

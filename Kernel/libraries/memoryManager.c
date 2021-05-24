@@ -18,12 +18,10 @@ uint8_t* start = (uint8_t*)START;
 static int findBlocks(int amount);
 static void asignMemory(int firstIdx, int count, int size);
 
-int nextindex = 0;
-
 typedef struct t_block {
-    uint16_t size;  // = a lo que pidio size = 64 
+    uint16_t size; 
     uint8_t free;
-    int pos;    //pos q tengo en el array
+    int pos;
     uint8_t usesNext;
 } t_block;
 
@@ -52,10 +50,6 @@ void* malloc(uint32_t size) {
     }
 
     asignMemory(firstIdx, amount, size);
-
-    // printString("MALLOC -> ");
-    // printInt(currentProcess->dirArrayIndex);
-    // printStringLn("");
 
     return &start[firstIdx * BLOCK_SIZE];
 }
@@ -167,8 +161,8 @@ static int findBlocks(int amount) {
   * The minimum allocation size is 16 bytes because we have an 8-byte header and
   * we need to stay 8-byte aligned.
   */
-#define MIN_ALLOC_LOG2 6
-#define MIN_ALLOC ((uint32_t)1 << MIN_ALLOC_LOG2)
+#define MIN_ALLOC_LOG2 4
+#define MIN_ALLOC ((int32_t)1 << MIN_ALLOC_LOG2)
 
   /*
    * The maximum allocation size is currently set to 2gb. This is the total size
@@ -178,7 +172,7 @@ static int findBlocks(int amount) {
    * is at most 1gb.
    */
 #define MAX_ALLOC_LOG2 20
-#define MAX_ALLOC ((uint32_t) 1 << MAX_ALLOC_LOG2)
+#define MAX_ALLOC ((int32_t) 1 << MAX_ALLOC_LOG2)
 
    /*
     * Allocations are done in powers of two starting from MIN_ALLOC and ending at
@@ -186,9 +180,13 @@ static int findBlocks(int amount) {
     * list for that allocation size.
     *
     * Given a bucket index, the size of the allocations in that bucket can be
-    * found with "(uint32_t)1 << (MAX_ALLOC_LOG2 - bucket)".
+    * found with "(int32_t)1 << (MAX_ALLOC_LOG2 - bucket)".
     */
+
 #define BUCKET_COUNT (MAX_ALLOC_LOG2 - MIN_ALLOC_LOG2 + 1)
+
+#define NODE_LIMIT ((1 << (BUCKET_COUNT - 1)) / 8)
+#define FREE_LIMIT ((1 << (BUCKET_COUNT)))
 
     /*
      * Free lists are stored as circular doubly-linked lists. Every possible
@@ -197,6 +195,7 @@ static int findBlocks(int amount) {
      * "sizeof(list_t)". MIN_ALLOC is currently 16 bytes, so this will be true for
      * both 32-bit and 64-bit.
      */
+
 
 typedef struct list_t {
     struct list_t* prev, * next;
@@ -246,8 +245,8 @@ static uint32_t bucket_limit;
  * Note that we don't need to store any nodes for allocations of size MIN_ALLOC
  * since we only ever care about parent nodes.
  */
-static uint8_t node_is_split[(1 << (BUCKET_COUNT - 1)) / 8];
-
+static uint8_t node_is_split[NODE_LIMIT];
+//static uint8_t node_is_free[FREE_LIMIT] = {2};
 /*
  * This is the starting address of the address range for this allocator. Every
  * returned allocation will be an offset of this pointer from 0 to MAX_ALLOC.
@@ -314,8 +313,8 @@ static void list_remove(list_t* entry) {
 /*
  * Remove and return the first entry in the list or NULL if the list is empty.
  */
-static list_t* list_pop(list_t* list) {
-    list_t* back = list->prev;
+static list_t * list_pop(list_t* list) {
+    list_t * back = list->prev;
     if (back == list) return NULL;
     list_remove(back);
     return back;
@@ -327,7 +326,7 @@ static list_t* list_pop(list_t* list) {
  * required to be provided here since having them means we can avoid the loop
  * and have this function return in constant time.
  */
-static uint8_t* ptr_for_node(uint32_t index, uint32_t bucket) {
+static uint8_t* ptr_for_node(int32_t index, int32_t bucket) {
     return base_ptr + ((index - (1 << bucket) + 1) << (MAX_ALLOC_LOG2 - bucket));
 }
 
@@ -336,13 +335,13 @@ static uint8_t* ptr_for_node(uint32_t index, uint32_t bucket) {
  * address. There are often many nodes that all map to the same address, so
  * the bucket is needed to uniquely identify a node.
  */
-static uint32_t node_for_ptr(uint8_t* ptr, uint32_t bucket) {
+static int32_t node_for_ptr(uint8_t* ptr, int32_t bucket) {
     return ((ptr - base_ptr) >> (MAX_ALLOC_LOG2 - bucket)) + (1 << bucket) - 1;
 }
 /*
  * Given the index of a node, this returns the "is split" flag of the parent.
  */
-static int parent_is_split(uint32_t index) {
+static int parent_is_split(int32_t index) {
     index = (index - 1) / 2;
     return (node_is_split[index / 8] >> (index % 8)) & 1;
 }
@@ -350,7 +349,7 @@ static int parent_is_split(uint32_t index) {
 /*
  * Given the index of a node, this flips the "is split" flag of the parent.
  */
-static void flip_parent_is_split(uint32_t index) {
+static void flip_parent_is_split(int32_t index) {
     index = (index - 1) / 2;
     node_is_split[index / 8] ^= 1 << (index % 8);
 }
@@ -359,9 +358,9 @@ static void flip_parent_is_split(uint32_t index) {
  * Given the requested size passed to "malloc", this function returns the index
  * of the smallest bucket that can fit that size.
  */
-static uint32_t bucket_for_request(uint32_t request) {
-    uint32_t bucket = BUCKET_COUNT - 1;
-    uint32_t size = MIN_ALLOC;
+static int32_t bucket_for_request(int32_t request) {
+    int32_t bucket = BUCKET_COUNT - 1;
+    int32_t size = MIN_ALLOC;
 
     while (size < request) {
         bucket--;
@@ -376,9 +375,9 @@ static uint32_t bucket_for_request(uint32_t request) {
  * tree by repeatedly doubling it in size until the root lies at the provided
  * bucket index. Each doubling lowers the bucket limit by 1.
  */
-static int lower_bucket_limit(uint32_t bucket) {
+static int lower_bucket_limit(int32_t bucket) {
     while (bucket < bucket_limit) {
-        uint32_t root = node_for_ptr(base_ptr, bucket_limit);
+        int32_t root = node_for_ptr(base_ptr, bucket_limit);
         uint8_t* right_child;
 
         /*
@@ -388,7 +387,7 @@ static int lower_bucket_limit(uint32_t bucket) {
          * block with the newly-expanded address space to the new root free list.
          */
         if (!parent_is_split(root)) {
-            list_remove((list_t*)base_ptr);
+            list_remove((list_t*) base_ptr);
             list_init(&buckets[--bucket_limit]);
             list_push(&buckets[bucket_limit], (list_t*)base_ptr);
             continue;
@@ -422,12 +421,30 @@ static int lower_bucket_limit(uint32_t bucket) {
     return 1;
 }
 
+static int invalidDir(void * address, int bucket) {
+    int32_t bucketSize = (1 << (MAX_ALLOC_LOG2 - bucket));
+    if (((uint64_t) address - (uint64_t) base_ptr) % bucketSize)
+        return 1;
+
+    if (bucket > BUCKET_COUNT)
+        return 1;
+    
+    return 0;
+}
+
+// static uint8_t isFree(int32_t idx) {
+//     return idx < FREE_LIMIT && node_is_free[idx] == 1;
+// }
+
 void initMemory() {
-    return;
+    int i;
+    // for (i = 0; i < FREE_LIMIT; i++) {
+    //     node_is_free[i] = 1;
+    // }
 }
 
 void* malloc(uint32_t request) {
-    uint32_t original_bucket, bucket;
+    int32_t original_bucket, bucket;
 
     /*
      * Make sure it's possible for an allocation of this size to succeed. There's
@@ -448,7 +465,7 @@ void* malloc(uint32_t request) {
         bucket_limit = BUCKET_COUNT - 1;
         update_max_ptr(base_ptr + sizeof(list_t));
         list_init(&buckets[BUCKET_COUNT - 1]);
-        list_push(&buckets[BUCKET_COUNT - 1], (list_t*)base_ptr);
+        list_push(&buckets[BUCKET_COUNT - 1], (list_t *)base_ptr);
     }
 
     /*
@@ -464,8 +481,7 @@ void* malloc(uint32_t request) {
      * larger one to get a match.
      */
     while ((bucket + 1) != 0) {
-        //printInt(1);
-        uint32_t size, bytes_needed, i;
+        int32_t size, bytes_needed, i;
         uint8_t* ptr;
 
         /*
@@ -508,9 +524,11 @@ void* malloc(uint32_t request) {
          * Try to expand the address space first before going any further. If we
          * have run out of space, put this block back on the free list and fail.
          */
-        size = (uint32_t)1 << (MAX_ALLOC_LOG2 - bucket);
+        size = (int32_t)1 << (MAX_ALLOC_LOG2 - bucket);
         bytes_needed = bucket < original_bucket ? size / 2 + sizeof(list_t) : size;
+        i = node_for_ptr(ptr, bucket);
         if (!update_max_ptr(ptr + bytes_needed)) {
+            //node_is_free[i] = 1;
             list_push(&buckets[bucket], (list_t*)ptr);
             return NULL;
         }
@@ -526,8 +544,8 @@ void* malloc(uint32_t request) {
          * grandparent to be UNUSED (if our buddy chunk was UNUSED, our parent
          * wouldn't ever have been split in the first place).
          */
-        i = node_for_ptr(ptr, bucket);
         if (i != 0) {
+            //node_is_free[i] = 0;
             flip_parent_is_split(i);
         }
 
@@ -541,6 +559,7 @@ void* malloc(uint32_t request) {
         while (bucket < original_bucket) {
             i = i * 2 + 1;
             bucket++;
+            //node_is_free[i] = 0;
             flip_parent_is_split(i);
             list_push(&buckets[bucket], (list_t*)ptr_for_node(i + 1, bucket));
         }
@@ -550,6 +569,7 @@ void* malloc(uint32_t request) {
          * of the allocation) and return the address immediately after the header.
          */
         *(uint32_t*)ptr = request;
+        //node_is_free[i] = 0;
         return ptr + HEADER_SIZE;
     }
 
@@ -557,7 +577,7 @@ void* malloc(uint32_t request) {
 }
 
 void free(void* ptr) {
-    uint32_t bucket, i;
+    int32_t bucket, i;
 
     /*
      * Ignore any attempts to free a NULL pointer.
@@ -572,20 +592,29 @@ void free(void* ptr) {
      * look up the index of the node corresponding to this address.
      */
     ptr = (uint8_t*)ptr - HEADER_SIZE;
-    if ((uint8_t*)ptr < base_ptr || (uint8_t*)ptr >= max_ptr - sizeof(list_t))
+    if ((uint8_t*)ptr < base_ptr || (uint8_t*) ptr >= max_ptr - sizeof(list_t))
         return;
 
-    bucket = bucket_for_request(*(uint32_t*)ptr + HEADER_SIZE);
-    if (((uint64_t) ptr - (uint64_t) base_ptr) % (1 << (MAX_ALLOC_LOG2 - bucket)))
-        return;
-    i = node_for_ptr((uint8_t*)ptr, bucket);
 
+    bucket = bucket_for_request(*(int32_t*)ptr + HEADER_SIZE);
+    if (invalidDir(ptr, bucket))
+        return;
+    
+    i = node_for_ptr((uint8_t *)ptr, bucket);
+    if (((i-1) / 16) >= NODE_LIMIT)
+        return;
+
+    /*if (isFree(i))
+        return;*/
+
+
+    int iter = 0;
     /*
      * Traverse up to the root node, flipping USED blocks to UNUSED and merging
      * UNUSED buddies together into a single UNUSED parent.
      */
-    while (i != 0) {
-        //printInt(2);
+    while (i != 0 && iter < BUCKET_COUNT) {
+        iter++;
         /*
          * Change this node from UNUSED to USED. This involves flipping our
          * parent's "is split" bit because that bit is the exclusive-or of the
@@ -593,6 +622,7 @@ void free(void* ptr) {
          * stored explicitly) has just changed.
          */
         flip_parent_is_split(i);
+        //node_is_free[i] = 0;
 
         /*
          * If the parent is now SPLIT, that means our buddy is USED, so don't merge
@@ -603,6 +633,7 @@ void free(void* ptr) {
          * is now UNUSED. Root nodes don't have a buddy so we can't merge with one.
          */
         if (parent_is_split(i) || bucket == bucket_limit) {
+            //node_is_free[i] = 1;
             break;
         }
 
@@ -613,7 +644,8 @@ void free(void* ptr) {
          * add the merged parent to its free list yet. That will be done once after
          * this loop is finished.
          */
-        list_remove((list_t*)ptr_for_node(((i - 1) ^ 1) + 1, bucket));
+        //node_is_free[((i - 1) ^ 1) + 1] = 0;
+        list_remove((list_t*) ptr_for_node(((i - 1) ^ 1) + 1, bucket));
         i = (i - 1) / 2;
         bucket--;
     }
@@ -624,45 +656,11 @@ void free(void* ptr) {
      * followed by a "malloc" of the same size to ideally use the same address
      * for better memory locality.
      */
-    list_push(&buckets[bucket], (list_t*)ptr_for_node(i, bucket));
+    list_push(&buckets[bucket], (list_t*) ptr_for_node(i, bucket));
 }
 
 char** getMemoryInfo(uint64_t* size) {
-    int freeMemory = 0;
-    int usedMemory = 0;
-    int blocksUsed = 0;
-    for (int i = 0; i < TOTAL_BLOCKS; i++) {
-        if (blockArray[i].free) {
-            freeMemory++;
-        } else {
-            blocksUsed++;
-            usedMemory += blockArray[i].size;
-        }
-    }
-    *size = 3;
-    char** info = malloc((*size) * sizeof(char*));
-    int i;
-    for (i = 0; i < *size; i++) {
-        info[i] = malloc(100);
-    }
-
-    int offset = 0;
-    offset += strcpy(info[0], "Memoria total: ");
-    offset += uintToBase(TOTAL_MEM, info[0] + offset, 10);
-    offset += strcpy(info[0] + offset, " bytes");
-    info[0][offset] = 0;
-
-    offset = 0;
-    offset += strcpy(info[1], "Memoria en uso: ");
-    offset += uintToBase(usedMemory, info[1] + offset, 10);
-    offset += strcpy(info[1] + offset, " bytes");
-    info[1][offset] = 0;
-    
-    offset = 0;
-    offset += strcpy(info[2], "Bloques en uso: ");
-    offset += uintToBase(blocksUsed, info[2] + offset, 10);
-    info[2][offset] = 0;
-    return info;
+    return NULL;
 }
 
 #endif

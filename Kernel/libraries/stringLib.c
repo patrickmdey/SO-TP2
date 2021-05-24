@@ -20,7 +20,6 @@ void sysWrite(int64_t fd, char * string, uint8_t lenght, t_colour bgColour, t_co
             toWriteFd = fd;
       
       if (toWriteFd != STDOUT) {
-
             t_fdNode * node = findFd(toWriteFd);
             if (node == NULL)
                   return;

@@ -29,10 +29,10 @@ typedef struct t_PCB {
 
     struct t_PCB * parent;
 
-    t_addressList * addresses;
+    //t_addressList * addresses;
 
     t_waitingPid * waiting;
-    t_waitingPid * children;
+    //t_waitingPid * children;
 
     int64_t in;
     int64_t out;
