@@ -68,9 +68,7 @@ static void initShell(t_shellData* shellData) {
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
           {NULL, &wc, "wc", "counts the amount of lines in a given input", 0},
           {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0},
-          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0},
-          {NULL, &testContextSwitching, "testCS", "enhanced context switching test", 0},
-          {NULL, &testPhylo, "testPhylo", "automatic phylo test", 0}
+          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0}
 
       };
 
@@ -137,7 +135,7 @@ static int processCommand(t_shellData* shellData) {
       }
 
       for (i = 0; i < idx; i++) {
-            argv[i] = (char**) malloc(MAX_ARGS * sizeof(char*));
+            argv[i] = (char**)malloc(MAX_ARGS * sizeof(char*));
             argc[i] = 0;
             strtok(0, 0, ' ');
             strtok(process[i], command[i], ' ');    // parse buffer
@@ -170,20 +168,22 @@ static int processCommand(t_shellData* shellData) {
             fd[1][0] = openedFd;
       }
       int notFound = 1;
-      int invalidCommand[MAX_PIPE_PROCESS] = { 1, 1 };
+      //int invalidCommand[MAX_PIPE_PROCESS] = { 1, 1 };
+      int toExecute[MAX_PIPE_PROCESS] = { -1, -1 };
+
       for (i = 0; i < COMMANDS && notFound; i++) {
             for (j = 0; j < idx; j++) {
                   if (stringcmp(shellData->commands[i].name, command[j]) == 0) {
-                        invalidCommand[j] = 0;
-                        if (shellData->commands[i].isBuiltIn) {
+                        //invalidCommand[j] = 0;
+                        /*if (shellData->commands[i].isBuiltIn) {
                               free(argv[j]);
                               shellData->commands[i].builtIn(shellData);
                         }
                         else {
                               pids[j] = sysCreateProcess(shellData->commands[i].command,
                                     shellData->commands[i].name, fd[j][0], fd[j][1], argc[j], argv[j]);
-                              //sysYield();
-                        }
+                        }*/
+                        toExecute[j] = i;
                         k++;
                         if (k == idx) {
                               notFound = 0;
@@ -191,24 +191,43 @@ static int processCommand(t_shellData* shellData) {
                         }
                   }
             }
+
       }
 
-      for (i = 0; i < idx; i++) { // Libero memoria de los comandos invalidos
-            if (invalidCommand[i]) {
+      for (i = 0; i < idx; i++) {
+            if (toExecute[i] == -1) {
                   printString("Invalid command: ");
                   printStringLn(command[i]);
-                  for (j = 0; j < argc[i]; j++) {
-                        free(argv[i][j]);
+                  for (j = 0; j < idx; j++) {
+                        for (k = 0; k < argc[j]; k++) {
+                              free(argv[j][k]);
+                        }
+                        free(argv[j]);
                   }
-                  free(argv[i]);
+                  return 1;
             }
-            else if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
+      }
+
+      for (i = 0; i < idx; i++) {
+            int execute = toExecute[i];
+            if (shellData->commands[execute].isBuiltIn) {
+                  free(argv[i]);
+                  shellData->commands[execute].builtIn(shellData);
+            } else {
+                  pids[i] = sysCreateProcess(shellData->commands[execute].command,
+                        shellData->commands[execute].name, fd[i][0], fd[i][1], argc[i], argv[i]);
+            }
+      }
+
+      for (i = 0; i < idx; i++) {
+            if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
                   sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
             }
       }
       if (openedFd != -1) {
             sysCloseFd(openedFd);
       }
+
       return 1;
 }
 
