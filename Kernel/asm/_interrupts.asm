@@ -21,7 +21,6 @@ GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 EXTERN exceptionDispatcher
 
-EXTERN timerHandler
 EXTERN schedule
 
 
@@ -149,8 +148,6 @@ _irq00Handler:
 	mov rsi, 0 		;start not forced
 	call schedule
 	mov rsp, rax
-
-	call timerHandler
 
 	mov al, 20h
 	out 20h, al

@@ -5,7 +5,6 @@
 #include <lib.h>
 #include <pipe.h>
 
-#include <list.h>
 #include <pcbQueue.h>
 #include <memoryManager.h>
 
@@ -92,10 +91,6 @@ void initTaskManager(void* entryPoint) {
 
 uint64_t getCurrentPid() {
       return current->pid;
-}
-
-t_PCB* getCurrentProcess() {
-      return current;
 }
 
 int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char** argv) {

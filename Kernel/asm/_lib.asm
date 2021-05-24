@@ -10,7 +10,6 @@ GLOBAL getBSDTimeInfo
 
 GLOBAL _xchg
 
-GLOBAL sys_changeProcess
 GLOBAL sysForceStart
 
 EXTERN schedule
@@ -191,14 +190,3 @@ sysForceStart:
 
 	popState
 	iretq
-
-sys_changeProcess:
-	;pushState
-
-	mov rdi, rsp
-	mov rsi, 0 		;start not forced
-	call schedule
-	mov rsp, rax
-
-	;popState
-	ret

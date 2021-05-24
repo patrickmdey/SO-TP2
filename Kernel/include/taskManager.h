@@ -44,9 +44,6 @@ typedef struct t_PCB {
 extern t_queue taskManager;
 
 void initTaskManager(void* entryPoint);
-
-t_PCB* getCurrentProcess();
-
 void* schedule(void* oldRSP, int forceStart);
 uint64_t getCurrentPid();
 int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut, uint8_t argc, char** argv);

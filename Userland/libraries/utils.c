@@ -169,12 +169,12 @@ char* strtok(char* string, char* result, const char delim) {
             return 0;
       }
 
-      for (int i = 0; result[i] != 0 && i < BUFFER_SIZE; i++) {
+      for (int i = 0; i < BUFFER_SIZE && result[i] != 0; i++) {
             result[i] = 0;
       }
 
       if (string != 0) {
-            for (int i = 0; string[i] != 0 && i < BUFFER_SIZE; i++) {
+            for (int i = 0; i < BUFFER_SIZE && string[i] != 0; i++) {
                   ogString[i] = string[i];
             }
       }
@@ -182,7 +182,7 @@ char* strtok(char* string, char* result, const char delim) {
             if (currentIndex == BUFFER_SIZE || ogString[currentIndex] == 0) {
                   return 0;
             }
-            for (; ogString[currentIndex] != 0 && ogString[currentIndex] == delim && currentIndex < BUFFER_SIZE; currentIndex++)
+            for (;currentIndex < BUFFER_SIZE && ogString[currentIndex] != 0 && ogString[currentIndex] == delim; currentIndex++)
                   ;
             if (currentIndex == BUFFER_SIZE || ogString[currentIndex] == 0) {
                   return 0;

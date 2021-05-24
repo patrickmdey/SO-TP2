@@ -28,7 +28,7 @@ void loadIDT() {
   setup_IDT_entry(0x20, (uint64_t)&_irq00Handler);
   setup_IDT_entry(0x21, (uint64_t)&_irq01Handler);
   setup_IDT_entry(0x80, (uint64_t)&_syscallHandler);
-  setup_IDT_entry(0x81, (uint64_t)&sys_changeProcess); //handler a parte para evitar basura en el stack y perder el interruptStackFrame
+  //setup_IDT_entry(0x81, (uint64_t)&sys_changeProcess); //handler a parte para evitar basura en el stack y perder el interruptStackFrame
   setup_IDT_entry(0x00, (uint64_t)&_exception0Handler);
   setup_IDT_entry(0x06, (uint64_t)&_exception6Handler);
 

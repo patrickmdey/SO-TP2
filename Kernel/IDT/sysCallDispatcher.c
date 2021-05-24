@@ -6,7 +6,6 @@
 #include <taskManager.h>
 #include <keyboardDriver.h>
 #include <videoDriver.h>
-#include <timerTick.h>
 #include <memoryManager.h>
 #include <sem.h>
 #include <pipe.h>
@@ -25,31 +24,30 @@
 #define SYS_MOVE_CURSOR 11
 #define SYS_MOVE_CURSOR_TO 12
 #define SYS_CURRENT_CURSOR 13
-#define SYS_TICKS_ELAPSED 14
-#define SYS_ASIGN_MEMORY 15
-#define SYS_FREE_MEMORY 16
-#define SYS_GET_MEM_INFO 17
-#define SYS_PS 18
-#define SYS_CREATE_PROCESS 19
-#define SYS_GET_PID 20
-#define SYS_KILL 21
-#define SYS_NICE 22
-#define SYS_BLOCK 23
-#define SYS_FOREGROUND 24
-#define SYS_SEM_OPEN 25
-#define SYS_SEM_INIT 26
-#define SYS_SEM_WAIT 27
-#define SYS_SEM_POST 28
-#define SYS_SEM_CLOSE 29
-#define SYS_YIELD 30
-#define SYS_SEM_INFO 31
-#define SYS_GET_FD 32
-#define SYS_WAIT_PID 33
-#define SYS_SEM_DESTROY 34
-#define SYS_CLOSE_FD 35
-#define SYS_PIPE_INFO 36
+#define SYS_ASIGN_MEMORY 14
+#define SYS_FREE_MEMORY 15
+#define SYS_GET_MEM_INFO 16
+#define SYS_PS 17
+#define SYS_CREATE_PROCESS 18
+#define SYS_GET_PID 19
+#define SYS_KILL 20
+#define SYS_NICE 21
+#define SYS_BLOCK 22
+#define SYS_FOREGROUND 23
+#define SYS_SEM_OPEN 24
+#define SYS_SEM_INIT 25
+#define SYS_SEM_WAIT 26
+#define SYS_SEM_POST 27
+#define SYS_SEM_CLOSE 28
+#define SYS_YIELD 29
+#define SYS_SEM_INFO 30
+#define SYS_GET_FD 31
+#define SYS_WAIT_PID 32
+#define SYS_SEM_DESTROY 33
+#define SYS_CLOSE_FD 34
+#define SYS_PIPE_INFO 35
 
-#define SYSCALLS 36
+#define SYSCALLS 35
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax >= 0 && r->rax <= SYSCALLS)
@@ -112,9 +110,6 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
             case SYS_CURRENT_CURSOR:
                   cursorPosition((int*)((uint64_t)(r->rdi)));
-                  break;
-            case SYS_TICKS_ELAPSED:
-                  return ticksElapsed();
                   break;
             case SYS_ASIGN_MEMORY:
                   return (uint64_t) allocateMem((uint32_t) r->rdi);

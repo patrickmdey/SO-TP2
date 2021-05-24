@@ -26,7 +26,7 @@ void sysWrite(int64_t fd, char * string, uint8_t lenght, t_colour bgColour, t_co
 
             pipeWriteStr(node, string);
       } else {
-            for (int i = 0; string[i] != 0 && i < lenght; i++) {
+            for (int i = 0; i < lenght && string[i] != 0 ; i++) {
                   if (string[i] == '\n') {
                         changeLineOnScreen();
                   } else if (string[i] == '\b') {
@@ -43,7 +43,7 @@ void sysStaticWrite(char* string, uint8_t lenght, t_colour bgColour, t_colour fo
             return;
       }
 
-      for (int i = 0; string[i] != 0 && i < lenght; i++) {
+      for (int i = 0; i < lenght && string[i] != 0 ; i++) {
             printCharOnScreen(string[i], bgColour, fontColour, 0);
       }
 }

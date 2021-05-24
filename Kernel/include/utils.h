@@ -21,7 +21,6 @@ char* strtok(char* string, char* result, const char delim);
 uint32_t uintToBaseWL(uint64_t value, char* buffer, uint32_t base, uint32_t lenght);
 uint64_t strToHex(char* str, int* error);
 uint8_t stringcmp(char* str1, char* str2);
-int ticksElapsed();
 void cleanBuffer(t_buffer* buffer);
 void cleanString(char* str);
 int strlen(char* str);

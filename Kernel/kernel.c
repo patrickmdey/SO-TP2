@@ -4,7 +4,6 @@
 #include <moduleLoader.h>
 #include <stdint.h>
 #include <stringLib.h>
-#include <timerTick.h>
 #include <videoDriver.h>
 #include <taskManager.h>
 #include <interrupts.h>

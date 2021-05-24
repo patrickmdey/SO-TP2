@@ -437,7 +437,6 @@ static int invalidDir(void * address, int bucket) {
 // }
 
 void initMemory() {
-    int i;
     // for (i = 0; i < FREE_LIMIT; i++) {
     //     node_is_free[i] = 1;
     // }
@@ -672,7 +671,7 @@ char** getMemoryInfo(uint64_t* size) {
     for(i = 0; i < 3; i++) {
         toReturn[i] = malloc(40 * sizeof(char));
         if (toReturn[i] == NULL) {
-            for (j = 0; i < i; ++i)
+            for (j = 0; j < i; ++i)
                 free(toReturn[j]);
 
             free(toReturn);

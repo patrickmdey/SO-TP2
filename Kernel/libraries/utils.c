@@ -161,12 +161,12 @@ char* strtok(char* string, char* result, const char delim) {
       }
 
       if (string != 0) {
-            for (int i = 0; string[i] != 0 && i < BUFFER_SIZE; i++) {
+            for (int i = 0; i < BUFFER_SIZE && string[i] != 0; i++) {
                   ogString[i] = string[i];
             }
-            for (; ogString[currentIndex] != 0 && ogString[currentIndex] == delim && currentIndex < BUFFER_SIZE; currentIndex++)
+            for (;currentIndex < BUFFER_SIZE && ogString[currentIndex] != 0 && ogString[currentIndex] == delim; currentIndex++)
                   ;
-            for (int i = 0; ogString[currentIndex] != 0 && ogString[currentIndex] != delim && currentIndex < BUFFER_SIZE; currentIndex++, i++) {
+            for (int i = 0; currentIndex < BUFFER_SIZE && ogString[currentIndex] != 0 && ogString[currentIndex] != delim; currentIndex++, i++) {
                   result[i] = string[currentIndex];
             }
       }
@@ -174,7 +174,7 @@ char* strtok(char* string, char* result, const char delim) {
             if (currentIndex == BUFFER_SIZE || ogString[currentIndex] == 0) {
                   return 0;
             }
-            for (; ogString[currentIndex] != 0 && ogString[currentIndex] == delim && currentIndex < BUFFER_SIZE; currentIndex++)
+            for (;currentIndex < BUFFER_SIZE && ogString[currentIndex] != 0 && ogString[currentIndex] == delim; currentIndex++)
                   ;
             for (int i = 0; ogString[currentIndex] != 0 && ogString[currentIndex] != delim; currentIndex++, i++) {
                   result[i] = ogString[currentIndex];
