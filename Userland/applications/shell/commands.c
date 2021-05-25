@@ -271,20 +271,19 @@ void filter(int argc, char** args) {
 }
 
 void wc(int argc, char** args) {
-      //sysBlock(0);
       char c;
-      int i = 0;
+      int counter = 0;
       while (1) {
             c = getchar();
             if (c == '\t') {
-                  printInt(i);
+                  printInt(counter);
                   putchar('\t');
                   putchar('\n');
                   sysExit();
             }
             else {
                   if (c == '\n')
-                        i++;
+                        counter++;
                   putchar(c);
             }
       }

@@ -65,10 +65,10 @@ static void initShell(t_shellData* shellData) {
           {NULL, &test_mm, "testMM", "tests memory manager", 0},
           {NULL, &testContextSwitching, "testContextSwitching", "tests kernel context switching with priorities", 0},
           {NULL, &sem, "sem", "prints a list with all opened semaphores with their most relevant information", 0},
-          {NULL, &cat, "cat", "prints to stdout the content of the fd", 0},
-          {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd", 0},
-          {NULL, &wc, "wc", "counts the amount of lines in a given input", 0},
-          {NULL, &phylo, "phylo", "simulates the phylosopher's table problem", 0},
+          {NULL, &cat, "cat", "prints to stdout the content of the fd. Use tab to go back", 0},
+          {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd. Use tab to go back", 0},
+          {NULL, &wc, "wc", "counts the amount of lines in a given input. Use tab get result and go back", 0},
+          {NULL, &phylo, "phylo", "simulates the phylosopher's table problem. Use tab to go back", 0},
           {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0}
       };
 
