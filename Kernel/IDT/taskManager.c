@@ -195,7 +195,7 @@ int killProcess(int pid) {
 
 
       t_PCB* pcb = findPCB(tasks, pid);
-      if (pcb == NULL)
+      if (pcb == NULL || pcb->state == KILLED)
             return 0;
 
       t_waitingPid* curr = pcb->waiting;
