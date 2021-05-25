@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <interrupts.h>
 #include <keyboardDriver.h>
 #include <videoDriver.h>
@@ -10,7 +12,7 @@
 
 #include <utils.h>
 
-#define SIZE_OF_STACK 8 * 1024
+#define SIZE_OF_STACK (8 * 1024)
 
 static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv);
 static t_PCB* getNextProcess();
@@ -150,8 +152,10 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
 
       process->state = READY;
       process->rbp = malloc(SIZE_OF_STACK);
-      if (process->rbp == NULL)
+      if (process->rbp == NULL) {
+            free(process);
             return -1;
+      }
 
       process->rsp = initializeStackFrame(process->entryPoint, (void*)(process->rbp + SIZE_OF_STACK) - 1,
             process->argc, process->argv);
@@ -164,6 +168,7 @@ int64_t createProcess(void* entryPoint, char* name, int64_t fdIn, int64_t fdOut,
 
       if (ret != 1) {
             //freeAddressList(process->addresses);
+            free(process->rbp);
             free(process);
             return -1;
       }
@@ -216,6 +221,9 @@ void waitpid(uint64_t pid) {
 
 
       t_waitingPid* toAdd = malloc(sizeof(t_waitingPid));
+      if (toAdd == NULL)
+            return;
+
       toAdd->pid = current->pid;
       toAdd->next = NULL;
       t_waitingPid* curr = pcb->waiting;
@@ -285,6 +293,10 @@ char** ps(int* index) {
       char** toReturn = malloc((size) * sizeof(char*));
 
       *index = fillPs(toReturn, size);
+
+      if (*index == 0) {
+            return NULL;
+      }
 
       return toReturn;
 
@@ -389,16 +401,6 @@ static t_PCB* getNextProcess() {
                   curr = popFirst(tasks);
                   insertPCB(tasks, curr);
             }
-            /*t_PCB* aux = curr->next;
-            if (curr->state == KILLED) {
-                  removePCB(tasks, curr->pid);
-            }
-            if (aux != NULL)
-                  curr = aux;
-            else {
-                  curr = tasks->first;
-            }
-            i++;*/
             i++;
       } while (i < getSize(tasks) && curr->state != READY);
 
@@ -423,15 +425,23 @@ static int fillPs(char** toReturn, int size) {
       while (i < size) {
             if (iterator->state != KILLED) {
                   toReturn[j] = malloc(150);
+                  if (toReturn[j] == NULL) {
+                        int k;
+                        for (k = 0; k < j; k++) {
+                              free(toReturn[k]);
+                        }
+                        free(toReturn);
+                        return 0;
+                  }
                   offset = 0;
                   offset += uintToBase(iterator->pid, toReturn[j] + offset, 10);
                   offset += strcpy(toReturn[j] + offset, "     ");
                   offset += uintToBase(iterator->priority, toReturn[j] + offset, 10);
                   offset += strcpy(toReturn[j] + offset, "          ");
                   offset += strcpy(toReturn[j] + offset, iterator->state == READY ? "READY     " : "BLOCKED   ");
-                  offset += strcpy(toReturn[j] + offset, iterator->foreground == 1 ? "TRUE           " : "FALSE          ");
+                  offset += strcpy(toReturn[j] + offset, iterator->foreground == 1 ? "TRUE           0x" : "FALSE          0x");
                   offset += uintToBase((uint64_t)iterator->rsp, toReturn[j] + offset, 16);
-                  offset += strcpy(toReturn[j] + offset, "          ");
+                  offset += strcpy(toReturn[j] + offset, "        0x");
                   offset += uintToBase((uint64_t)iterator->rbp, toReturn[j] + offset, 16);
                   offset += strcpy(toReturn[j] + offset, "     ");
                   offset += strcpy(toReturn[j] + offset, iterator->name);

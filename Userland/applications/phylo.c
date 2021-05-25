@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <sem.h>
 #include <stringLib.h>
 #include <utils.h>
@@ -112,9 +114,7 @@ static void phyloProcess(int argc, char** args) {
 
             if (sig[id] == -1) {
                 removeEater();
-            }
-            else if (sig[id] == 1) {
-                //sig[id] = 0;
+            } else if (sig[id] == 1) {
                 addEater();
                 semPost(creatingSem);
             }
@@ -141,8 +141,31 @@ void phylo(int argc, char** args) {
         addEater(pids);
     }
 
-    char** printParams = (char**)malloc(sizeof(char*));
-    printParams[0] = (char*)malloc(sizeof(char));
+    char ** printParams = (char**)malloc(sizeof(char*));
+    if (printParams == NULL) {
+        printStringWC("Unable to allocate memory\n", BLACK, RED);
+        for (i = 0; i < size; i++) {
+            semClose(forks[i]);
+            sysKill(pids[i]);
+        }
+        semClose(changeMutex);
+        semClose(creatingSem);
+        semClose(printSem);
+        sysExit();
+    }
+    printParams[0] = (char*) malloc(sizeof(char));
+    if (printParams[0] == NULL) {
+        free(printParams);
+        printStringWC("Unable to allocate memory\n", BLACK, RED);
+        for (i = 0; i < size; i++) {
+            semClose(forks[i]);
+            sysKill(pids[i]);
+        }
+        semClose(changeMutex);
+        semClose(creatingSem);
+        semClose(printSem);
+        sysExit();
+    }
     printParams[0][0] = '&';
 
     printPid = sysCreateProcess(&printProcess, "printer", -1, -1, 1, printParams);
@@ -165,11 +188,9 @@ void phylo(int argc, char** args) {
             if (size - 1 > 2) {
                 semWait(changeMutex);
                 sig[size - 1] = -1;
-            }
-            else
+            } else
                 printStringWC("Too few phylosophers\n", BLACK, RED);
-        }
-        else if (c == '\t') {
+        } else if (c == '\t') {
             for (i = 0; i < size; i++) {
                 semClose(forks[i]);
                 sysKill(pids[i]);
@@ -184,11 +205,26 @@ void phylo(int argc, char** args) {
 }
 
 static void addEater() {
-    printStringWC("Agrego filosofo\n", BLACK, RED);
+    printStringWC("Adding phylosopher\n", BLACK, RED);
     char** param = (char**)malloc(2 * sizeof(char*));
+    if (param == NULL) {
+        printStringWC("Unable to add phylosopher\n", BLACK, RED);
+        return;
+    }
     param[0] = (char*)malloc(3 * sizeof(char));
+    if (param[0] == NULL) {
+        printStringWC("Unable to add phylosopher\n", BLACK, RED);
+        free(param);
+        return;
+    }
     uintToBase(size, param[0], 10);
     param[1] = (char*)malloc(1 * sizeof(char));
+    if (param[1] == NULL) {
+        printStringWC("Unable to add phylosopher\n", BLACK, RED);
+        free(param[0]);
+        free(param);
+        return;
+    }
     param[1][0] = '&';
     sig[size] = 0;
     if (size != 0)
@@ -204,7 +240,7 @@ static void addEater() {
 static void removeEater() {
     semWait(printSem);
     eating[size - 1] = 0;
-    printStringWC("Mato filosofo\n", BLACK, RED);
+    printStringWC("Killing phylosopher\n", BLACK, RED);
     semPost(printSem);
     size--;
     sig[0] = -1;

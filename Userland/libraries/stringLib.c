@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stringLib.h>
 #include <syscalls.h>
 #include <utils.h>
@@ -20,10 +22,6 @@ char readchar(int64_t fd) {
 }
 
 char getchar() {
-      return readchar(-1);
-}
-
-char getcharOnce() {
       return readchar(-1);
 }
 

@@ -5,12 +5,12 @@
 #include <stdint.h>
 #include <colours.h>
 
-#define IS_LETTER(c) (c >= 'a' && c <= 'z' ? 1 : 0)
-#define IS_VOCAL(x) (x=='a' || x=='A' || x=='e' || x=='E' || x=='i' || x=='I' || x=='o' || x=='O' || x=='u' || x=='U' ? 1 : 0)
-#define IS_OPERAND(c) (c == '+' || c == '-' || c == '*' || c == '%' || c == '(' || c == ')' ? 1 : 0)
-#define IS_DIGIT(c) (c >= '0' && c <= '9' ? 1 : 0)
-#define ABS(c) (c >= 0 ? c : c * -1)
-#define MAX(a, b) (a > b ? a : b)
+#define IS_LETTER(c) (((c) >= 'a' && (c) <= 'z') ? 1 : 0)
+#define IS_VOCAL(c) (((c) =='a' || (c) =='A' || (c) =='e' || (c) =='E' || (c) =='i' || (c) == 'I' || (c) =='o' || (c) =='O' || (c) =='u' || (c) =='U') ? 1 : 0)
+#define IS_OPERAND(c) (((c) == '+' || (c) == '-' || (c) == '*' || (c) == '%' || (c) == '(' || (c) == ')') ? 1 : 0)
+#define IS_DIGIT(c) (((c) >= '0' && (c) <= '9') ? 1 : 0)
+#define ABS(c) (((c) >= 0) ? (c) : (c) * -1)
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 void printPrompt(void);
 

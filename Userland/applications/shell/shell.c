@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <shell.h>
 #include <commands.h>
 #include <keys.h>
@@ -136,13 +138,34 @@ static int processCommand(t_shellData* shellData) {
 
       for (i = 0; i < idx; i++) {
             argv[i] = (char**)malloc(MAX_ARGS * sizeof(char*));
+            if (argv[i] == NULL) {
+                  printStringWC("Unable to create process\n", BLACK, RED);
+                  for (j = 0; j < i; j++) {
+                        for (k = 0; k < argc[j]; k++) {
+                              free(argv[j][k]);
+                        }
+                        free(argv[j]);
+                  }
+                  return 1;
+            }
             argc[i] = 0;
             strtok(0, 0, ' ');
             strtok(process[i], command[i], ' ');    // parse buffer
             strtok(NULL, command[i], ' ');          // parse buffer
 
 
-            argv[i][0] = (char*)malloc(BUFFER_SIZE * sizeof(char));
+            argv[i][0] = (char *) malloc(BUFFER_SIZE * sizeof(char));
+            if (argv[i][0] == NULL) {
+                  printStringWC("Unable to create process\n", BLACK, RED);
+                  for (j = 0; j < i; j++) {
+                        for (k = 0; k < argc[j]; k++) {
+                              free(argv[j][k]);
+                        }
+                        free(argv[j]);
+                  }
+                  free(argv[i]);
+                  return 1;
+            }
             while (argc[i] < MAX_ARGS && strtok(NULL, argv[i][argc[i]], ' ')) {
                   argc[i]++;
                   argv[i][argc[i]] = (char*)malloc(BUFFER_SIZE * sizeof(char));
@@ -160,7 +183,7 @@ static int processCommand(t_shellData* shellData) {
             {-1, -1}
       };
 
-      int64_t pids[MAX_PIPE_PROCESS] = { -1 };
+      int64_t pids[MAX_PIPE_PROCESS] = { -1 , -1 };
       int openedFd = -1;
       if (idx == MAX_PIPE_PROCESS) {
             openedFd = sysGetFd();
@@ -221,7 +244,7 @@ static int processCommand(t_shellData* shellData) {
       }
 
       for (i = 0; i < idx; i++) {
-            if (pids[i] != -1 && (argc[i] == 0 || (argc[i] > 0 && argv[i][argc[i] - 1][0] != '&'))) {
+            if (pids[i] != -1 && (argc[i] == 0 && argv[i][argc[i] - 1][0] != '&')) {
                   sysWaitpid(pids[i]); // cedo foreground si cree un proceso y este no esta en el background
             }
       }

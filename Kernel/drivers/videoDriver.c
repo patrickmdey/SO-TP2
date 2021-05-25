@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <font.h>
 #include <lib.h>
 #include <stringLib.h>
@@ -124,8 +126,7 @@ void draw(char* bitmap, t_colour colour, int multiplier) {
 }
 
 void moveCursor(int x, int y) {
-      if (currentScreen->currentX + x < 0 || currentScreen->currentX + x > currentScreen->width
-            || currentScreen->currentY + y < 0 || currentScreen->currentY + y > currentScreen->height)
+      if (currentScreen->currentX + x > currentScreen->width || currentScreen->currentY + y > currentScreen->height)
             return;
       currentScreen->currentX += x;
       currentScreen->currentY += y;

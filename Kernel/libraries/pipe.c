@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <pipe.h>
 #include <memoryManager.h>
 #include <staticQueue.h>
@@ -22,7 +24,7 @@ void initPipes() {
 }
 
 void insertFd(t_fdNode* fdNode) {
-    t_fdList* l = &fdList;
+    t_fdList * l = &fdList;
     if (l == NULL) {
         return;
     }
@@ -77,6 +79,9 @@ char pipeRead(uint64_t fd) {
 
     int pid = getCurrentPid();
     t_waitingPid* toAdd = malloc(sizeof(t_waitingPid));
+    if (toAdd == NULL)
+        return 0;
+    
     toAdd->pid = pid;
     toAdd->next = NULL;
     t_waitingPid* curr = node->waiting;
@@ -140,14 +145,23 @@ char** pipeInfo(int* index) {
         current = current->next;
     }
     char** toReturn = malloc((size) * sizeof(char*));
+    if (toReturn == NULL) {
+        *index = 0;
+        return NULL;
+    }
 
     *index = fillPipeInfo(toReturn, size);
+    if (*index == 0)
+        return NULL;
     return toReturn;
 
 }
 
 static uint64_t createFd() {
     t_fdNode* node = malloc(sizeof(t_fdNode));
+    if (node == NULL)
+        return -1;
+    
     node->fd = nextFd++;
     node->buffer = queueInit(sizeof(char));
     node->next = NULL;
@@ -188,6 +202,15 @@ static int fillPipeInfo(char** toReturn, int size) {
 
     while (nodeIterator != NULL) {
         toReturn[j] = malloc(150);
+        if (toReturn[j] == NULL) {
+            int k;
+            for (k = 0; k < j; k++) {
+                free(toReturn[k]);
+            }
+            free(toReturn);
+            return 0;
+        }
+
         offset = 0;
         waitingIterator = nodeIterator->waiting;
         if (waitingIterator != NULL) {
@@ -204,6 +227,14 @@ static int fillPipeInfo(char** toReturn, int size) {
 
         while (waitingIterator != NULL) {
             toReturn[j] = malloc(150);
+            if (toReturn[j] == NULL) {
+                int k;
+                for (k = 0; k < j; k++) {
+                    free(toReturn[k]);
+                }
+                free(toReturn);
+                return 0;
+            }
             offset = 0;
             offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
             toReturn[j][offset] = 0;

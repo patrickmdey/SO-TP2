@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semList.h>
 #include <memoryManager.h>
 #include <utils.h>
@@ -23,12 +25,15 @@ uint8_t removeSem(t_semList* l, int chan) {
     return flag;
 }
 
-void insertSem(t_semList* l, t_sem* sem) {
+void insertSem(t_semList* l, t_sem * sem) {
     if (l == NULL) {
         return;
     }
 
     t_semNode* node = malloc(sizeof(t_semNode));
+    if (node == NULL)
+        return;
+    
     node->sem = sem;
     node->next = NULL;
 

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <sem.h>
 #include <utils.h>
 #include <interrupts.h>
@@ -91,14 +93,23 @@ char** semInfo(int* index) {
         current = current->next;
     }
     char** toReturn = malloc((size) * sizeof(char*));
+    if (toReturn == NULL) {
+        *index = 0;
+        return NULL;
+    }
 
     *index = fillSemInfo(toReturn, size);
+    if (*index == 0)
+        return NULL;
     return toReturn;
 
 }
 
 static t_sem* semCreate(char* name, uint64_t value) {
     t_sem* sem = malloc(sizeof(t_sem));
+    if (sem == NULL)
+        return NULL;
+
     sem->name = name;
     sem->chan = chan++;
     sem->value = value;
@@ -112,6 +123,9 @@ static t_sem* semCreate(char* name, uint64_t value) {
 static void sleep(t_sem* sem) {
     uint64_t pid = getCurrentPid();
     t_waitingPid* toCreate = malloc(sizeof(t_waitingPid));
+    if (toCreate == NULL)
+        return;
+
     toCreate->pid = pid;
     toCreate->next = NULL;
     if (sem->waiting == NULL) {
@@ -167,14 +181,21 @@ static int fillSemInfo(char** toReturn, int size) {
 
     while (nodeIterator != NULL) {
         toReturn[j] = malloc(150);
+        if (toReturn[j] == NULL) {
+            int k;
+            for (k = 0; k < j; k++) {
+                free(toReturn[k]);
+            }
+            free(toReturn);
+            return 0;
+        }
         offset = 0;
         waitingIterator = nodeIterator->sem->waiting;
         if (waitingIterator != NULL) {
             offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
             offset += strcpy(toReturn[j] + offset, "                 ");
             waitingIterator = waitingIterator->next;
-        }
-        else {
+        } else {
             offset += uintToBase(0, toReturn[j] + offset, 10);
             offset += strcpy(toReturn[j] + offset, "                 ");
         }
@@ -186,7 +207,15 @@ static int fillSemInfo(char** toReturn, int size) {
         toReturn[j++][offset] = 0;
 
         while (waitingIterator != NULL) {
-            toReturn[j] = malloc(150);
+            toReturn[j] = malloc(20);
+            if (toReturn[j] == NULL) {
+                int k;
+                for (k = 0; k < j; k++) {
+                    free(toReturn[k]);
+                }
+                free(toReturn);
+                return 0;
+            }
             offset = 0;
             offset += uintToBase(waitingIterator->pid, toReturn[j] + offset, 10);
             toReturn[j][offset] = 0;

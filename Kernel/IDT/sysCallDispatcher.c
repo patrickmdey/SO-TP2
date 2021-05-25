@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <sysCallDispatcher.h>
 #include <RTCTime.h>
 #include <stringLib.h>
@@ -50,7 +52,7 @@
 #define SYSCALLS 35
 
 uint64_t sysCallDispatcher(t_registers* r) {
-      if (r->rax >= 0 && r->rax <= SYSCALLS)
+      if (r->rax <= SYSCALLS)
       {
             switch (r->rax)
             {
@@ -71,9 +73,6 @@ uint64_t sysCallDispatcher(t_registers* r) {
                   break;
 
             case SYS_GETCHAR:
-                  /*if ((int)(r->rdi) == 1)
-                        return getcharOnce();*/
-
                   return getChar((int64_t)r->rdi);
                   break;
 

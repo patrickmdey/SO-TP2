@@ -16,7 +16,6 @@ void putcharWC(char c, t_colour bgColour, t_colour fontColour);
 void staticputchar(char c);
 char readchar(int64_t fd);
 char getchar();
-char getcharOnce();
 void deletechar();
 int strlen(char* str);
 void strcpy(char* dst, char* src);

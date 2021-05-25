@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <commands.h>
 #include <RTCTime.h>
 #include <cpuInfo.h>
@@ -183,7 +185,7 @@ void memoryInfo(int argc, char** args) {
 void ps(int argc, char** args) {
       int size = 0;
       char** info = sysPs(&size);
-      printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP        NAME", BLACK, GREEN);
+      printStringWC("PID   PRIORITY   STATE     FOREGROUND     RSP             RBP          NAME", BLACK, GREEN);
       printStringLn(" ");
       for (int i = 0; i < size; i++) {
             printStringLn(info[i]);

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <memoryManager.h>
 #include <stringLib.h>
 #include <limits.h>
@@ -5,7 +7,7 @@
 #include <stddef.h>
 #include <taskManager.h>
 
-#define TOTAL_MEM 1024 * 1024
+#define TOTAL_MEM (1024 * 1024)
 #define BLOCK_SIZE 32
 #define TOTAL_BLOCKS (TOTAL_MEM/BLOCK_SIZE)
 #define START 0x600000
@@ -84,17 +86,29 @@ char** getMemoryInfo(uint64_t* size) {
     for (int i = 0; i < TOTAL_BLOCKS; i++) {
         if (blockArray[i].free) {
             freeMemory++;
-        }
-        else {
+        } else {
             blocksUsed++;
             usedMemory += blockArray[i].size;
         }
     }
     *size = 3;
     char** info = malloc((*size) * sizeof(char*));
+    if (info == NULL) {
+        *size = 0;
+        return NULL;
+    }
     int i;
     for (i = 0; i < *size; i++) {
         info[i] = malloc(100);
+        if (info[i] == NULL) {
+            int j;
+            for (j = 0; j < i; j++) {
+                free(info[j]);
+            }
+            free(info);
+            *size = 0;
+            return NULL;
+        }
     }
 
     int offset = 0;
