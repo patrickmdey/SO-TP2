@@ -71,7 +71,8 @@ static void initShell(t_shellData* shellData) {
           {NULL, &filter, "filter", "prints the vocals to stdout the content of the fd. Use tab to go back", 0},
           {NULL, &wc, "wc", "counts the amount of lines in a given input. Use tab get result and go back", 0},
           {NULL, &phylo, "phylo", "simulates the phylosopher's table problem. Use tab to go back", 0},
-          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0}
+          {NULL, &pipeInfo, "pipe", "prints a list with all opened pipes with their most relevant information", 0},
+          {NULL, &shmTestProcess, "testShm", "simulates use of shared memory between processes", 0}
       };
 
       for (int i = 0; i < COMMANDS; i++) {

@@ -12,6 +12,7 @@ void test_no_sync(int argc, char ** argv);
 void inc(int argc, char ** argv);
 void slowInc(int64_t* p, int64_t inc);
 
+void shmTestProcess(int argc, char** argv);
 void test_mm();
 
 void testContextSwitching();

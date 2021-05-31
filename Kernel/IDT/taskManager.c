@@ -357,6 +357,32 @@ void idleProcess() {
       while (1);
 }
 
+int64_t shmOpen(char * name, uint8_t create) {
+      int64_t fd = getShmFd(name, create);
+      if (fd == -1 || current->fdsIdx == MAX_FDS)
+            return -1;
+
+      current->fds[(current->fdsIdx)++] = fd;
+      return fd;
+}
+
+void shmClose(int64_t fd) {
+      uint8_t removed = closeShmFd(fd);
+      if (removed == 0)
+            return;
+
+      int i, j = 0, found = 0;
+      int64_t * fdArr = current->fds;
+      for (i = 0; i < current->fdsIdx; i++) {
+            if (fdArr[i] != fd) {
+                  fdArr[j++] = fdArr[i];
+                  found = 1;
+            }
+      }
+      if (found)
+            (current->fdsIdx)--;
+}
+
 //guarda el contexto de un proceso
 static void* initializeStackFrame(void* entryPoint, void* baseStack, int argc, char** argv) {
       t_stackFrame* frame = (t_stackFrame*)(baseStack - sizeof(t_stackFrame));

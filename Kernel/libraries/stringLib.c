@@ -13,7 +13,6 @@ void sysWrite(int64_t fd, char* string, uint8_t lenght, t_colour bgColour, t_col
             return;
       }
 
-
       uint64_t toWriteFd;
 
       if (fd == -1)

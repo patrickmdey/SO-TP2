@@ -5,7 +5,6 @@
 #include <staticQueue.h>
 #include <interrupts.h>
 #include <taskManager.h>
-
 #include <utils.h>
 
 //static void insertFdNode(t_fdNode* node);
@@ -19,8 +18,8 @@ static t_fdList fdList = { NULL, 0 };
 static uint64_t nextFd = 0;
 
 void initPipes() {
-    createFd(); // STDIN
-    createFd(); // STDOUT
+    createFd(NULL); // STDIN
+    createFd(NULL); // STDOUT
 }
 
 void insertFd(t_fdNode* fdNode) {
@@ -125,13 +124,53 @@ t_fdNode* findFd(uint64_t fd) {
     return fdNode;
 }
 
+t_fdNode* findFdByName(char * name) {
+    t_fdList* l = &fdList;
+    if (l == NULL)
+        return NULL;
+    t_fdNode* fdNode = l->first;
+    while (fdNode != NULL && stringcmp(fdNode->name, name) == 0) {
+        fdNode = fdNode->next;
+    }
+    return fdNode;
+}
+
 uint64_t getFdSize() {
     return fdList.size;
 }
 
 int64_t getFd() {
-    return createFd();
+    return createFd(NULL);
 }
+
+int64_t getShmFd(char * name, uint8_t create) {
+    t_fdNode* fdNode = findFdByName(name);
+    if (fdNode == NULL) {
+        if (create == 0)
+            return -1;
+
+        return createFd(name);     
+    } else {
+        (fdNode->amount)++;
+        return fdNode->fd;
+    }
+}
+
+uint8_t closeShmFd(int64_t fd) {
+    t_fdNode* toClose = findFd(fd);
+    if (toClose == NULL)
+        return 0;
+    
+    toClose->amount--;
+    if(toClose->amount == 0){
+        closeFd(fd);
+    }
+
+    return 1;
+    
+}
+
+
 
 char** pipeInfo(int* index) {
     int size = fdList.size;
@@ -157,7 +196,7 @@ char** pipeInfo(int* index) {
 
 }
 
-static uint64_t createFd() {
+static uint64_t createFd(char * name) {
     t_fdNode* node = malloc(sizeof(t_fdNode));
     if (node == NULL)
         return -1;
@@ -166,9 +205,12 @@ static uint64_t createFd() {
     node->buffer = queueInit(sizeof(char));
     node->next = NULL;
     node->waiting = NULL;
+    node->name = name;
+    node->amount = 1;
     insertFd(node);
     return node->fd;
 }
+
 
 static t_fdNode* deleteFdNode(t_fdNode* fdNode, uint64_t fd, int* flag) {
     if (fdNode == NULL) {

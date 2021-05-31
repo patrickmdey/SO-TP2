@@ -12,7 +12,9 @@ typedef struct t_fdNode {
     uint64_t fd;
     t_queue* buffer;
     t_waitingPid* waiting;
+    int amount;
     struct t_fdNode* next;
+    char * name;
 } t_fdNode;
 
 typedef struct  t_fdList {
@@ -29,8 +31,11 @@ int64_t getFd();
 void pipeWrite(t_fdNode* node, char c);
 char pipeRead(uint64_t fd);
 void pipeWriteStr(t_fdNode* node, char* str);
-
 char** pipeInfo(int* size);
+int64_t getShmFd(char * name, uint8_t create);
+uint8_t closeShmFd(int64_t fd);
+t_fdNode* findFdByName(char * name);
+
 
 
 #endif

@@ -59,6 +59,14 @@ void sysCloseFd(int64_t fd) {
     syscall(CLOSE_FD, fd, 0, 0, 0, 0, 0);
 }
 
+int64_t sysShmOpen(char *name, uint8_t create) {
+    return (int64_t)syscall(SHM_OPEN, (uint64_t) name, create, 0, 0, 0, 0);
+}
+
+void sysShmClose(int64_t fd) {
+    syscall(SHM_CLOSE, fd, 0, 0, 0, 0, 0);
+}
+
 int sysNice(int pid, int priority) {
     return syscall(NICE, pid, priority, 0, 0, 0, 0);
 }
@@ -99,3 +107,4 @@ void sysMoveCursorTo(int x, int y) {
 void sysCursorPosition(int* array) {
     syscall(CURSOR_POSITION, (uint64_t)array, 0, 0, 0, 0, 0);
 }
+

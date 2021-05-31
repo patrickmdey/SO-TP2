@@ -8,6 +8,10 @@ void printString(char* str) {
       syscall(WRITE, -1, (uint64_t) str, strlen(str), BLACK, WHITE, 0);
 }
 
+void sysWrite(char* str, int64_t fd) {
+      syscall(WRITE, fd, (uint64_t) str, strlen(str), BLACK, WHITE, 0);
+}
+
 void printStringWC(char* str, t_colour bgColour, t_colour fontColour) {
       syscall(WRITE, -1, (uint64_t) str, strlen(str), bgColour, fontColour, 0);
 }

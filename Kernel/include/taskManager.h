@@ -8,6 +8,8 @@
 #define YIELD 3
 #define KILLED 4
 
+#define MAX_FDS 50
+
 #include <stdint.h>
 #include <buffer.h>
 #include <staticQueue.h>
@@ -37,6 +39,9 @@ typedef struct t_PCB {
     int64_t in;
     int64_t out;
 
+    int64_t fds[MAX_FDS];
+    uint32_t fdsIdx;
+
     int argc;
     char** argv;
 } t_PCB;     //Process Control Block
@@ -62,6 +67,10 @@ void yield();
 void idleProcess();
 
 uint64_t getCurrentOut();
+
+int64_t shmOpen(char * name, uint8_t create);
+
+void shmClose(int64_t fd);
 
 void writeKeyOnBuffer(char key);
 char getChar(int64_t fd);

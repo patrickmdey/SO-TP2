@@ -48,8 +48,10 @@
 #define SYS_SEM_DESTROY 33
 #define SYS_CLOSE_FD 34
 #define SYS_PIPE_INFO 35
+#define SYS_SHM_OPEN 36
+#define SYS_SHM_CLOSE 37
 
-#define SYSCALLS 35
+#define SYSCALLS 37
 
 uint64_t sysCallDispatcher(t_registers* r) {
       if (r->rax <= SYSCALLS)
@@ -176,7 +178,17 @@ uint64_t sysCallDispatcher(t_registers* r) {
             case SYS_PIPE_INFO:
                   return (uint64_t)pipeInfo((int*)((uint64_t)(r->rdi)));
                   break;
+
+            case SYS_SHM_OPEN:
+                  return (uint64_t)shmOpen((char*)r->rdi, (uint8_t)r->rsi);
+                  break;
+
+            case SYS_SHM_CLOSE:
+                  shmClose((char *)r->rdi);
+                  break;
             }
+
+      
 
       }
       return 0;
